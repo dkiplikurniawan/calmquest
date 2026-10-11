@@ -116,6 +116,12 @@ func setup(cave_data: Dictionary, tile_size: float, p: Node2D) -> void:
 		chest.position = cell_center(_cell(chest.info["cell"])) + Vector2(0, 16)
 		chest.interacted.connect(func(_t: Interactable) -> void: _on_chest())
 		add_child(chest)
+	# Rest spots in this cave (0.4.0, data in game/data/rest_spots.json).
+	for s: Dictionary in RestSpots.cave_spots(cave_id):
+		var spot := RestSpot.new()
+		spot.setup(s)
+		spot.position = cell_center(_cell(s["cell"]))
+		add_child(spot)
 	for n: Dictionary in data.get("notes", []):
 		var note := LoreNote.new()
 		note.note_id = String(n["id"])

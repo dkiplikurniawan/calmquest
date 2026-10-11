@@ -19,7 +19,7 @@ const KEYS: PackedStringArray = [
 	"ambience_volume", "ui_volume", "music_mode", "hint_frequency", "weather_effects", "captions", "key_bindings",
 	"language", "mood_check", "session_summary", "mood_journal", "study_mode",
 	"control_hints", "hud_fade", "quest_tracker_compact", "window_mode", "vsync", "ui_scale_index",
-	"footsteps",
+	"footsteps", "rest_time_passes", "breathe_pace", "breathe_length",
 ]
 
 const MUSIC_MODE_NAMES: PackedStringArray = ["Continuous music", "Music with quiet pauses", "Music off"]
@@ -105,6 +105,12 @@ var window_mode: int = WINDOWED
 var vsync: bool = true
 ## Audio: quiet footsteps that follow the ground (grass, path, wood, sand, snow, stone).
 var footsteps: bool = true
+## Rest spots: let the clock run faster while sitting (watch a sunset or sunrise).
+var rest_time_passes: bool = false
+## "Breathe with Lumi": the last pace (0 Gentle, 1 Even, 2 Slow) and length
+## (0 = 1 minute, 1 = 2, 2 = 3, 3 = until stopped). Preferences only.
+var breathe_pace: int = 0
+var breathe_length: int = 0
 var ui_scale_index: int = 1
 ## Study Mode unlocked from the main menu (kept until "Leave Study Mode").
 ## The command-line flag --study turns it on for one run only (StudyMode.cli_active).
@@ -268,6 +274,9 @@ func _sanitize() -> void:
 	fullscreen = window_mode == FULLSCREEN
 	vsync = bool(vsync)
 	footsteps = bool(footsteps)
+	rest_time_passes = bool(rest_time_passes)
+	breathe_pace = clampi(int(breathe_pace), 0, 2)
+	breathe_length = clampi(int(breathe_length), 0, 3)
 	ui_scale_index = clampi(int(ui_scale_index), 0, UI_SCALES.size() - 1)
 
 

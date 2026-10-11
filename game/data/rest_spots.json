@@ -1,0 +1,17 @@
+{
+	"_comment": "Rest spots (0.4.0). pos is the seat in world pixels, or cell in a cave (column, row). view points the camera's slow drift toward the view. Positions were chosen in open ground that the generated scenery already leaves free, so no scenery or object id changes.",
+	"spots": [
+		{"id": "rest_sunset_hill", "kind": "hill", "pos": [3684, 3050], "view": [-1, -0.3], "name": "Sunset Hill", "text": "A soft green rise where the evening light stays a little longer."},
+		{"id": "rest_village_bench", "kind": "bench", "pos": [5026, 3596], "view": [1, 0], "name": "The Village Bench", "text": "A bench at the edge of the village. You can hear the campfire from here."},
+		{"id": "rest_creek_log", "kind": "log", "pos": [6840, 3618], "view": [1, 0.2], "name": "Creekside Log", "text": "An old log beside the water. The creek talks quietly to itself."},
+		{"id": "rest_waterfall_stone", "kind": "stone", "pos": [6680, 2004], "view": [1, -0.8], "name": "Waterfall View", "text": "A flat stone with a view toward the falls. The sound of water fills everything."},
+		{"id": "rest_firefly_bench", "kind": "bench", "pos": [2466, 1486], "view": [-0.6, -1], "name": "Firefly Bench", "text": "A mossy bench under the glowcaps. At night, the fireflies come close."},
+		{"id": "rest_lookout_stump", "kind": "stump", "pos": [1636, 4332], "view": [-0.4, 0.6], "name": "Lookout Stump", "text": "A wide stump below the old lookout tower. The pines hush the wind."},
+		{"id": "rest_moonlit_bench", "kind": "moon_bench", "pos": [4678, 1002], "view": [0, -1], "name": "Moonlit Bench", "text": "A pale stone bench in the sanctuary. The stars feel very near here."},
+		{"id": "rest_cliff_edge", "kind": "stone", "pos": [8778, 3200], "view": [1, 0.3], "name": "Cliff Edge", "text": "A grassy cliff edge above the sea. The waves arrive slowly, one by one."},
+		{"id": "rest_driftwood_seat", "kind": "driftwood", "pos": [3300, 5200], "view": [0, 1], "name": "Driftwood Seat", "text": "A smooth piece of driftwood on the beach, warm from the sun."},
+		{"id": "rest_aurora_ridge", "kind": "stone", "pos": [8050, 1100], "view": [0.3, -1], "name": "Aurora Ridge", "text": "A sheltered ridge under the open sky. On some nights, the aurora dances above."},
+		{"id": "rest_isle_rock", "kind": "stone", "pos": [1084, 5700], "view": [-0.5, 1], "name": "Isle Rock", "text": "A sun-warmed rock on the little isle. Nothing to do here but listen."},
+		{"id": "rest_crystal_pool", "kind": "crystal_pool", "cave": "cave_grotto", "cell": [6, 11], "view": [0, -1], "name": "Crystal Pool", "text": "A still pool in the grotto. The crystals hum a single, patient note."}
+	]
+}

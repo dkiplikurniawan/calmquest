@@ -111,20 +111,31 @@ func _exit_tree() -> void:
 		p.stream = null
 
 
+## Resting at a rest spot: 0 = normal, 1 = the music and ambience gently swell.
+var rest_boost: float = 0.0
+const REST_MUSIC_DB := 2.5
+const REST_AMBIENCE_DB := 4.0
+
+
+func set_rest_boost(amount: float) -> void:
+	rest_boost = clampf(amount, 0.0, 1.0)
+	apply_volumes()
+
+
 func apply_volumes() -> void:
 	_set_bus_volume(&"Master", GameSettings.master_volume)
-	_set_bus_volume(MUSIC_BUS, GameSettings.music_volume if GameSettings.music_mode != 2 else 0.0)
-	_set_bus_volume(AMBIENCE_BUS, GameSettings.ambience_volume)
+	_set_bus_volume(MUSIC_BUS, GameSettings.music_volume if GameSettings.music_mode != 2 else 0.0, REST_MUSIC_DB * rest_boost)
+	_set_bus_volume(AMBIENCE_BUS, GameSettings.ambience_volume, REST_AMBIENCE_DB * rest_boost)
 	_set_bus_volume(SFX_BUS, GameSettings.sfx_volume)
 	_set_bus_volume(UI_BUS, GameSettings.ui_volume)
 
 
-func _set_bus_volume(bus_name: StringName, linear: float) -> void:
+func _set_bus_volume(bus_name: StringName, linear: float, extra_db: float = 0.0) -> void:
 	var idx := AudioServer.get_bus_index(bus_name)
 	if idx < 0:
 		return
 	AudioServer.set_bus_mute(idx, linear <= MIN_LINEAR_VOLUME)
-	AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(linear, MIN_LINEAR_VOLUME)))
+	AudioServer.set_bus_volume_db(idx, linear_to_db(maxf(linear, MIN_LINEAR_VOLUME)) + extra_db)
 
 
 func _ensure_bus(bus_name: StringName) -> void:

@@ -14,6 +14,7 @@ const GLOWS := {
 	"moonlight": {"name": "Moonlight glow (from Pip)", "color": Color("#cfd9ff")},
 	"mint": {"name": "Mint glow (from Mossa)", "color": Color("#b8f0d8")},
 	"ember": {"name": "Ember glow (from Fennel)", "color": Color("#ffc08a")},
+	"dusk": {"name": "Dusk glow (every quiet place found)", "color": Color("#f5b8c8")},
 }
 
 

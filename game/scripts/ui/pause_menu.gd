@@ -18,6 +18,8 @@ signal load_requested(slot: int)
 ## Default layer: leave to the main menu / quit the game (the world shows the
 ## session closing first when it is enabled).
 signal leave_requested
+## "Breathe with Lumi" (0.4.0).
+signal breathe_requested
 signal quit_requested
 
 var _root: Control
@@ -71,6 +73,7 @@ func _ready() -> void:
 	box.add_child(HSeparator.new())
 
 	var settings := UiKit.button("Settings", _open_settings)
+	box.add_child(UiKit.hbox([UiKit.button("Breathe with Lumi", func() -> void: breathe_requested.emit())]))
 	if study:
 		# The study journey is temporary: no saving, loading or restarting.
 		box.add_child(UiKit.hbox([settings]))

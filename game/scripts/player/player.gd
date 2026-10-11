@@ -26,6 +26,8 @@ const REACH_RING_SECONDS := 3.0
 @export var interaction_radius: float = 72.0
 
 var input_enabled: bool = true
+## Sitting at a rest spot (drawn lower, feet forward).
+var sitting: bool = false
 var animation_intensity: float = 1.0
 var current_target: Interactable = null
 var facing: Vector2 = Vector2.DOWN
@@ -69,6 +71,21 @@ func block_input(seconds: float) -> void:
 ## Ends a block early (a skipped cutscene hands control back at once).
 func unblock_input() -> void:
 	_input_block = 0.0
+
+
+## Rest spots (0.4.0): sits on the seat at `pos`; movement waits until stand().
+func sit_at(pos: Vector2) -> void:
+	global_position = pos
+	velocity = Vector2.ZERO
+	facing = Vector2.DOWN
+	sitting = true
+	input_enabled = false
+
+
+func stand() -> void:
+	sitting = false
+	input_enabled = true
+	block_input(0.2)
 
 
 func show_reach_ring() -> void:
@@ -201,16 +218,22 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	_draw_puffs()
 
+	# Sitting: the body rests lower, on the seat.
+	var sit := 7.0 if sitting else 0.0
 	var sprite := CharacterSprites.traveler()
 	if sprite != null:
-		CharacterSprites.draw_traveler(self, sprite, CharacterSprites.traveler_row(facing), CharacterSprites.traveler_column(_t, _walk > 0.5, is_blinking()), -bob)
+		CharacterSprites.draw_traveler(self, sprite, CharacterSprites.traveler_row(facing), CharacterSprites.traveler_column(_t, _walk > 0.5, is_blinking()), -bob + sit)
 		return
 
-	# Feet peek out under the cloak, alternating while walking.
-	draw_circle(Vector2(-5, -3 + step * 2.0), 3.6, Palette.BARK_DARK)
-	draw_circle(Vector2(5, -3 - step * 2.0), 3.6, Palette.BARK_DARK)
+	# Feet peek out under the cloak, alternating while walking (forward when sitting).
+	if sitting:
+		draw_circle(Vector2(-6, 5), 3.6, Palette.BARK_DARK)
+		draw_circle(Vector2(6, 5), 3.6, Palette.BARK_DARK)
+	else:
+		draw_circle(Vector2(-5, -3 + step * 2.0), 3.6, Palette.BARK_DARK)
+		draw_circle(Vector2(5, -3 - step * 2.0), 3.6, Palette.BARK_DARK)
 
-	var y := -bob
+	var y := -bob + sit
 	# Breathing: the shoulders rise and fall a little when standing still.
 	var breath := sin(_t * 1.6) * 0.7 * (1.0 - _walk) * k
 	# The hem sways a little, more while walking.

@@ -137,6 +137,7 @@ func _run() -> void:
 
 	await _check_player_flow(host)
 	await _check_hud_and_ui(host)
+	await _check_rest_and_breathe(host)
 
 	# --- Language: English <-> Bahasa Indonesia ----------------------------------------
 	var settings := SettingsPanel.new()
@@ -627,6 +628,182 @@ func _check_hud_and_ui(host: Control) -> void:
 	hud_id.queue_free()
 	GameSettings.set_setting("language", "en")
 	await get_tree().process_frame
+
+
+## 0.4.0 P5: rest spots (sit and stand with keyboard, mouse and gamepad; the
+## HUD hides and returns; Lumi; the camera; time passing) and "Breathe with
+## Lumi" from a rest spot and from the pause menu.
+func _check_rest_and_breathe(host: Control) -> void:
+	get_tree().paused = false
+	var rest_state := GameState.system_state(RestSpots.STATE_KEY)
+	var saved_rest := rest_state.duplicate(true)
+	var old_lapse := GameSettings.rest_time_passes
+	rest_state.clear()
+	SessionState.begin_session(null, AdaptiveComfortEngine.MODE_BALANCED, false)
+	var world: Overworld = load("res://game/scenes/world/overworld.tscn").instantiate()
+	add_child(world)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	world.features.wildlife.enabled = false
+	var spots := get_tree().get_nodes_in_group(RestSpot.GROUP_NAME)
+	check(spots.size() == RestSpots.ids().size(), "every rest spot is in the world or its cave (%d)" % spots.size())
+	var spot: RestSpot = null
+	for n in spots:
+		if (n as RestSpot).spot_id == "rest_village_bench":
+			spot = n
+	check(spot != null, "the village bench is placed")
+	if spot == null:
+		world.queue_free()
+		return
+	# Coming near marks it as found (map and journal).
+	world.teleport_to(spot.global_position + Vector2(0, 150))
+	await get_tree().create_timer(RestController.DISCOVER_INTERVAL + 0.3).timeout
+	check(RestSpots.is_found(spot.spot_id), "coming near a quiet place marks it as found")
+	var journal := JournalPanel.new()
+	host.add_child(journal)
+	await get_tree().process_frame
+	var quiet := journal.tabs.get_node_or_null("Quiet places")
+	check(quiet != null and _all_label_text(quiet).contains(spot.display_name()), "the journal lists it under Quiet places")
+	journal.queue_free()
+	# Keyboard: E sits down.
+	world.teleport_to(spot.global_position + Vector2(0, 34))
+	await get_tree().process_frame
+	world.player.update_target()
+	check(world.player.current_target == spot, "the seat is the player's target")
+	check(spot.get_prompt() == "Sit and rest", "[E] Sit and rest")
+	_press(InputSetup.INTERACT)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(world.rest.is_resting() and world.player.sitting and not world.player.input_enabled, "E sits down")
+	check(world.player.global_position.distance_to(spot.seat_point()) < 1.0, "on the seat")
+	check(world.lumi.is_resting(), "Lumi curls up nearby")
+	check(world.camera.override_zoom > 0.0, "the camera widens toward the view")
+	await get_tree().create_timer(1.8).timeout
+	check(world.hud.items_alpha() < 0.05, "the HUD fades out completely")
+	check(world.lumi.curl_amount() > 0.5, "Lumi is curled up")
+	check(AudioManager.rest_boost > 0.3, "the music and ambience swell a little")
+	# E while resting: Breathe with Lumi; any key stops it and the rest goes on.
+	_press(InputSetup.INTERACT)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(world._overlay is BreathePanel, "E opens Breathe with Lumi at the rest spot")
+	if world._overlay is BreathePanel:
+		var panel := world._overlay as BreathePanel
+		check(_all_label_text(panel).contains(BreathePanel.NOTE), "the panel says to breathe comfortably and stop if anything feels uncomfortable")
+		panel.begin_breathing()
+		await get_tree().create_timer(BreathePanel.SETTLE_SECONDS + 0.5).timeout
+		check(panel.running and panel._cue.text == "Breathe in...", "Breathe in...")
+		var key := InputEventKey.new()
+		key.keycode = KEY_SPACE
+		key.physical_keycode = KEY_SPACE
+		key.pressed = true
+		Input.parse_input_event(key)
+		await get_tree().process_frame
+		await get_tree().process_frame
+		var key_up := key.duplicate() as InputEventKey
+		key_up.pressed = false
+		Input.parse_input_event(key_up)
+		await get_tree().process_frame
+	check(world._overlay == null and not get_tree().paused and world.rest.is_resting(), "any key stops breathing; the rest goes on")
+	# Watch time pass while resting.
+	GameSettings.rest_time_passes = true
+	var before := TimeManager.day * 1440.0 + TimeManager.minute_of_day
+	await get_tree().create_timer(1.0).timeout
+	var passed := TimeManager.day * 1440.0 + TimeManager.minute_of_day - before
+	check(passed >= RestController.TIME_LAPSE * 0.7, "Watch time pass while resting: the clock runs faster (%.1f min in 1 s)" % passed)
+	GameSettings.rest_time_passes = false
+	# Keyboard: a movement key stands up.
+	var seat := world.player.global_position
+	_press(InputSetup.MOVE_LEFT)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(not world.rest.is_resting() and not world.player.sitting and world.player.input_enabled, "a movement key stands up")
+	check(world.player.global_position.distance_to(seat) < 30.0, "right where the seat is")
+	await get_tree().create_timer(0.9).timeout
+	check(world.hud.items_alpha() > 0.95, "the HUD comes back")
+	check(not world.lumi.is_resting() and world.camera.override_zoom == 0.0 and AudioManager.rest_boost < 0.7, "Lumi follows again, the camera and the music return")
+	# Keyboard: Esc stands up (and does not open the pause menu).
+	spot.interact()
+	await get_tree().process_frame
+	_press(InputSetup.PAUSE)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(not world.rest.is_resting() and not world._modal_open, "Esc stands up without opening the pause menu")
+	# Gamepad: B (cancel) and the stick stand up; A sits down. (After standing,
+	# input waits 0.2 s so the same press cannot sit down again at once.)
+	world.teleport_to(spot.global_position + Vector2(0, 34))
+	await get_tree().create_timer(0.3).timeout
+	world.player.update_target()
+	var pad_a := InputEventJoypadButton.new()
+	pad_a.button_index = JOY_BUTTON_A
+	pad_a.pressed = true
+	Input.parse_input_event(pad_a)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(world.rest.is_resting(), "gamepad A sits down")
+	var pad_b := InputEventJoypadButton.new()
+	pad_b.button_index = JOY_BUTTON_B
+	pad_b.pressed = true
+	Input.parse_input_event(pad_b)
+	await get_tree().process_frame
+	await get_tree().process_frame
+	check(not world.rest.is_resting(), "gamepad B (the Run button) stands up")
+	for e in [pad_a, pad_b]:
+		var up := (e as InputEventJoypadButton).duplicate() as InputEventJoypadButton
+		up.pressed = false
+		Input.parse_input_event(up)
+	await get_tree().process_frame
+	spot.interact()
+	await get_tree().process_frame
+	var stick := InputEventJoypadMotion.new()
+	stick.axis = JOY_AXIS_LEFT_X
+	stick.axis_value = -1.0
+	world._unhandled_input(stick)
+	check(not world.rest.is_resting(), "moving the gamepad stick stands up")
+	# Mouse: clicking the seat sits down; the Stand up button stands up.
+	world.teleport_to(spot.global_position + Vector2(0, 34))
+	await get_tree().process_frame
+	world.player.update_target()
+	var click := InputEventMouseButton.new()
+	click.button_index = MOUSE_BUTTON_LEFT
+	click.pressed = true
+	click.position = world.get_viewport().get_canvas_transform() * spot.get_interaction_point()
+	world._unhandled_input(click)
+	check(world.rest.is_resting(), "clicking the seat sits down")
+	world._unhandled_input(InputEventMouseMotion.new())
+	for i in 20:
+		world.rest.overlay._process(0.05)
+	check(world.rest.overlay.controls_visible(), "moving the mouse shows the rest controls")
+	world.rest.overlay.stand_button.pressed.emit()
+	await get_tree().process_frame
+	check(not world.rest.is_resting(), "the Stand up button stands up")
+	# The pause menu also offers Breathe with Lumi.
+	world._open_pause()
+	world.pause_menu.breathe_requested.emit()
+	await get_tree().process_frame
+	check(world._overlay is BreathePanel and not world.pause_menu.visible, "Breathe with Lumi from the pause menu")
+	if world._overlay is BreathePanel:
+		(world._overlay as BreathePanel).close_panel()
+		await get_tree().process_frame
+	check(not world._modal_open and not get_tree().paused, "Back returns to the world")
+	world.queue_free()
+	await get_tree().process_frame
+	rest_state.clear()
+	rest_state.merge(saved_rest)
+	GameSettings.rest_time_passes = old_lapse
+	get_tree().paused = false
+
+
+## Sends a pressed-and-released action through the real input path.
+func _press(action: StringName) -> void:
+	var down := InputEventAction.new()
+	down.action = action
+	down.pressed = true
+	Input.parse_input_event(down)
+	var up := InputEventAction.new()
+	up.action = action
+	up.pressed = false
+	Input.parse_input_event(up)
 
 
 func _unlock_dialog(menu: Node) -> Control:

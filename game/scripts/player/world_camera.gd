@@ -18,6 +18,9 @@ const DEAD_ZONE := 0.06
 var target_zoom: float = DEFAULT_ZOOM
 ## A wide shot for cutscenes (the finale); 0 = none. It wins over region zoom.
 var override_zoom: float = 0.0
+## A slow drift toward a view (rest spots); zero = none.
+var drift_offset: Vector2 = Vector2.ZERO
+const DRIFT_RATE := 0.45
 
 
 func _ready() -> void:
@@ -62,11 +65,12 @@ func _wanted_zoom() -> float:
 
 
 func _process(delta: float) -> void:
-	var desired := BASE_OFFSET
+	var desired := BASE_OFFSET + drift_offset
 	var body := get_parent() as CharacterBody2D
 	if body != null and not GameSettings.reduced_camera_motion and body.velocity.length() > 40.0:
 		desired += body.velocity.normalized() * LOOK_AHEAD
-	position = position.lerp(desired, 1.0 - exp(-LOOK_AHEAD_RATE * delta))
+	var rate := DRIFT_RATE if drift_offset != Vector2.ZERO else LOOK_AHEAD_RATE
+	position = position.lerp(desired, 1.0 - exp(-rate * delta))
 	var z := lerpf(zoom.x, _wanted_zoom(), 1.0 - exp(-ZOOM_RATE * delta))
 	zoom = Vector2(z, z)
 

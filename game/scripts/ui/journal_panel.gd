@@ -32,6 +32,7 @@ func _ready() -> void:
 	_add_tab("Lore", _lore_tab())
 	_add_tab("Collections", _collections_tab())
 	_add_tab("Villagers", _villagers_tab())
+	_add_tab("Quiet places", _quiet_places_tab())
 	if GameSettings.mood_journal and not StudyMode.is_active():
 		_add_tab("Feelings", _feelings_tab())
 	var close_button := UiKit.button("Close", close, UiTheme.PRIMARY_BUTTON)
@@ -174,6 +175,19 @@ func _villagers_tab() -> Control:
 	return v
 
 
+## Rest spots found so far, each with its short line. No totals to complete.
+func _quiet_places_tab() -> Control:
+	var v := _vbox()
+	_line(v, "Quiet places to sit for a while. Press E at one to sit and rest.", UiTheme.SUBTLE)
+	for id in RestSpots.found_ids():
+		_line(v, "%s\n    %s" % [RestSpots.display_name(id), RestSpots.line(id)])
+	if RestSpots.found_ids().is_empty():
+		_line(v, "None found yet. Benches, logs and flat stones with a good view are worth a look.", UiTheme.SUBTLE)
+	elif not RestSpots.all_found():
+		_line(v, "There are more quiet places out there, whenever you feel like finding them.", UiTheme.SUBTLE)
+	return v
+
+
 func _recipes_tab() -> Control:
 	var v := _vbox()
 	var book := GameState.crafting
@@ -241,7 +255,8 @@ func _collections_tab() -> Control:
 	var glows := HFlowContainer.new()
 	for key: String in Cosmetics.GLOWS:
 		var unlocked := Cosmetics.is_unlocked("glow:" + key)
-		var label := L.t(String(Cosmetics.GLOWS[key]["name"])) if unlocked else L.t("??? (a friend's gift)")
+		var locked_text := "??? (every quiet place)" if key == "dusk" else "??? (a friend's gift)"
+		var label := L.t(String(Cosmetics.GLOWS[key]["name"])) if unlocked else L.t(locked_text)
 		var b := UiKit.button(("> " if Cosmetics.current("glow") == key else "") + label, func() -> void: _wear("glow:" + key))
 		b.disabled = not unlocked
 		glows.add_child(b)

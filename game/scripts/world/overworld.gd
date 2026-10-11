@@ -76,6 +76,8 @@ var idle_progress_seconds: float = 0.0
 ## Seconds since the last key or button press (for idle key hints).
 var idle_input_seconds: float = 0.0
 var _idle_hint_index: int = 0
+## Rest spots (0.4.0): sitting, the quiet places, "Breathe with Lumi".
+var rest: RestController
 const NUDGE_SECONDS := {1: 600.0, 2: 300.0, 3: 150.0}
 
 
@@ -91,6 +93,11 @@ func _ready() -> void:
 	features.build(self)
 	caves.build(self)
 	village.build(self)
+	rest = RestController.new()
+	rest.name = "Rest"
+	add_child(rest)
+	rest.setup(self)
+	_build_rest_spots()
 	for p in world.pois:
 		zones.append([p["pos"], float(p["clear"])])
 	_restore_sublevel_from_save()
@@ -200,6 +207,9 @@ func _connect_signals() -> void:
 	pause_menu.quit_requested.connect(func() -> void: _request_leave("quit"))
 	pause_menu.save_requested.connect(_manual_save)
 	pause_menu.load_requested.connect(_load_slot)
+	pause_menu.breathe_requested.connect(func() -> void:
+		_close_pause()
+		open_breathe())
 	completion_panel.continue_requested.connect(_close_completion)
 	completion_panel.finish_requested.connect(_finish_session)
 	SessionState.mode_changed.connect(_on_mode_changed)
@@ -219,6 +229,7 @@ func _connect_signals() -> void:
 
 
 func _exit_tree() -> void:
+	AudioManager.set_rest_boost(0.0)
 	ViewCull.reset()
 	TimeManager.running = false
 	SaveManager.set_active(false)
@@ -341,6 +352,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if village.finale_running:
 		# Esc is held to skip the finale (FinaleCinematic); nothing else opens.
+		return
+	if rest.handle_click(event) or rest.handle_input(event):
+		get_viewport().set_input_as_handled()
+		return
+	if rest.is_resting():
 		return
 	if event.is_action_pressed(InputSetup.PAUSE):
 		get_viewport().set_input_as_handled()
@@ -838,6 +854,25 @@ func open_request_board() -> void:
 	if _modal_open:
 		return
 	var panel := RequestBoardPanel.new()
+	_open_overlay(panel)
+	panel.setup()
+	panel.closed.connect(_close_overlay)
+
+
+## Places the rest spots of the open world (cave ones are built by CaveLevel).
+func _build_rest_spots() -> void:
+	for s: Dictionary in RestSpots.overworld_spots():
+		var node := RestSpot.new()
+		node.setup(s)
+		node.position = RestSpots.world_pos(s)
+		entities.add_child(node)
+
+
+## "Breathe with Lumi" (from a rest spot or the pause menu).
+func open_breathe() -> void:
+	if _modal_open:
+		return
+	var panel := BreathePanel.new()
 	_open_overlay(panel)
 	panel.setup()
 	panel.closed.connect(_close_overlay)

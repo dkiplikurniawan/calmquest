@@ -494,4 +494,48 @@ All were fixed and checked again in screenshots.
   - The overworld test still waits `FINALE_SECONDS + 1` in total; the constant grew from 9 to 36 s. The wait is now split so that it can also check the cinematic, the hidden HUD, the guests, the Esc behaviour, the credits, the wide shot, both autosaves, the clean-up and the festival lanterns.
   - It then replays the finale with the `act3_complete` flag cleared (test only) to check the skip path, and walks afterwards.
   - The streaming test expects a chunk's children to be exactly its objects. The ground detail is added as an *internal* child, so that contract holds without changing the test.
-- **New tests:** 8 unit tests (`test_visual_polish.gd`: feature determinism and placement rules, no collision, an unchanged scenery stream, ground detail determinism, sprite fallback and frame mapping, blink and puff with Reduce motion, Lumi's celebration, a skip that happens only once) and 17 new overworld checks.
+- **New tests (P4):** 8 unit tests (`test_visual_polish.gd`: feature determinism and placement rules, no collision, an unchanged scenery stream, ground detail determinism, sprite fallback and frame mapping, blink and puff with Reduce motion, Lumi's celebration, a skip that happens only once) and 17 new overworld checks.
+
+### P5 - Rest spots and "Breathe with Lumi"
+
+- **12 rest spots** (`game/data/rest_spots.json`):
+  - Sunset Hill, the Village Bench, the Creekside Log, the Waterfall View, the Firefly Bench and the Lookout Stump;
+  - the Moonlit Bench (sanctuary), the Cliff Edge, the Driftwood Seat, Aurora Ridge (highlands) and Isle Rock;
+  - the Crystal Pool, inside the Singing Grotto.
+  - The positions were searched in open, dry ground at least 60 px from all generated scenery, with room around the seat. The generator was not changed: scenery ids are numbered in order, so new clear zones would have shifted the ids that saves use for gathered objects.
+- **Sitting:** "[E] Sit and rest" (also a click on the seat, or gamepad A).
+  - The Traveler sits and Lumi curls up beside them.
+  - The camera drifts and widens (a crossfade with Reduce motion), and the HUD fades out completely.
+  - Music +2.5 dB and ambience +4 dB through the bus volumes, plus the soft swell sound.
+  - With **Settings > Well-being > "Watch time pass while resting"** the clock runs 6 game minutes per second.
+  - Any movement, Esc or Run stands up again (gamepad: the stick, B or Start; in Godot 4.7 the default `ui_cancel` has no gamepad button, and B is the Run button in this game). The Stand up button works too.
+  - There is no minimum or maximum time and nothing is counted.
+- **Quiet places:** a place is found when the player comes within 300 px or sits there. It then shows on the map (a small bench) and on the journal page "Quiet places", with its line. The page shows no total, only a gentle note when more exist. Finding all 12 unlocks one cosmetic, Lumi's dusk glow; there is no other reward.
+- **Breathe with Lumi** (rest spots: E; also in the pause menu, in both layers):
+  - paces Gentle 4/6, Even 4/4 and Slow 5/7; lengths 1, 2 or 3 minutes, or until stopped;
+  - the required note about breathing comfortably;
+  - any key, click or gamepad button stops it at once;
+  - no counters, scores, streaks or judgements; when the time is up it simply fades and closes;
+  - Reduce motion: a steady glow that brightens and dims, with a progress line.
+  - It stores only the chosen pace and length (`settings.cfg`). In Study Mode with consent it logs only `activity_started` / `activity_finished` with `breathing`.
+- **Study Mode events:** `rest_spot_used` (spot id) and the activities `resting` and `breathing`. `lantern_catch` was listed in the P1 documentation but never logged; it is now logged when a Lantern Night starts and ends.
+- **Deliberate test change:** the overworld test expected exactly 8 journal pages; it now expects exactly 9, because "Quiet places" was added. It is still an exact count.
+- **Tests:**
+  - **Smoke:** reachability now covers the 11 open-world spots (before the veil opens, the Moonlit Bench and Aurora Ridge are correctly unreachable). The cave spot is covered by the overworld test's cave check.
+  - **Unit** (8 in `test_rest_and_breathe.gd` + 1 in `test_study_mode.gd`):
+    - data completeness;
+    - open ground away from scenery;
+    - cave floor;
+    - found once, and the single cosmetic;
+    - the timing of every pace;
+    - Reduce motion;
+    - stops on a key, a click and a gamepad button and writes no journal, study or research file;
+    - ends by itself after a minute, and "Until I stop" keeps going;
+    - in a study, only started and stopped are logged.
+  - **UI smoke** (31 checks):
+    - discovery, the journal page, sitting with E, the seat, Lumi, the camera;
+    - the HUD fading out and back, the swell;
+    - E opening breathing and any key stopping it;
+    - time passing;
+    - standing up with a movement key, Esc (without the pause menu), gamepad A/B and the stick, a mouse click on the seat and the Stand up button;
+    - breathing from the pause menu.

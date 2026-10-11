@@ -73,6 +73,14 @@ func _draw() -> void:
 			_draw_icon(world_to_map(e["pos"]), String(e.get("kind", "landmark")), true)
 	if show_labels:
 		_draw_region_labels()
+	# Quiet places (rest spots) once found: a small bench.
+	for s: Dictionary in RestSpots.overworld_spots():
+		if RestSpots.is_found(String(s["id"])):
+			var r := world_to_map(RestSpots.world_pos(s))
+			draw_rect(Rect2(r + Vector2(-7, -5), Vector2(14, 4)), Palette.BARK)
+			draw_rect(Rect2(r + Vector2(-7, -1), Vector2(14, 3)), Palette.BARK_DARK)
+			draw_line(r + Vector2(-5, 2), r + Vector2(-5, 6), Palette.BARK_DARK, 2.0)
+			draw_line(r + Vector2(5, 2), r + Vector2(5, 6), Palette.BARK_DARK, 2.0)
 	for pin: Vector2 in GameState.pins:
 		var m := world_to_map(pin)
 		draw_line(m, m + Vector2(0, -16), Palette.INK, 2.0, true)

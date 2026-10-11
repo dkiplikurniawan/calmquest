@@ -55,6 +55,7 @@ func _ready() -> void:
 	list.add_child(_mood_button)
 	list.add_child(_check("Show session summary when I leave", "session_summary"))
 	list.add_child(_check("Keep a private mood journal on this device", "mood_journal"))
+	list.add_child(_check("Watch time pass while resting (at rest spots)", "rest_time_passes"))
 	list.add_child(UiKit.label("All of this is optional, stays on this device and is never a measurement. The journal can be deleted any time in Data & Privacy.", UiTheme.SUBTLE, true))
 	list.add_child(HSeparator.new())
 

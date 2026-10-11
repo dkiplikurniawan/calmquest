@@ -488,7 +488,8 @@ func _run() -> void:
 		check(QuestManager.book.is_completed(q), "%s complete" % q)
 	world._open_journal()
 	await _frames(2)
-	check(world._overlay is JournalPanel and (world._overlay as JournalPanel).tabs.get_tab_count() == 8, "the journal has eight pages")
+	# 0.4.0 P5 (deliberate change): "Quiet places" is the ninth page.
+	check(world._overlay is JournalPanel and (world._overlay as JournalPanel).tabs.get_tab_count() == 9, "the journal has nine pages")
 	(world._overlay as JournalPanel).close()
 	await _frames(2)
 

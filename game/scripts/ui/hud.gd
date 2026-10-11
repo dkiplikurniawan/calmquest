@@ -88,6 +88,9 @@ var _build_hint: PanelContainer
 var _day_arc: DayArc
 var _clock_text: String = ""
 var _caption: Label
+## Every HUD item (not overlays, captions or the study light); fades out while resting.
+var _items: Control
+var _rest_tween: Tween
 var _caption_t: float = 0.0
 var _key_hint: PanelContainer
 var _key_hint_label: Label
@@ -113,14 +116,20 @@ func _ready() -> void:
 	add_child(root)
 	UiKit.adopt_theme(root)
 	_root = root
-	_build_tracker(root)
-	_build_prompt(root)
-	_build_dialogue(root)
-	_build_toasts(root)
-	_build_region_card(root)
-	_build_hotbar(root)
-	_build_corner(root)
-	_build_key_hints(root)
+	_items = Control.new()
+	_items.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_items.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root.add_child(_items)
+	_build_tracker(_items)
+	_build_prompt(_items)
+	_build_dialogue(_items)
+	_build_toasts(_items)
+	_build_region_card(_items)
+	_build_hotbar(_items)
+	_build_corner(_items)
+	_build_key_hints(_items)
+	# Captions stay readable even while the rest of the HUD fades away.
+	_caption.reparent(root)
 	_study_light = StudyLight.new()
 	_study_light.visible = false
 	root.add_child(_study_light)
@@ -572,7 +581,7 @@ func setup_minimap(world: WorldData) -> void:
 	minimap.show_labels = false
 	minimap.setup(world)
 	_minimap_panel.add_child(minimap)
-	_root.add_child(_minimap_panel)
+	_items.add_child(_minimap_panel)
 	_minimap_panel.visible = false
 
 
@@ -594,6 +603,18 @@ func update_minimap(shown: bool, player_pos: Vector2, facing: Vector2, quest_tar
 
 
 # --- Overlays, prompt, dialogue --------------------------------------------------------------
+
+## Rest spots: the whole HUD fades out (and back in when standing up).
+func set_resting(on: bool) -> void:
+	if _rest_tween != null:
+		_rest_tween.kill()
+	_rest_tween = create_tween()
+	_rest_tween.tween_property(_items, "modulate:a", 0.0 if on else 1.0, 1.4 if on else 0.6)
+
+
+func items_alpha() -> float:
+	return _items.modulate.a
+
 
 ## Adds a full-screen overlay (e.g. the journal) under the themed HUD root.
 func add_overlay(overlay: Control) -> void:

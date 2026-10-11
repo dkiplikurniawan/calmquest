@@ -48,7 +48,7 @@ All files are in `%APPDATA%\CALMQUEST\` on Windows:
 | File | Contents |
 |---|---|
 | `study_sessions.csv` | one row per study session: `study_schema_version`, `participant_code`, `language`, `build_version`, `git_commit`, `target_duration_seconds`, then the **16 schema-v1 columns** (same order and meaning as `sessions.csv`) |
-| `study_events.csv` | coarse events: `participant_code`, `session_id`, `t_seconds`, `event`, `detail` (region entered, activity started/finished, puzzle solved, hint requested, mode changed, gentle end) |
+| `study_events.csv` | coarse events: `participant_code`, `session_id`, `t_seconds`, `event`, `detail` (region entered, activity started/finished, puzzle solved, hint requested, mode changed, rest spot used, gentle end). Activities: fishing, cooking, crafting, building, talking, lantern catch, resting and breathing. Breathing logs only that it started and stopped |
 | `sessions.csv` | the normal schema-v1 row for the same session, as in V1 |
 
 Without consent, none of these files is written. No positions finer than a region, no keystrokes and no personal data are recorded. Details: [DATA_SCHEMA.md](DATA_SCHEMA.md).

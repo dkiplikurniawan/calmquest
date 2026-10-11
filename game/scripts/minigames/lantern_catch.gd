@@ -53,6 +53,8 @@ func start_night(config: ModeConfig, motion_scale: float) -> bool:
 		lantern.interacted.connect(_on_lantern_interacted)
 		_lanterns.append(lantern)
 	progress_changed.emit(caught, target_count, bonus_caught)
+	# Study Mode's coarse event log (only during a consented study session).
+	StudyMode.log_event("activity_started", "lantern_catch")
 	return true
 
 
@@ -80,6 +82,7 @@ func end_night(completed: bool) -> void:
 		if is_instance_valid(lantern) and not lantern.collected:
 			lantern.dismiss()
 	_lanterns.clear()
+	StudyMode.log_event("activity_finished", "lantern_catch")
 	night_ended.emit(completed)
 
 

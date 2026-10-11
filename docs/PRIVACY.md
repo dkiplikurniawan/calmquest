@@ -40,10 +40,10 @@ Only on the player's computer, in Godot's user-data folder for this game:
 |---|---|---|
 | `sessions.csv` | consented session records | yes |
 | `progress.cfg` | journal progress (hidden details found, times the Heart Tree was restored, Lantern Nights completed), with no answers | no (ordinary game save) |
-| `settings.cfg` | volume, display, accessibility and language settings, and key bindings | no |
+| `settings.cfg` | volume, display, accessibility and language settings, key bindings, and the last "Breathe with Lumi" pace and length (preferences only) | no |
 | `saves/slot_N.json` (+ `.bak.json`) | world saves: places, items, homes, villagers, quests (V2); never check-in or reflection answers | no (ordinary game save; delete from "Choose a journey") |
 | `wellbeing_journal.json` | the private mood journal: date and time, the faces chosen when starting and leaving (or nothing if skipped), minutes played, the short summary | the player's own opt-in (Settings > Well-being) |
-| `study_sessions.csv`, `study_events.csv` | Study Mode only: the participant code, language, build, session length and the 16 session fields; coarse events (region entered, activity started or finished, hint requested), no positions or keystrokes | yes (the participant's consent at the check-in) |
+| `study_sessions.csv`, `study_events.csv` | Study Mode only: the participant code, language, build, session length and the 16 session fields; coarse events (region entered, activity started or finished, rest spot used, hint requested), no positions or keystrokes; breathing only as started and stopped | yes (the participant's consent at the check-in) |
 | `saves/study_tmp.json` | Study Mode's temporary world; deleted when the study session ends | no |
 
 Only Windows was tested. The Linux and macOS paths are Godot's documented defaults.

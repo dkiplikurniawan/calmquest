@@ -34,6 +34,9 @@ var _light: PointLight2D
 var _trail: Array = []
 var _last_pos: Vector2 = Vector2.INF
 var _celebrate: float = 0.0
+## Resting beside the player at a rest spot (Vector2.INF = following).
+var _rest_pos: Vector2 = Vector2.INF
+var _curl: float = 0.0
 
 
 func _ready() -> void:
@@ -74,6 +77,23 @@ func is_celebrating() -> bool:
 	return _celebrate > 0.0
 
 
+## Rest spots: Lumi settles at `pos` and curls up until wake().
+func rest_at(pos: Vector2) -> void:
+	_rest_pos = pos
+
+
+func wake() -> void:
+	_rest_pos = Vector2.INF
+
+
+func is_resting() -> bool:
+	return _rest_pos != Vector2.INF
+
+
+func curl_amount() -> float:
+	return _curl
+
+
 func _desired_position() -> Vector2:
 	var facing := Vector2.DOWN
 	if target is Player:
@@ -97,7 +117,11 @@ func _process(delta: float) -> void:
 	for p: Array in _trail:
 		p[1] = float(p[1]) + delta
 	_trail = _trail.filter(func(p: Array) -> bool: return float(p[1]) < 0.6).slice(0, 8)
-	if target != null and not _recovering:
+	_curl = move_toward(_curl, 1.0 if is_resting() else 0.0, delta * 0.8)
+	if is_resting():
+		global_position = global_position.lerp(_rest_pos, 1.0 - exp(-1.5 * delta))
+		_settled = false
+	elif target != null and not _recovering:
 		var desired := _desired_position()
 		var gap := global_position.distance_to(desired)
 		if gap > recovery_distance:
@@ -122,7 +146,7 @@ func _recover() -> void:
 
 func _draw() -> void:
 	var k := animation_intensity
-	var float_y := -FLOAT_HEIGHT + sin(_t * 1.6) * 4.0 * k - sin(_hop * PI) * 14.0
+	var float_y := -FLOAT_HEIGHT * (1.0 - 0.72 * _curl) + sin(_t * 1.6) * 4.0 * k * (1.0 - 0.8 * _curl) - sin(_hop * PI) * 14.0
 	var c := Vector2(0, float_y)
 	var facing_x := 1.0
 	if target is Player and (target as Player).facing.x < -0.1:
@@ -173,7 +197,13 @@ func _draw() -> void:
 	# Face: happy squint after a reaction, otherwise round eyes
 	var eye_y := c.y - 1.0
 	var ex := 2.0 * facing_x
-	if _happy > 0.0:
+	if _curl > 0.5:
+		# Curled up and dozing: closed eyes, the tail wrapped around the front.
+		draw_arc(Vector2(-4 + ex, eye_y), 2.2, 0.0, PI, 8, Palette.INK, 1.5, true)
+		draw_arc(Vector2(4 + ex, eye_y), 2.2, 0.0, PI, 8, Palette.INK, 1.5, true)
+		draw_arc(c + Vector2(0, 3), 12.0, 0.25, PI - 0.25, 16, Palette.CREAM, 5.0, true)
+		draw_circle(c + Vector2(-11.5 * facing_x, 7), 3.2, Palette.TURQUOISE)
+	elif _happy > 0.0:
 		draw_arc(Vector2(-4 + ex, eye_y + 1), 2.2, PI, TAU, 8, Palette.INK, 1.6, true)
 		draw_arc(Vector2(4 + ex, eye_y + 1), 2.2, PI, TAU, 8, Palette.INK, 1.6, true)
 	else:

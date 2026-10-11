@@ -3,7 +3,8 @@ extends "res://tests/test_case.gd"
 ## unlock), participant codes, the fresh study journey (identical every time,
 ## never slots 1-3), the gentle end (never while busy), the study CSV (header,
 ## participant code, the 16 schema-v1 columns, score_delta), the event log
-## (consent only), and that the default flow never opens the research layer.
+## (consent only; breathing logs only started and stopped), and that the
+## default flow never opens the research layer.
 ## Every file goes to user://test_tmp/.
 
 const TEST_DIR := "user://test_tmp"
@@ -257,4 +258,25 @@ func test_default_flow_never_opens_the_research_layer() -> void:
 	SessionState.start_cards = {}
 	SessionState.finalize_and_save(false)
 	assert_false(FileAccess.file_exists(SESSIONS_CSV), "nothing written")
+	_restore(saved)
+
+
+func test_breathing_logs_only_started_and_stopped_in_a_study() -> void:
+	var saved := _save_state()
+	StudyMode.participant_code = "P04"
+	StudyMode.session_running = true
+	SessionState.consent_to_store = true
+	var panel := BreathePanel.new()
+	(Engine.get_main_loop() as SceneTree).root.add_child(panel)
+	panel.setup()
+	panel.pace_index = 1
+	panel.begin_breathing()
+	panel._process(BreathePanel.SETTLE_SECONDS + 5.0)
+	panel.stop()
+	panel.free()
+	var rows: Array = StudyMode.events_store.read_rows()["rows"]
+	var events := PackedStringArray()
+	for r: Dictionary in rows:
+		events.append("%s:%s" % [r["event"], r["detail"]])
+	assert_eq(events, PackedStringArray(["activity_started:breathing", "activity_finished:breathing"]), "only breathing started and stopped are logged (no pace, timing or count)")
 	_restore(saved)

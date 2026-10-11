@@ -120,6 +120,17 @@ All art is original and drawn procedurally in GDScript (`_draw`) or shaders. The
   - credits from the About screen (they fade page by page with *Reduce motion*);
   - "Hold Esc to skip" with a progress ring.
 
+## Polish pass (0.4.0): rest spots and breathing
+
+- **Seats** (`RestSpot`, drawn in code, no collision): wooden and pale stone benches, a log, a wide stump, flat stones, a grassy hill with a stone, a piece of driftwood, and a crystal pool in the Singing Grotto. 12 places in total (11 in the open world, 1 in a cave). They stand in open ground that the generated scenery already leaves free, so no scenery or object id changes.
+- **Sitting:**
+  - the Traveler sits a little lower with the feet forward, and Lumi floats down, curls up and closes her eyes, with her tail around her;
+  - the camera drifts slowly toward the view and widens (a crossfade with *Reduce motion* or *Reduced camera motion*);
+  - the HUD fades out completely; captions and the Study Mode light stay;
+  - the spot's name and line appear at the bottom with two quiet buttons, then fade away and come back when the mouse moves.
+- **Map and journal:** a small bench icon on the map, and the journal page "Quiet places", for places found.
+- **Breathe with Lumi:** a dim screen, a soft glow in layers around Lumi that grows and shrinks with the breath, and "Breathe in..." / "Breathe out..." under it. With *Reduce motion* the glow keeps its size, brightens and dims, and a thin line shows each breath's progress.
+
 ## Layering (V2)
 
 | z / layer | Content |
@@ -130,6 +141,7 @@ All art is original and drawn procedurally in GDScript (`_draw`) or shaders. The
 | -3 | farm plots, tide pools, fishing ripples |
 | CanvasLayer 1 (follows viewport) | gloom veils (shader) and mist |
 | CanvasLayer 2 | atmosphere and weather |
+| CanvasLayer 4 | the rest spot's name, line and buttons (0.4.0) |
 | CanvasLayer 5+ | HUD, captions, menus |
 | CanvasLayer 20 | the finale cinematic (0.4.0) |
 

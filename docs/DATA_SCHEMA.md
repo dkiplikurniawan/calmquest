@@ -85,6 +85,7 @@ The file is pretty-printed JSON.
 | `villagers` | VillageDB | `id → {"points", "talked_day", "gifted_day", "rewarded", "invited"}` |
 | `requests` | VillageDB | completed request ids and the day each was done |
 | `cosmetics` | Cosmetics | unlocked cloaks and glows, and the current choice |
+| `rest_spots` | RestSpots (0.4.0) | `{"found": {id: true}}`: the quiet places found (for the map and the journal). Nothing about how long or how often the player rested |
 | `puzzle_bonus` | PuzzleBonus | best move counts (Playful) |
 | `legacy_journal` | SaveManager | V1 `progress.cfg` counters copied in for new journeys |
 
@@ -196,7 +197,9 @@ The header is the 6 study columns followed by **all 16 schema-v1 columns in the 
 | `participant_code` | as above |
 | `session_id` | the same random ID as the session record (join key) |
 | `t_seconds` | seconds since the study session started (one decimal) |
-| `event` | `session_started`, `region_entered`, `activity_started`, `activity_finished`, `puzzle_solved`, `hint_requested`, `mode_changed`, `gentle_end`, `session_ended` (plus the rest-spot and breathing events from P5) |
-| `detail` | the region id, activity (`fishing`, `cooking`, `crafting`, `building`, `talking`, `lantern_catch`), puzzle id or mode id |
+| `event` | `session_started`, `region_entered`, `activity_started`, `activity_finished`, `puzzle_solved`, `hint_requested`, `mode_changed`, `rest_spot_used`, `gentle_end`, `session_ended` |
+| `detail` | the region id, activity (`fishing`, `cooking`, `crafting`, `building`, `talking`, `lantern_catch`, `resting`, `breathing`), puzzle id, mode id or rest spot id |
+
+For "Breathe with Lumi" only `activity_started` / `activity_finished` with `breathing` are written: no pace, length, timing or count.
 
 Coarse and non-identifying: no keystrokes, no timing of individual inputs, and no position finer than the region.

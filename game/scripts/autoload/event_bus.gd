@@ -17,3 +17,5 @@ signal quest_completed(quest_id: String)
 signal progress_changed
 ## A short HUD toast from systems that have no HUD reference (e.g. puzzles).
 signal toast_requested(text: String)
+## The player asked to sit at a rest spot (0.4.0; the overworld's RestController listens).
+signal rest_requested(spot: Node2D)
