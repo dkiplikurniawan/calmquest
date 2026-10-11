@@ -687,6 +687,7 @@ func _check_rest_and_breathe(host: Control) -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	check(world._overlay is BreathePanel, "E opens Breathe with Lumi at the rest spot")
+	check(world.rest.overlay != null and not world.rest.overlay.visible, "the rest spot's line steps aside while breathing")
 	if world._overlay is BreathePanel:
 		var panel := world._overlay as BreathePanel
 		check(_all_label_text(panel).contains(BreathePanel.NOTE), "the panel says to breathe comfortably and stop if anything feels uncomfortable")
@@ -705,6 +706,7 @@ func _check_rest_and_breathe(host: Control) -> void:
 		Input.parse_input_event(key_up)
 		await get_tree().process_frame
 	check(world._overlay == null and not get_tree().paused and world.rest.is_resting(), "any key stops breathing; the rest goes on")
+	check(world.rest.overlay.visible and not world.rest.overlay.controls_visible(), "and the rest spot's line returns quietly (hidden until the mouse moves)")
 	# Watch time pass while resting.
 	GameSettings.rest_time_passes = true
 	var before := TimeManager.day * 1440.0 + TimeManager.minute_of_day
@@ -777,6 +779,23 @@ func _check_rest_and_breathe(host: Control) -> void:
 	world.rest.overlay.stand_button.pressed.emit()
 	await get_tree().process_frame
 	check(not world.rest.is_resting(), "the Stand up button stands up")
+	# Study Mode: when time is up while sitting, the player stands so Lumi's line shows.
+	spot.interact()
+	await get_tree().process_frame
+	var saved_study := [StudyMode.session_running, StudyMode.fake_elapsed, StudyMode.end_stage, StudyMode.duration_minutes]
+	StudyMode.session_running = true
+	StudyMode.duration_minutes = 10
+	StudyMode.end_stage = StudyMode.EndStage.PLAYING
+	StudyMode.fake_elapsed = 10.0 * 60.0 + 1.0
+	world.hud.hide_dialogue()
+	world._update_study_end()
+	check(not world.rest.is_resting() and world.hud.is_dialogue_visible(), "a study's gentle end stands the player up so the line can be read")
+	StudyMode.session_running = saved_study[0]
+	StudyMode.fake_elapsed = saved_study[1]
+	StudyMode.end_stage = saved_study[2]
+	StudyMode.duration_minutes = saved_study[3]
+	world.hud.hide_dialogue()
+	await get_tree().create_timer(0.3).timeout
 	# The pause menu also offers Breathe with Lumi.
 	world._open_pause()
 	world.pause_menu.breathe_requested.emit()

@@ -1,4 +1,4 @@
-# Manual Test Checklist (V2)
+# Manual Test Checklist (V2 and 0.4.0)
 
 `tools/run_checks.ps1` runs the automated tests. They cover:
 - logic, data and save/load round trips;
@@ -12,10 +12,20 @@ They cannot judge feel, readability, audio quality or real hardware. The items b
 Mark each item: ☐ not run / ✅ pass / ❌ fail (with a note).
 
 ## Start and flow
-- ☐ Splash, main menu, check-in, "Choose a journey", then the overworld. Finish Session, then reflection and results.
+- ☐ Splash, then the main menu (wordmark, backdrop, Continue when a save exists), then Start Adventure, "Choose a journey" and the overworld. **No questionnaire** appears in the default game.
+- ☐ A new journey shows the comfort-mode card (Balanced pre-selected), then the mood check (five faces, Skip, "Don't ask again"). Lumi's reply is neutral and kind. Continuing a journey shows neither card.
+- ☐ Pause > Return to menu or Quit Game shows "Before you go..." (a short summary of real events, optional faces). "Keep playing" returns. With the setting off, the game leaves directly.
+- ☐ The private mood journal: off by default. When on, entries appear on the journal's "Feelings" page and can be exported and deleted in Data & Privacy.
 - ☐ Continue a journey after quitting the game: the position, inventory, homestead, villagers and quests are all there.
 - ☐ Start over and delete a slot (with confirmations). The other slots are untouched.
-- ☐ Main Menu from the pause menu shows the incomplete-session warning, and returning works.
+- ☐ About: credits (your name from `game/data/credits.json`), licenses, version 0.4.0, the disclaimer.
+
+## Study Mode (0.4.0; follow docs/STUDY_MODE.md)
+- ☐ Unlock: 7 clicks on the version label, then `LUMERIA-STUDY`. The badge shows, and it stays after a restart until "Leave Study Mode". `--study` works for one run.
+- ☐ Setup: invalid codes are refused (P01-P999 only). 10/15/20 minutes; the language is chosen.
+- ☐ A full session: check-in with consent, a fresh world, the gentle end ("Our walk is almost done..."; never during dialogue or a minigame), reflection, results, "Next session".
+- ☐ Main Menu from the study pause menu shows the incomplete-session warning, and returning works.
+- ☐ Export study data, and run `analysis/analyze_study.py` on it. The player's own saves (slots 1-3) are untouched.
 
 ## Movement, camera, world
 - ☐ Walking feels responsive in 8 directions. Shift running is comfortable; the toggle option works.
@@ -72,6 +82,27 @@ Do this once with headphones and once with speakers, at the default volumes:
 - ☐ **Footsteps:** grass, a path, a bridge or dock, coast sand, highland snow, a cave, and the cottage floor. They should be barely noticeable, and Settings > Audio > Footsteps off silences them.
 - ☐ If rendered files were added: they play instead of the placeholders, and the log no longer warns about placeholders.
 
+## HUD and UI (0.4.0)
+- ☐ The HUD feels calm: tracker top-left (it fades while walking), the day arc top-right, the hotbar fades when unused, no key buttons on screen.
+- ☐ Key hints: "Sometimes" shows a hint when a control first matters and after about 45 s idle; "Always" keeps a strip; "Never" shows none. Remapped keys are shown.
+- ☐ Toasts never cover the player or Lumi (try the cottage, the coast edge and caves). Pickups merge.
+- ☐ Rings only on the target (and the 2 nearest in Gentle).
+- ☐ Fishing in the world: the bobber and the bar beside the player are readable; large text and high contrast make the bar bigger.
+- ☐ Display: windowed / fullscreen / borderless, VSync, UI scale 90-130% (the world stays the same size).
+
+## Visuals and finale (0.4.0)
+- ☐ Ground detail, small features (stumps, bird baths, shrines, mushroom rings), fireflies, water mist, stars, needles, snow, gulls and the lighthouse beam look calm and fit each region; nothing flickers or pops in.
+- ☐ Village at night: lantern posts and windows glow warmly; the frame rate stays smooth.
+- ☐ The Traveler's arm swing, breathing, blink and run puff, and Lumi's trail look natural; with Reduce motion they are calmer and the puff is gone.
+- ☐ The finale cinematic: the lines are readable, the credits roll (they fade page by page with Reduce motion), "Hold Esc to skip" works at any moment, and afterwards the world is restored, the festival lanterns stand, and you can walk on.
+
+## Rest spots and breathing (0.4.0)
+- ☐ Find a few quiet places: a toast, a bench icon on the map, and the journal page "Quiet places".
+- ☐ Sit (E, a click on the seat, gamepad A): the Traveler sits, Lumi curls up, the camera drifts, the HUD fades, the music swells a little. Nothing else happens; there is no timer.
+- ☐ Stand up with a movement key, Esc, Shift, the stick, B, Start and the Stand up button.
+- ☐ "Watch time pass while resting" on: a sunset passes in a minute or so; off: the clock runs normally.
+- ☐ Breathe with Lumi (at a rest spot and from the pause menu): each pace feels even and comfortable; the note is shown; any key stops it; with Reduce motion the glow keeps its size and a line shows the progress. Nothing praises or scores you.
+
 ## Input and accessibility (M11)
 - ☐ **Gamepad** (not tested with real hardware): move, interact, run, bag, hint, journal (with LB/RB tabs), pause, map, build mode (rotate, store, undo, LB/RB items), fishing (A to reel), and the use-item trigger. All menus can be navigated with the D-pad and A/B.
 - ☐ Key remapping: change keys, see a clash warning, restart the game (bindings kept), and reset to defaults.
@@ -85,8 +116,9 @@ Do this once with headphones and once with speakers, at the default volumes:
 - ☐ No Indonesian text is cut off or overflows at Normal and Extra large text sizes (prompts, toasts, quest panel, buttons).
 - ☐ The stress question and its labels read naturally. The Indonesian wording is a plain translation, not a validated instrument; compare sessions in different languages with care.
 
-## Research flow (unchanged from V1)
-- ☐ Consent unticked: nothing is written. Consent ticked: one row is appended to `sessions.csv` with correct values.
+## Research flow (Study Mode; the record is unchanged from V1)
+- ☐ Consent unticked: nothing is written. Consent ticked: one row is appended to `sessions.csv` with correct values, plus the study files.
+- ☐ The default game (not Study Mode) never writes `sessions.csv` or the study files.
 - ☐ Data & Privacy: export, open folder, delete. Saves are not affected.
 
 ## Performance (record your hardware)
@@ -94,4 +126,5 @@ Do this once with headphones and once with speakers, at the default volumes:
 - Reference runs on an RTX 3050 Laptop GPU (GL Compatibility):
   - M2 scripted run: average 72.6 FPS, minimum 51;
   - latest capture (after M10): average about 61-68 FPS, minimum 44-51 during scripted running;
-  - perf probe (after the M6 culling fix): 65-74 FPS with every system on.
+  - perf probe (after the M6 culling fix): 65-74 FPS with every system on;
+  - perf probe 0.4.0 (after the ground-detail and atmosphere fixes): 61.1 FPS on average over five spots (pinewood 58, the village at night 60), 1% low 37 FPS, worst frame 39 ms.

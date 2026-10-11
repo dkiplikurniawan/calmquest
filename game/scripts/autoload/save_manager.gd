@@ -17,7 +17,7 @@ const SAVE_VERSION := 2
 const SLOT_COUNT := 3
 ## Study Mode's temporary journey (saves/study_tmp.json); never one of slots 1-3.
 const STUDY_SLOT := 0
-const GAME_VERSION := "0.3.1"
+const GAME_VERSION := "0.4.0"
 
 ## -1 = no slot (e.g. a test or a scene run directly): nothing is written.
 var current_slot: int = -1

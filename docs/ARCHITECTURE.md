@@ -1,4 +1,4 @@
-# Architecture (V2)
+# Architecture (V2, updated for 0.4.0)
 
 ## Overview
 
@@ -37,6 +37,7 @@
 - **Data-driven content.** Everything authorable is JSON under `game/data/`: the world map and POIs, quests, items (including crop, fish, food and decor metadata), recipes, creatures, restoration sites, caves, villagers and requests, lore, and the cottage. Adding a fish, quest, request or decoration needs no code. (The root `data/` folder is research data and is ignored by Godot.)
 - **Pure, testable logic:** `WorldData`, `ChunkGenerator`, `QuestBook`, `BeamPuzzle`, `CraftingBook`, `Inventory`, `DecorRules`, `Farming`, `Fishing`, `CreatureDB`, `VillageDB`, `Weather`, `Cosmetics`, `AdaptiveComfortEngine`, `SessionRecord` and `CsvCodec`. Most are static helpers over `GameState.systems[...]`.
 - **Gameplay code does not know the UI.** Controllers push text to the HUD and open overlay panels through `Overworld`. Panels only emit signals.
+- **One game, two layers (0.4.0).** The default game and Study Mode run the same `Overworld`. Study Mode only changes what happens around it: the setup screen, a temporary save slot, a fixed duration with a gentle end, and its own CSV files. The well-being layer (`Wellbeing`) is optional and never writes research data.
 
 ## Autoloads (load order)
 
@@ -50,8 +51,10 @@
 | `GameState` | persistent world state (see [DATA_SCHEMA.md](DATA_SCHEMA.md)) |
 | `SessionState` | research session and the adaptive engine |
 | `QuestManager` | loads quest JSON, re-evaluates when state changes, follows the HUD quest, applies `unlock` |
-| `SaveManager` | slots, versioning and migration, atomic writes and backups, autosaves, restoring the player (including sub-levels) |
-| `SceneRouter` | scene changes and `fade_through()` |
+| `SaveManager` | slots, versioning and migration, atomic writes and backups, autosaves, restoring the player (including sub-levels); `STUDY_SLOT` (0) for Study Mode's temporary world; `GAME_VERSION` (0.4.0, the same as `config/version`) |
+| `Wellbeing` (0.4.0) | the optional mood check and session closing: faces, Lumi's replies, the "Before you go..." summary from real events, and the private mood journal (`wellbeing_journal.json`, opt-in, export and delete) |
+| `StudyMode` (0.4.0) | activation (`--study` or the hidden unlock), participant codes, duration and the gentle end, `study_sessions.csv` and `study_events.csv` (through `CsvFileStore`, `SessionRecord` and `CsvCodec`), export, leave |
+| `SceneRouter` | scene changes and `fade_through()`; also `STUDY_SETUP` and `ABOUT` |
 
 ## Overworld controllers (children of `overworld.tscn`)
 
@@ -64,8 +67,9 @@
 | `Homestead` | `homestead/homestead_controller.gd` | cottage restoration, the interior sub-level, decor, farm plots |
 | `Features` | `world/region_features.gd` | wildlife spawner, gloom and Gloomlings, docks and sailing, restoration sites (lighthouse, mountain path), wreck puzzle, fox family, fishing spots, forgotten garden, aurora shrine, Hearthstone grants, `RegionAtmosphere` |
 | `Caves` | `caves/caves_controller.gd` | two `CaveLevel` sub-levels built from `caves.json`, cave entrances, entering and leaving |
-| `Village` | `village/village_controller.gd` | villagers and homes, request board, campfire and stall, the Hearthstone circle, the Act 3 finale, quest rewards |
-| `Hud`, `PauseMenu`, `SessionComplete` | `ui/*.gd` | HUD (hotbar, clock, pickups, captions, compass, minimap) and menus |
+| `Village` | `village/village_controller.gd` | villagers and homes, request board, campfire and stall, lantern posts, the Hearthstone circle, the Act 3 finale (`FinaleCinematic`: skippable, autosaves before and after), quest rewards |
+| `Rest` (0.4.0, created in code) | `rest/rest_controller.gd` | rest spots (`RestSpot`, data in `rest_spots.json`, state in `RestSpots`): sitting and standing, Lumi, the camera drift, the HUD fade, the music swell, time passing, discovering quiet places; opens `BreathePanel` |
+| `Hud`, `PauseMenu`, `SessionComplete` | `ui/*.gd` | HUD (a fading tracker with the compass, the day arc, the hotbar, key hints, toasts, captions, minimap, the mouse menu) and menus. HUD items live under one node, so they can fade out together while resting; overlays, captions and the study light stay visible |
 
 **Sub-levels** (the cottage at (12000, 400) and the caves at (12000, 1400) and (12000, 3000)):
 - They are placed outside the world map.
@@ -78,6 +82,7 @@
 2. `Terrain` draws the shader ground, paths and rivers, and builds row-run collision for blocked cells and river banks plus a safety ring.
 3. `ChunkGenerator` places seeded scenery and gatherables per 1024 px chunk; `WorldStreamer` streams them around the camera (at most one chunk build per frame; deltas live in `GameState`).
 4. Controllers spawn hand-placed POIs. Their clearings keep scenery away.
+5. **0.4.0:** each chunk also gets a `GroundDetail` (an internal child, one triangle mesh, its own `"ground"` random stream) and at most one small feature (`generate_features`, its own `"feature"` stream). Separate streams keep the scenery and its object ids identical, and saves refer to those ids for gathered objects. Rest spots were placed where the scenery is already clear for the same reason.
 
 ## Rendering and performance
 
@@ -88,6 +93,8 @@
 - **Atmosphere (`RegionAtmosphere`, CanvasLayer 2):** screen-space fog with parallax, light shafts, cloud shadows, rain, overcast, mist and the aurora.
 - **Gloom veil:** a canvas shader reading the screen texture in its own follow-viewport CanvasLayer (1), so it desaturates the finished world image. The mist is drawn after it.
 - **`ViewCull`:** objects animated by `_draw()` only redraw when near the camera. This was the main M6 performance fix (about 6-7 ms per frame saved).
+- **Light budget (0.4.0):** `Overworld.LIGHT_BUDGET` = 16 `PointLight2D` near the screen. New lights (lantern posts, the cottage window) switch on only at night and near the camera. The overworld test measures the festival and the village at night.
+- **Batching (0.4.0):** ground detail is one `canvas_item_add_triangle_array` per chunk, and atmosphere particles (stars, fireflies, snow, needles) are one per effect. Mist is capped at 12 shapes.
 - **Measurements and the probe:** `tools/capture/perf_probe.tscn` measures frame times per region with features on and off.
 
 ## Quests
@@ -108,15 +115,19 @@ See [DATA_SCHEMA.md](DATA_SCHEMA.md).
 
 ## Audio
 
-`AudioManager` keeps the V1 synthesized sound effects. `MusicManager` plays the cue chosen by `Overworld._update_music()` from the region, sub-level, night amount, finale and rain. Files come from `assets/music/placeholder` and `assets/ambience/placeholder`, generated by `tools/music/`; see [MUSIC_PIPELINE.md](MUSIC_PIPELINE.md).
+`AudioManager` synthesizes the sound effects (0.4.0: softer, ±4% pitch variation, footsteps on six surfaces chosen by `Footsteps`). Resting raises the Music and Ambience bus volumes a little (`set_rest_boost`). `MusicManager` plays the cue chosen by `Overworld._update_music()` from the region, sub-level, night amount, finale and rain. It prefers `assets/music/rendered/<cue>.ogg|wav` and falls back to `assets/music/placeholder` (one warning per run). Ambience comes from `assets/ambience/placeholder`, generated by `tools/music/`; see [MUSIC_PIPELINE.md](MUSIC_PIPELINE.md).
 
-## Session data flow (research, unchanged)
+## Session data flow
 
-1. The check-in calls `SessionState.begin_session`.
-2. The player chooses a journey (a slot), and `SaveManager.prepare_world` loads or starts it.
-3. Finish Session runs `end_gameplay`, then the reflection screen, then `finalize_and_save` (only with consent), then the results.
-4. Main Menu or closing the window: autosave, then `abandon_session`.
-5. Restart Session: a new session timer, and the world reloaded from the last save.
+**Default game (0.4.0):** Start Adventure, then "Choose a journey" (`slot_select.start_play_session`), then the world. A session is begun without consent, so `finalize_and_save` never writes. The optional mood check and "Before you go..." go through `Wellbeing`. Leaving: autosave, the optional journal entry, then the menu or quit.
+
+**Study Mode (research):**
+1. The study setup sets the participant code, the minutes and the language.
+2. The check-in calls `SessionState.begin_session` (with the participant's consent choice).
+3. `StudyMode.begin_play()` starts a fresh world in `STUDY_SLOT`.
+4. When the time is up, `end_step()` announces the end and waits until nothing is open. Then `end_gameplay`, the reflection, and `finalize_and_save`: with consent it writes the unchanged v1 row to `sessions.csv` and the study row to `study_sessions.csv`.
+5. Then the results and "Next session". The temporary save is deleted.
+6. Events go to `study_events.csv` only during a consented study session.
 
 ## Error handling
 
@@ -150,6 +161,13 @@ All bodies use the default layer 1 and mask 1: the player, decorations, terrain,
 - **The research data never depends on the language:** the CSV stores mode ids and numbers, and a unit test compares the header and a row in both languages.
 - `python tools/i18n/extract.py` collects every player-facing string and reports missing translations, placeholder or line-break mismatches and unused entries; `run_checks.ps1` runs it. Text in a table that is translated where it is used gets a trailing `# i18n` comment so the extractor finds it.
 - **To add a language:** add its code to `L.LANGUAGES` and `L.ORDER`, create `game/data/i18n/<code>/`, and run the extractor with `--locale <code> --missing` for the list to translate.
+
+## Platform integration (later; not included)
+
+There is no Steamworks SDK in this project (out of scope for 0.4.0). If it is added later, keep it in one optional autoload (for example `Platform`), loaded before `SaveManager`:
+- **achievements** listen to `EventBus` signals (quests, Hearthstones, quiet places) and never change gameplay;
+- **cloud saves** sync the files in `SaveManager.save_dir` and never the research or study files;
+- the game must still run unchanged when the SDK is missing.
 
 ## Extension points
 

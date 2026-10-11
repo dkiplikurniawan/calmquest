@@ -42,6 +42,9 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://capture_tmp"))
 	SessionState.progress = ProgressStore.new("user://capture_tmp/progress.cfg")
+	# Anything saved while capturing (e.g. the breathing pace) goes to a scratch file,
+	# never to the player's own settings.cfg.
+	GameSettings.settings_path = "user://capture_tmp/settings.cfg"
 	await _capture_all()
 	get_tree().quit()
 
@@ -366,10 +369,11 @@ func _capture_all() -> void:
 	vc.play_finale()
 	await _wait(4.0)
 	await _snap("42a_finale_gathering")
-	# The light spreads (about 12-21 s), then the credits roll.
-	await _wait(11.0)
+	# The light spreads from about 12 s (the first closing line is fully shown
+	# at about 13-14 s), then the credits roll from about 21 s.
+	await _wait(9.6)
 	await _snap("42_festival_of_light")
-	await _wait(11.0)
+	await _wait(12.4)
 	await _snap("42b_finale_credits")
 	var waited := 0.0
 	while vc.finale_running and waited < 20.0:
@@ -407,6 +411,64 @@ func _capture_all() -> void:
 	settings.close()
 	await _wait(0.3)
 
+	# 0.4.0: the start cards, "Before you go", a rest spot and breathing.
+	# (Settings are changed in memory only.)
+	GameSettings.mood_check = true
+	GameSettings.session_summary = true
+	var mode_card := ModeChoiceCard.new()
+	world._open_overlay(mode_card)
+	await _wait(0.6)
+	await _snap("51_mode_choice")
+	world._close_overlay()
+	mode_card.queue_free()
+	await _wait(0.3)
+	world._show_mood_check({"mood_check": true})
+	await _wait(0.6)
+	await _snap("52_mood_check")
+	# Skip, like a player would (the card closes itself).
+	if world._overlay is MoodCheckCard:
+		(world._overlay as MoodCheckCard).skip_button.pressed.emit()
+	world.hud.hide_dialogue()
+	await _wait(0.3)
+	world._open_pause()
+	world.pause_menu.leave_requested.emit()
+	await _wait(0.6)
+	await _snap("53_session_closing")
+	if world._overlay is SessionClosingPanel:
+		(world._overlay as SessionClosingPanel).keep_button.pressed.emit()
+	await _wait(0.3)
+	TimeManager.load_state({"day": 14, "minute": 18.6 * 60.0})
+	Weather.force("clear")
+	var hill: RestSpot = null
+	for n in get_tree().get_nodes_in_group(RestSpot.GROUP_NAME):
+		if (n as RestSpot).spot_id == "rest_sunset_hill":
+			hill = n
+	if hill != null:
+		world.teleport_to(hill.global_position + Vector2(0, 60))
+		await _wait(1.5)
+		world.hud.hide_dialogue()
+		hill.interact()
+		await _wait(3.0)
+		await _snap("54_rest_spot")
+		world.open_breathe()
+		await _wait(0.6)
+		await _snap("55_breathe_setup")
+		if world._overlay is BreathePanel:
+			(world._overlay as BreathePanel).begin_breathing()
+			await _wait(BreathePanel.SETTLE_SECONDS + 2.6)
+			await _snap("56_breathing")
+			(world._overlay as BreathePanel).stop()
+		await _wait(0.3)
+		world.rest.stand_up()
+		await _wait(0.8)
+	world._open_journal()
+	await _wait(0.4)
+	(world._overlay as JournalPanel).tabs.current_tab = 8
+	await _wait(0.4)
+	await _snap("57_journal_quiet_places")
+	(world._overlay as JournalPanel).close()
+	await _wait(0.3)
+
 	print("chunk builds: %d, last %.1f ms, max %.1f ms" % [world.streamer.total_builds, world.streamer.last_build_usec / 1000.0, world.streamer.max_build_usec / 1000.0])
 	print("loaded chunks now: %d, objects: %d" % [world.streamer.loaded.size(), world.streamer.object_count()])
 	if not _fps_samples.is_empty():
@@ -424,6 +486,10 @@ func _capture_all() -> void:
 	await _snap("13_results")
 	await _show("res://game/scenes/ui/slot_select.tscn", 1.0)
 	await _snap("20_slot_select")
+	await _show("res://game/scenes/ui/about.tscn", 1.0)
+	await _snap("58_about")
+	await _show("res://game/scenes/ui/study_setup.tscn", 1.0)
+	await _snap("59_study_setup")
 
 
 func _notification(what: int) -> void:

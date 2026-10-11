@@ -169,3 +169,15 @@ func test_playful_bonus_is_praise_only() -> void:
 	assert_true(Creature.mode_shyness() > 1.0, "Playful creatures need a little more calm")
 	SessionState.select_mode(&"gentle", AdaptiveComfortEngine.REASON_PLAYER_CHOICE)
 	assert_true(Creature.mode_shyness() < 1.0, "Gentle creatures are at ease quickly")
+
+
+func test_gamepad_can_choose_and_go_back_in_menus() -> void:
+	InputSetup.ensure_actions()
+	var accept := false
+	var cancel := false
+	for e in InputMap.action_get_events(&"ui_accept"):
+		accept = accept or (e is InputEventJoypadButton and (e as InputEventJoypadButton).button_index == JOY_BUTTON_A)
+	for e in InputMap.action_get_events(&"ui_cancel"):
+		cancel = cancel or (e is InputEventJoypadButton and (e as InputEventJoypadButton).button_index == JOY_BUTTON_B)
+	assert_true(accept, "gamepad A chooses in menus (ui_accept)")
+	assert_true(cancel, "gamepad B goes back in menus (ui_cancel)")

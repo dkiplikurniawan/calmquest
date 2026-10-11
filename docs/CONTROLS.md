@@ -10,7 +10,7 @@ All gameplay actions are registered in one table: `game/scripts/systems/input_se
 | Run | Shift | Hold by default; Settings can switch it to press-to-toggle. No stamina |
 | Interact | E | Only when a golden ring shows the target is within reach |
 | Ask Lumi for a hint | H | Context-aware: puzzle hint ladder, locked-place explanations, quest direction |
-| Journal | J | Tabs: Quests, Map, Creatures, Fish, Recipes, Lore, Collections, Villagers. Q / E (or [ / ]) switch tabs |
+| Journal | J | Tabs: Quests, Map, Creatures, Fish, Recipes, Lore, Collections, Villagers, Quiet places (and Feelings when the private mood journal is on). Q / E (or [ / ]) switch tabs |
 | World map | M | Click a relit waystone to travel; click elsewhere to place or remove a pin |
 | Place a pin | P | Pins your current position on the map (also works inside the map) |
 | Pause / back | Escape | Also closes overlays |
@@ -19,6 +19,10 @@ All gameplay actions are registered in one table: `game/scripts/systems/input_se
 | Bag and crafting | I / Tab | |
 | Build mode | B | Q / C change item, R rotate, X store, Z undo |
 | Menus | Mouse, or arrow keys + Enter/Space | Visible golden focus ring |
+| Sit and rest | E at a rest spot, or click the seat | 0.4.0. While sitting, E opens *Breathe with Lumi* |
+| Stand up | Any movement key, Escape or Shift | Or the *Stand up* button (move the mouse to show it) |
+| Breathe with Lumi | E while sitting, or the pause menu | Any key, click or button stops it |
+| Skip the finale | Hold Escape | A ring fills; letting go cancels |
 
 **Mouse (0.4.0):** the HUD no longer shows key buttons all the time. Move the mouse and a small menu icon fades in at the top right, under the sun/moon arc. It opens Ask Lumi, Journal, Map and Pause, and shows the current mode and the clock. These buttons are mouse-only and never take keyboard focus, so Space and E can't trigger them by accident.
 
@@ -51,8 +55,11 @@ All core actions have gamepad bindings (Xbox-style names; other controllers use 
 | Place a map pin | Left trigger |
 | Build mode: rotate / store / undo | Y / X / Back |
 | Menus | D-pad or left stick, A to choose, B to go back |
+| Sit and rest / Breathe with Lumi (while sitting) | A |
+| Stand up | Left stick, B or Start |
+| Skip the finale | Hold Start (or B) |
 
-The bindings are covered by automated tests (`tests/unit/test_audio_input.gd`). **They have not been tried with a physical gamepad** (none was available); see the manual test checklist.
+In 0.4.0, A and B were also added to Godot's menu actions (`ui_accept`, `ui_cancel`). Godot 4.7's built-in versions have no gamepad button, so before this fix A and B did nothing in menus. The bindings are covered by automated tests (`tests/unit/test_audio_input.gd`). **They have not been tried with a physical gamepad** (none was available); see the manual test checklist.
 
 ## Key remapping
 

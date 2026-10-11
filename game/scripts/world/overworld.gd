@@ -868,14 +868,16 @@ func _build_rest_spots() -> void:
 		entities.add_child(node)
 
 
-## "Breathe with Lumi" (from a rest spot or the pause menu).
-func open_breathe() -> void:
+## "Breathe with Lumi" (from a rest spot or the pause menu). Returns the panel.
+func open_breathe() -> BreathePanel:
 	if _modal_open:
-		return
+		return null
 	var panel := BreathePanel.new()
 	_open_overlay(panel)
 	panel.setup()
 	panel.closed.connect(_close_overlay)
+	rest.on_breathe_opened(panel)
+	return panel
 
 
 func show_finale_panel() -> void:
@@ -1226,6 +1228,9 @@ func _update_study_end() -> void:
 	var busy := hud.is_dialogue_visible() or lantern_catch.active or SceneRouter.is_busy()
 	match StudyMode.end_step(busy):
 		"announce":
+			# Sitting fades the HUD; stand up first so the line can be read.
+			if rest.is_resting():
+				rest.stand_up()
 			lumi.react()
 			hud.show_dialogue(L.t(StudyMode.END_LINE), 8.0)
 		"finish":

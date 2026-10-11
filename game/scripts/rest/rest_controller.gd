@@ -84,6 +84,18 @@ func breathe() -> void:
 		overworld.open_breathe()
 
 
+## The rest spot's line and buttons step aside while breathing (whether it was
+## opened with E or from the pause menu) and come back hidden afterwards.
+func on_breathe_opened(panel: BreathePanel) -> void:
+	if overlay == null or panel == null:
+		return
+	overlay.visible = false
+	panel.closed.connect(func() -> void:
+		if overlay != null:
+			overlay.hide_controls()
+			overlay.visible = true)
+
+
 ## Mouse: a click on the seat the player is next to (the current target) sits down.
 func handle_click(event: InputEvent) -> bool:
 	var click := event as InputEventMouseButton
@@ -210,6 +222,10 @@ class RestOverlay extends CanvasLayer:
 
 	func show_controls() -> void:
 		_shown = maxf(_shown, 3.0)
+
+	func hide_controls() -> void:
+		_shown = 0.0
+		_root.modulate.a = 0.0
 
 	func controls_visible() -> bool:
 		return _root.modulate.a > 0.05

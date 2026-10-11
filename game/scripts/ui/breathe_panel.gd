@@ -125,7 +125,7 @@ func _build_running() -> void:
 	_cue.offset_bottom = -130
 	_cue.custom_minimum_size.x = 600
 	_run_root.add_child(_cue)
-	var stop := UiKit.label("Press any key to stop", UiTheme.SUBTLE)
+	var stop := UiKit.label("Press any key to stop", UiTheme.LIGHT)
 	stop.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	stop.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	stop.grow_horizontal = Control.GROW_DIRECTION_BOTH

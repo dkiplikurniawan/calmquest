@@ -17,6 +17,8 @@ var _hold: float = 0.0
 var _root: Control
 var _caption: Label
 var _credits: VBoxContainer
+## A soft dark veil behind the credits, so they read well over the bright world.
+var _veil: ColorRect
 var _skip_hint: Label
 var _ring: Control
 var _bars: Array[ColorRect] = []
@@ -56,6 +58,12 @@ func _ready() -> void:
 	_caption.grow_horizontal = Control.GROW_DIRECTION_BOTH
 	_caption.grow_vertical = Control.GROW_DIRECTION_BOTH
 	_caption.modulate.a = 0.0
+	_outline(_caption)
+	_veil = ColorRect.new()
+	_veil.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	_veil.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_veil.color = Color(0.05, 0.06, 0.12, 0.0)
+	_root.add_child(_veil)
 	_root.add_child(_caption)
 	_credits = VBoxContainer.new()
 	_credits.add_theme_constant_override("separation", 16)
@@ -152,6 +160,11 @@ func show_lines(lines: PackedStringArray) -> void:
 		tween.tween_property(_caption, "modulate:a", 0.0, 0.8)
 
 
+func _outline(l: Label) -> void:
+	l.add_theme_color_override("font_outline_color", Color(0.06, 0.07, 0.14, 0.85))
+	l.add_theme_constant_override("outline_size", 8)
+
+
 func caption_text() -> String:
 	return _caption.text
 
@@ -166,10 +179,13 @@ func roll_credits(lines: PackedStringArray, seconds: float) -> void:
 		var l := UiKit.label(line, UiTheme.LIGHT, true)
 		l.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		l.custom_minimum_size.x = 760
+		_outline(l)
 		_credits.add_child(l)
 	var thanks := UiKit.label("Thank you for playing.", UiTheme.LIGHT)
 	thanks.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_outline(thanks)
 	_credits.add_child(thanks)
+	create_tween().tween_property(_veil, "color:a", 0.45, 1.5)
 	_credits.visible = true
 	_credits.reset_size()
 	var view := _root.get_viewport_rect().size

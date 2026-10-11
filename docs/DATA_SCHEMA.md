@@ -124,7 +124,7 @@ V1 keys are unchanged. Keys added in V2:
 | `gentle_clock` | int 0-2 | 1 | Gentle mode clock: normal / half / paused |
 | `autosave_minutes` | int | 5 | 0 = event autosaves only |
 | `last_slot` | int 1-3 | 1 | pre-selected journey |
-| `ambience_volume`, `ui_volume` | float 0-1 | 0.6, 0.7 | bus volumes |
+| `ambience_volume`, `ui_volume` | float 0-1 | 0.6, 0.6 | bus volumes (0.4.0: Interface 0.6 for new players, was 0.7; `sfx_volume` 0.7, was 0.8) |
 | `music_mode` | int 0-2 | 0 | continuous / quiet pauses / off |
 | `hint_frequency` | int -1..3 | -1 | Lumi's nudges: by mode / off / rare / normal / helpful |
 | `weather_effects` | bool | true | rain, cloud and mist visuals (crops are still watered) |
@@ -141,6 +141,9 @@ V1 keys are unchanged. Keys added in V2:
 | `window_mode` | int 0-2 | 0 | Display: windowed / fullscreen / borderless. Older files with only `fullscreen = true` are read as fullscreen, and `fullscreen` is kept in sync |
 | `vsync` | bool | true | Display: vertical sync |
 | `ui_scale_index` | int 0-3 | 1 | Display: interface scale 90 / 100 / 115 / 130 %. The world camera compensates, so only the interface changes size |
+| `footsteps` | bool | true | Audio: footsteps that follow the ground |
+| `rest_time_passes` | bool | false | Well-being: the clock runs faster while sitting at a rest spot |
+| `breathe_pace`, `breathe_length` | int 0-2, int 0-3 | 0, 0 | the last "Breathe with Lumi" choice: Gentle / Even / Slow, and 1 / 2 / 3 minutes / until stopped (preferences only; nothing about the breathing itself is stored) |
 
 ## Private mood journal (`wellbeing_journal.json`)
 

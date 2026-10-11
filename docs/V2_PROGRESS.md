@@ -539,3 +539,31 @@ All were fixed and checked again in screenshots.
     - time passing;
     - standing up with a movement key, Esc (without the pause menu), gamepad A/B and the stick, a mouse click on the seat and the Stand up button;
     - breathing from the pause menu.
+
+### P6 - Documentation, version, screenshots, validation
+
+- **Version:** `SaveManager.GAME_VERSION` and `project.godot` `config/version` are both 0.4.0 (`config/version` had stayed at 0.1.0 since V1).
+- **Docs updated:** README, CHANGELOG (0.4.0), GAME_DESIGN_V2, ARCHITECTURE (with a section on where a Steamworks integration would go later; no SDK added), DATA_SCHEMA (new settings keys, `rest_spots`, study events), DATA_DICTIONARY and PRIVACY (from P1, checked again), ART_DIRECTION, MUSIC_PIPELINE (finale, rest and breathing audio), ASSET_PROVENANCE, CONTROLS, MANUAL_TEST_CHECKLIST (new sections for the flow, Study Mode, HUD, visuals and the finale, rest and breathing) and STUDY_MODE.
+- **Gamepad bug found while documenting the controls:** Godot 4.7's built-in `ui_accept` and `ui_cancel` have no gamepad button. Gamepad A and B therefore did nothing in menus, although the controls doc (since M11) said they did. `InputSetup` now adds A to `ui_accept` and B to `ui_cancel`, with a unit test. This has not been tried with a physical gamepad.
+- **Screenshot tool:**
+  - captures the new screens: the mode card, mood check, "Before you go...", a rest spot at sunset, the breathing setup and breathing, the journal's "Quiet places", About and Study setup, plus the finale's gathering and credits (61 shots);
+  - saves anything written while capturing (the breathing preference) to `capture_tmp`, never to the player's `settings.cfg`.
+  - The first run showed the mood card left behind in later shots: the tool closed it without pressing Skip. It now presses Skip, as a player would. The finale caption was caught mid-fade, so the timing was moved.
+  - The finale's captions and credits got a dark outline and a soft veil behind the credits, for readability.
+- A few 0.3.1 shots are kept in `screenshots/before_0.4.0/` for before/after comparison.
+- **Two rest-spot fixes found while reviewing the screenshots and the study flow:**
+  - **Study end while sitting:** in Study Mode, if the time ran out while the participant was sitting, Lumi's end line would have been hidden, because sitting fades the HUD. The announcement now stands the player up first. This is checked in the UI smoke test.
+  - **Breathing at a rest spot:** the rest spot's name, line and buttons showed faintly through the breathing screen. They now step aside while breathing and come back hidden (they reappear when the mouse moves). This is also checked.
+- **Final validation (2026-10-12):** `tools/run_checks.ps1` passed all **18 checks**:
+  - 174 references;
+  - import;
+  - **188/188 unit tests** (baseline 144);
+  - smoke **678** (baseline 656);
+  - overworld **396** (baseline 378);
+  - UI **175** (baseline 39);
+  - **9/9 scenes** (baseline 7);
+  - catalog **1,673/1,673** (baseline 1,481);
+  - 9 music-tool tests and **21** Python analysis tests (baseline 13).
+  - After that run, only the breathing panel's "Press any key to stop" style changed (from subtle to light, for readability). The unit tests (188/188) and the UI smoke test (175/175) were run again after it.
+- **Performance:** the perf probe averaged 61.1 fps (1% low 37, worst frame 39 ms). The screenshot runs measured 54-57 fps on average while running, minimum 36-41; screenshots are being saved during those runs.
+

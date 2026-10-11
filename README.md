@@ -8,7 +8,16 @@ A cozy 2D fantasy adventure built in **Godot 4**, with **transparent, preference
 - **Saves:** persistent, in 3 slots.
 - **Languages:** English and Bahasa Indonesia, switchable at any time in Settings.
 
-Each milestone is described in [docs/V2_PROGRESS.md](docs/V2_PROGRESS.md).
+**Version 0.4.0, the polish pass**, makes it one game with two layers:
+- **The game (default):** a player opens it and simply plays. There is no questionnaire and no research data. It has:
+  - an optional mood check and an optional private mood journal;
+  - a calm HUD;
+  - 12 rest spots to sit and watch the world;
+  - an optional "Breathe with Lumi";
+  - a short, skippable finale cinematic.
+- **Study Mode (hidden):** the same game for a research session, with participant codes, a fixed length and consent-based CSV files. See [docs/STUDY_MODE.md](docs/STUDY_MODE.md).
+
+Each milestone is described in [docs/V2_PROGRESS.md](docs/V2_PROGRESS.md), and the changes per version in [CHANGELOG.md](CHANGELOG.md).
 
 ![Firefly Grove in the V2 open world](screenshots/05_firefly_grove.png)
 
@@ -44,11 +53,15 @@ The light of **Lumeria Isles** has faded. As a traveler you explore **Whispering
 | Caves and puzzles | Braziers, block pushing, a light bridge, a tuned crystal door, beam puzzles, a ship's signal lanterns, an aurora shrine. Every puzzle has a reset lever and a 3-step hint ladder |
 | Time and weather | Day/night (15-24 min, keep day/night, Gentle slow/pause), clear/cloudy/rain/mist, fog, light shafts, cloud shadows, aurora |
 | Saves | 3 slots, versioned with migration, atomic writes plus a backup, autosaves (sleep, doors, quests, timer). Research data is separate |
-| Audio | Music per place with crossfades, adaptive meadow layers, stingers, ambience and rain, 5 buses. **Music files are synthesized placeholders** rendered from original MIDI scores (see [docs/MUSIC_PIPELINE.md](docs/MUSIC_PIPELINE.md)) |
+| Audio | Music per place with crossfades, adaptive meadow layers, stingers, ambience and rain, 5 buses, soft synthesized SFX with pitch variation, footsteps on six surfaces. **Music files are synthesized placeholders** rendered from original MIDI scores. Rendered recordings in `assets/music/rendered/` are used automatically once they exist (see [docs/MUSIC_PIPELINE.md](docs/MUSIC_PIPELINE.md)) |
 | Adaptive engine | Gentle / Balanced / Playful change real parameters in every system (reach, hints, fishing, creatures, puzzles, Lantern Night, clock). There are score-based *suggestions* only, and the player is always in control |
 | Reflection and data | Optional 0-10 check-in before and after, `score_delta = post - pre`, opt-in local CSV (schema v1, unchanged), Python analysis |
 | Accessibility | Keyboard, mouse and gamepad; key remapping; text size; high contrast; reduce motion; captions; weather effects off; shape cues that never rely on color alone; hint frequency |
 | Languages | English and **Bahasa Indonesia** (Settings > Language, switches at once and is remembered). Every player-facing text is translated, including the check-in, reflection and Data & Privacy; the research CSV is the same in both languages |
+| Player flow (0.4.0) | Start Adventure leads to "Choose a journey", then (new journeys) one comfort-mode card and an optional mood check of five drawn faces. Leaving shows "Before you go..." with a short summary of real events. The private mood journal is off by default. Nothing is stored for research |
+| Calm HUD (0.4.0) | A compact, fading quest tracker with the guidance arrow, a sun/moon day arc, a fading hotbar, contextual key hints (Always / Sometimes / Never), toasts below the player, rings only on the nearest objects, in-world fishing, an About screen, and display and interface settings |
+| Rest and breathing (0.4.0) | 12 quiet places: sit, and Lumi curls up, the camera drifts, the HUD fades and the music swells. Optional "Watch time pass while resting". The places appear on the map and on the journal page "Quiet places". "Breathe with Lumi" offers three paces and 1-3 minutes or until stopped, stops on any key, and has no scores |
+| Study Mode (0.4.0) | Hidden (`--study`, or 7 clicks on the version label and `LUMERIA-STUDY`). Participant codes, 10/15/20 minutes, a fresh temporary world, a gentle end, and with consent `study_sessions.csv` and `study_events.csv`, plus `analysis/analyze_study.py` |
 
 ## 4. Screenshots
 
@@ -63,8 +76,11 @@ The light of **Lumeria Isles** has faded. As a traveler you explore **Whispering
 | ![The spirit village](screenshots/38_village.png) | ![Village evening](screenshots/41_village_evening.png) |
 | ![Aurora over the highlands](screenshots/47_aurora_night.png) | ![Festival of Light](screenshots/42_festival_of_light.png) |
 | ![Journal](screenshots/27_journal_creatures.png) | ![Settings](screenshots/49_settings_audio.png) |
+| ![Mood check (0.4.0)](screenshots/52_mood_check.png) | ![Before you go (0.4.0)](screenshots/53_session_closing.png) |
+| ![A rest spot at sunset (0.4.0)](screenshots/54_rest_spot.png) | ![Breathe with Lumi (0.4.0)](screenshots/56_breathing.png) |
+| ![Finale credits (0.4.0)](screenshots/42b_finale_credits.png) | ![About (0.4.0)](screenshots/58_about.png) |
 
-Screenshots are rendered from the real game by `tools/capture/capture_screenshots.tscn` (50 shots). Some scenes are set up by the script (items, flags, time of day), and the results screen shows a scripted test session, not real player data.
+Screenshots are rendered from the real game by `tools/capture/capture_screenshots.tscn` (61 shots; the same set in Bahasa Indonesia in `screenshots/id/`, and a few 0.3.1 shots for comparison in `screenshots/before_0.4.0/`). Some scenes are set up by the script (items, flags, time of day), and the results screen shows a scripted test session, not real player data.
 
 ## 5. Technology stack
 
@@ -101,6 +117,10 @@ godot --path .                   # run the game
 | Ask Lumi | H | Y |
 | Journal (Q/E tabs) | J | Back (LB/RB tabs) |
 | Pause / back | Escape | Start / B |
+| Sit and rest (at a rest spot) | E, or click the seat | A |
+| Stand up | any movement key, Escape or Shift | stick, B or Start |
+| Breathe with Lumi | E while sitting, or the pause menu | A while sitting |
+| Skip the finale | hold Escape | hold Start |
 
 Keys can be remapped in Settings > Controls. Full list: [docs/CONTROLS.md](docs/CONTROLS.md).
 
@@ -108,7 +128,7 @@ Keys can be remapped in Settings > Controls. Full list: [docs/CONTROLS.md](docs/
 
 ### Gameplay walkthrough
 
-1. Start Adventure, optionally answer the check-in and pick a mode, then choose a journey (save slot).
+1. Start Adventure and choose a journey (save slot). A new journey asks for a comfort mode (Balanced is pre-selected) and, optionally, how you feel today (Skip always works).
 2. **Act 1:** gather 8 lights and restore the Heart Tree, then Firefly Grove (Lantern Night), the Crystal Creek puzzle, and the Moon Altar in the Moonlit Sanctuary.
 3. Along the way: gather, craft at the workbench, restore the cottage, decorate, plant, fish and cook. Spirit villagers move in as the world brightens.
 4. **Act 2:** at the Heart Tree circle you learn about five Hearthstones. Find them in any order:
@@ -119,7 +139,7 @@ Keys can be remapped in Settings > Controls. Full list: [docs/CONTROLS.md](docs/
    - climb to the highlands and wake the aurora.
 5. **Act 3:** set the stones, invite your five friends, and light the Great Lantern. The world stays open afterwards.
 
-Use **Finish Session** (pause menu) at any time, answer or skip the reflection, and view your results. Your world is saved automatically.
+Leave from the pause menu (**Return to menu** or **Quit Game**) at any time. If you like, "Before you go..." shows a short summary of your walk. Your world is saved automatically. In Study Mode, the session ends by itself after the set time and leads to the reflection and results.
 
 ## 7. Running the Python analysis
 
@@ -142,13 +162,15 @@ One row per consented session, schema version 1. Full details are in [docs/DATA_
 
 ## 9. Privacy and consent
 
-- Storage is **off by default**. A clearly worded checkbox at the check-in turns it on for that session.
+- **The default game stores no research data at all.** Research storage exists only in Study Mode, and only after the participant ticks a clearly worded checkbox at the check-in.
+- The optional private mood journal (`wellbeing_journal.json`) is off by default and stays on the device. It can be exported or deleted in Data & Privacy.
 - No name, email, account, location or device identifiers are collected. The session ID is random.
 - Files live in `%APPDATA%\CALMQUEST\` (Windows):
   - `sessions.csv` (consented records);
   - `progress.cfg` (V1 journal progress, no answers);
   - `settings.cfg`;
-  - `saves/slot_N.json` (world saves, with no research data). See [docs/DATA_SCHEMA.md](docs/DATA_SCHEMA.md).
+  - `saves/slot_N.json` (world saves, with no research data);
+  - Study Mode only: `study_sessions.csv` and `study_events.csv`. See [docs/DATA_SCHEMA.md](docs/DATA_SCHEMA.md).
 - The game contains **no network code, analytics or trackers**.
 - **Data & Privacy** explains all of this and offers export, open-folder, delete and reset.
 
@@ -187,16 +209,16 @@ Run every automated check on Windows:
 powershell -ExecutionPolicy Bypass -File tools\run_checks.ps1 -Godot "C:\path\to\Godot_v4.7.2-stable_win64_console.exe"
 ```
 
-Latest local run (Godot 4.7.2, Python 3.12, Windows 11, after adding Bahasa Indonesia): **all 15 checks passed**. The suite covers:
+Latest local run (Godot 4.7.2, Python 3.12, Windows 11, version 0.4.0): **all 18 checks passed**. The suite covers:
 
-- static `res://` references,
-- 144 GDScript unit tests: world determinism, items and crafting, saves and migration, wildlife, farming, fishing, caves, villagers, story chain, highlands, audio and input, localization,
-- a 656-check smoke test, which flood-fills reachability of every interactable across the world, including boat routes, the closed and open mountain pass, and the moonlit veil,
-- a 378-check V2 overworld test. It plays every system through real interactions, including Acts 1-3, the finale and both caves, and then saves, wipes memory, relaunches and verifies everything persisted,
-- a 39-check UI smoke test (including switching the language live),
-- all seven screens loading without script errors,
-- the Indonesian catalog: every player-facing string translated, with the same placeholders (in order) and line breaks (`tools/i18n/extract.py`),
-- 13 Python tests.
+- static `res://` references;
+- 188 GDScript unit tests: world determinism, items and crafting, saves and migration, wildlife, farming, fishing, caves, villagers, story chain, highlands, audio and input, localization, well-being, Study Mode, audio polish, visual polish, rest spots and breathing;
+- a 678-check smoke test, which flood-fills reachability of every interactable across the world, including the rest spots, boat routes, the closed and open mountain pass, and the moonlit veil;
+- a 396-check V2 overworld test. It plays every system through real interactions, including Acts 1-3, the finale cinematic (played and skipped), both caves and the light budget, and then saves, wipes memory, relaunches and verifies everything persisted;
+- a 175-check UI smoke test: the player flow, the HUD, sitting and standing with keyboard, mouse and gamepad, breathing, the study end while sitting, and switching the language live;
+- all nine screens loading without script errors;
+- the Indonesian catalog: every player-facing string translated, with the same placeholders (in order) and line breaks (`tools/i18n/extract.py`);
+- 9 music-tool tests and 21 Python analysis tests.
 
 The analysis notebook also executes end-to-end.
 
@@ -208,7 +230,9 @@ Visual and feel checks are manual: see [docs/MANUAL_TEST_CHECKLIST.md](docs/MANU
 - **No physical gamepad** was available. The gamepad bindings exist and are unit tested, but have not been tried by hand.
 - **Not play-tested by people.** Everything above is verified by automated tests and scripted screenshots only. See the [manual test checklist](docs/MANUAL_TEST_CHECKLIST.md).
 - The Frostbloom Highlands are a compact region (one pass, one shrine, one waystone).
-- Art is procedural and intentionally simple (no sprite animation).
+- Art is procedural and intentionally simple. A sprite-sheet path exists, but no sheets are included.
+- **No custom font file is included.** The game uses Godot's default font until an OFL font is placed in `assets/fonts/` (see the README there).
+- **Performance:** about 61 fps on average in the perf probe on the development laptop (RTX 3050, VSync on). Misty Pinewood is about 58 fps, and running into new chunks can still cause single slow frames (worst about 39 ms).
 - The Indonesian translation has not been reviewed by a native speaker yet, and the stress question in Indonesian is a plain translation, not a validated instrument. The session record does not store the language.
 - The UI is built in code, so screens appear empty in the editor's 2D view until you run them.
 - Self-report scores are a single subjective item, not a validated instrument.
@@ -230,10 +254,11 @@ game/scenes/             main, ui, world, player, companion, collectibles, garde
 game/scripts/            autoload, systems (adaptive engine...), data (CSV layer), world, ui...
 game/data/               world, quests, items, recipes, wildlife, sites, caves, villagers, lore, homestead, i18n/id (JSON)
 game/shaders/            ground, river and gloom shaders
-assets/music/            midi/ (original scores), placeholder/ (synthesized loops)
+assets/music/            midi/ (original scores), placeholder/ (synthesized loops), rendered/ (empty: for real recordings)
+assets/fonts/, sprites/  empty except a README: where an OFL font and optional sprite sheets go
 assets/ambience/         placeholder/ (synthesized ambience loops)
 tests/                   GDScript unit tests + V1 smoke, V2 overworld and UI tests
-analysis/                analyze_sessions.py, notebook, tests, synthetic data generator
+analysis/                analyze_sessions.py, analyze_study.py, notebook, tests, synthetic data generator
 data/                    sample_sessions_SYNTHETIC.csv (synthetic only)
 docs/                    design, architecture, data dictionary, privacy, tests, roadmap, evaluation
 tools/                   run_checks.ps1, check_references.py, screenshot capture, perf probe, music/ (compose.py, ambience.py), i18n/extract.py
@@ -241,7 +266,7 @@ tools/                   run_checks.ps1, check_references.py, screenshot capture
 
 ## 16. Acknowledgments and asset licenses
 
-All art is drawn procedurally in GDScript. Sound effects are synthesized at runtime, and music and ambience are synthesized offline from original scores by `tools/music/`. All of it is original to this project. The UI uses Godot's built-in default font. No third-party assets are included. Godot Engine is MIT-licensed (© Godot Engine contributors).
+All art is drawn procedurally in GDScript. Sound effects are synthesized at runtime, and music and ambience are synthesized offline from original scores by `tools/music/`. All of it is original to this project. The UI uses Godot's built-in default font. No third-party assets are included. Details: [docs/ASSET_PROVENANCE.md](docs/ASSET_PROVENANCE.md); the credits are also shown in the game's About screen. Godot Engine is MIT-licensed (© Godot Engine contributors).
 
 ## 17. License
 

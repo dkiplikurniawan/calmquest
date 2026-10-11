@@ -123,6 +123,18 @@ Core loop: **wander, discover, gather, craft and help, restore, see the world br
 
 Switching modes at any time never affects progress, and no mode adds punishment.
 
+## Polish pass (0.4.0, built)
+
+- **One game, two layers.**
+  - *Default:* a player just plays. There is no questionnaire and no research data. A new journey asks for a comfort mode and, optionally, how the player feels (five drawn faces, Skip, "Don't ask again"). Leaving shows "Before you go...": a short summary of real events and an optional face.
+  - *Private mood journal:* off by default.
+  - *Study Mode:* hidden, for research sessions; see [STUDY_MODE.md](STUDY_MODE.md).
+- **A calm screen:** a small, fading quest tracker, a sun/moon arc, a fading hotbar, key hints only when useful, toasts below the player, rings only on the nearest objects, fishing in the world.
+- **A warmer world:** ground detail, small features, fireflies, mist over water, stars, falling needles and snow, gulls, the lighthouse beam, lantern posts and windows at night. The characters breathe, blink and swing their arms.
+- **The Festival of Light** is a half-minute cinematic: the friends gather, befriended creatures come, closing lines, then credits. Holding Esc skips it at any moment, and nothing is lost: the world is restored, both autosaves happen, and play continues.
+- **Rest spots:** 12 quiet places. Sitting is the whole activity: Lumi curls up, the camera drifts toward the view, the HUD fades and the music swells. Optionally, time passes faster. Places found appear on the map and on the journal page "Quiet places". There is no timer and nothing to complete; finding all of them gives one cosmetic glow.
+- **Breathe with Lumi:** an optional breathing pace with Lumi's glow (Gentle 4/6, Even 4/4, Slow 5/7; 1-3 minutes or until stopped). Any input stops it. No scores, no streaks, no claims; the panel says to breathe comfortably and stop if anything feels uncomfortable.
+
 ## Not built / honest limits
 
 - Real orchestral recordings: the music is synthesized placeholders, and the MIDI scores are ready to render.

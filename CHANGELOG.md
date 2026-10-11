@@ -3,6 +3,79 @@
 All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.4.0] - 2026-10-12 (Polish pass: "Ready for Steam, ready for research")
+
+### Added
+- **One game, two layers (P1).**
+  - *Default flow:* Start Adventure opens "Choose a journey". A new journey shows one comfort-mode card (Balanced pre-selected) and then an optional mood check (five drawn faces; Skip; "Don't ask again").
+  - *Leaving* from the pause menu shows "Before you go...", with up to four lines from real events and an optional face.
+  - *Private mood journal* (off by default, `user://wellbeing_journal.json`) with export and delete, and a "Feelings" journal page when it is on.
+  - The default flow stores no research data.
+- **Study Mode (P1),** hidden:
+  - activated by `--study`, or by clicking the version label 7 times and typing `LUMERIA-STUDY`;
+  - participant codes `P01`-`P999`, 10/15/20 minutes, a fresh temporary world, and a gentle end that never interrupts;
+  - with consent, `study_sessions.csv` (participant code, language, build, minutes and the 16 schema-v1 columns) and a coarse `study_events.csv`;
+  - export, leave, `analysis/analyze_study.py` and `docs/STUDY_MODE.md`.
+- **A calm HUD (P2):**
+  - a compact quest tracker with the guidance arrow, which fades while walking;
+  - a sun/moon day arc, a hotbar that fades, and a mouse menu icon;
+  - contextual key hints (Always / Sometimes / Never), toasts grouped below the player, a smaller banner for major moments, and rings only on the nearest objects;
+  - in-world fishing (a bobber and a bar beside the player).
+- **Menus (P2):**
+  - a drawn wordmark, a parallax isles backdrop, and Continue on the main menu;
+  - an About screen (credits from `game/data/credits.json`, licenses, version, disclaimer);
+  - display settings (window mode, VSync, UI scale) and interface settings (hints, fading, compact tracker);
+  - automatic use of an OFL font in `assets/fonts/` when one is added.
+- **Audio (P3):**
+  - `MusicManager` prefers rendered recordings in `assets/music/rendered/`;
+  - `tools/music/render_music.py` for a MuseScore render (seamless loops, loudness, seam check);
+  - softer synthesized SFX with ±4% pitch variation, new sounds for gathering, crafting, cooking, placing, quest steps, fishing and the rest swell, and footsteps on six surfaces (with a setting).
+- **Visuals (P4):**
+  - ground detail per chunk and 24 small features;
+  - fireflies, water mist, stars, needles, snow, gulls and the lighthouse beam;
+  - village lantern posts, festival lanterns and a warm cottage window;
+  - Traveler arm swing, breathing, blinking and run puffs; Lumi's trail and celebration;
+  - an optional sprite-sheet path (no sheets are included).
+- **Finale cinematic (P4):** about 36 s with letterbox, befriended creatures, closing lines, a wide shot, rising motes and credits. "Hold Esc to skip" leads to the same result. It autosaves before and after, and free exploration continues.
+- **Rest spots (P5):**
+  - 12 quiet places (11 in the open world and a crystal pool in the Singing Grotto). "[E] Sit and rest": the Traveler sits, Lumi curls up, the camera drifts, the HUD fades out, and the music and ambience swell.
+  - Optional "Watch time pass while resting".
+  - The places appear on the map and on the journal page "Quiet places". Finding them all unlocks one cosmetic glow.
+- **Breathe with Lumi (P5),** from a rest spot or the pause menu:
+  - Gentle 4/6, Even 4/4 and Slow 5/7, for 1, 2 or 3 minutes or until stopped;
+  - any input stops it; no scores or counters;
+  - a Reduce motion variant.
+  - Study Mode logs only that it started and stopped.
+- **Tests:** `test_wellbeing`, `test_study_mode`, `test_audio_polish`, `test_visual_polish` and `test_rest_and_breathe` (44 new unit tests, including the gamepad menu buttons), and new UI, overworld and smoke checks.
+  - Python: 8 tests for `analyze_study.py` and 9 for the music tool.
+  - `run_checks.ps1` now runs 18 checks.
+
+### Changed
+- The completion panel no longer appears by itself. Players leave from the pause menu, and study sessions end on their own time.
+- "Restart Session" was removed from the player's pause menu. Study Mode has Finish Session and Main Menu.
+- Default volumes: SFX 0.7 (was 0.8) and Interface 0.6 (was 0.7) for new players. Existing settings are kept.
+- During the finale, Esc is held to skip it instead of opening the pause menu.
+- The journal has a ninth page, "Quiet places".
+- Performance work for the new layers: ground detail is one mesh per chunk, small atmosphere particles are batched, and mist is capped. The perf probe went from 50.1 to 61.1 fps on average.
+- `GAME_VERSION` and `project.godot` `config/version` are both **0.4.0** (`config/version` was still 0.1.0).
+
+### Fixed
+- `lantern_catch` was documented as a Study Mode activity but never logged. It now is.
+- Gamepad A and B did nothing in menus (Godot 4.7's `ui_accept` / `ui_cancel` have no gamepad button). They now choose and go back.
+- In Study Mode, the end announcement while sitting at a rest spot stands the player up, so Lumi's line is visible.
+- The first small-feature generator placed nothing (one candidate spot per large chunk). It now tries up to 10 seeded spots.
+
+### Unchanged
+- `sessions.csv` schema v1, `score_delta = post - pre`, missing answers left empty, the save format (`save_version` 2), and `analyze_sessions.py`.
+- The generated scenery and its object ids (new random streams only), so existing saves keep their gathered objects.
+- No network code, analytics or trackers. No health or therapeutic claims.
+
+### Not done here (needs the developer)
+- **Font:** no OFL font file is included (`assets/fonts/README.md`).
+- **Orchestral music:** no MuseScore on this machine. The music is still the synthesized placeholders (`docs/MUSIC_PIPELINE.md`).
+- **Sprite sheets:** none (`assets/sprites/README.md`).
+- **Listening and playtesting:** no manual listening or playtest was done (see `docs/MANUAL_TEST_CHECKLIST.md`).
+
 ## [0.3.1] - 2026-10-11 (Bahasa Indonesia)
 
 ### Added

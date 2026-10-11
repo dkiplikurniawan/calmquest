@@ -70,6 +70,10 @@ const PAD_BUTTONS := {
 	ROTATE: [JOY_BUTTON_Y],
 	STORE: [JOY_BUTTON_X],
 	UNDO: [JOY_BUTTON_BACK],
+	# Menus: Godot 4.7's built-in ui_accept / ui_cancel have no gamepad button,
+	# so A chooses and B goes back (0.4.0 fix).
+	&"ui_accept": [JOY_BUTTON_A],
+	&"ui_cancel": [JOY_BUTTON_B],
 }
 ## Gamepad axes: [axis, direction].
 const PAD_AXES := {

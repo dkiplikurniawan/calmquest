@@ -99,6 +99,12 @@ Each MIDI file:
 
 The SFX and Interface defaults were lowered a little, so effects sit gently above the music for new players. Existing `settings.cfg` files keep their values. Stingers duck the music by 9 dB over 0.6 s and return over 2 s. These are numbers, not listening, and they need checking by ear (see the checklist).
 
+### Moments (0.4.0)
+
+- **Finale:** the `finale` cue plays for the whole cinematic (about 36 s) and the credits. The `swell` sound marks the moment the light spreads.
+- **Rest spots:** sitting plays the soft `swell` sound. The Music bus rises by 2.5 dB and the Ambience bus by 4 dB over 3 s, and they return over about 1.2 s when standing up (`AudioManager.set_rest_boost`). Leaving the world always resets it.
+- **Breathe with Lumi** adds no sound of its own. The world's music and ambience continue quietly (the game is paused behind the panel).
+
 ## Step 2: render with a real orchestral sound (manual)
 
 Only use a SoundFont or sample library whose licence clearly allows use in a distributed game. Record its name, source and licence in `docs/ASSET_PROVENANCE.md`.
