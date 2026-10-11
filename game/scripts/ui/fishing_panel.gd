@@ -115,6 +115,7 @@ func _start_wait() -> void:
 	var lucky := 0.5 if ItemConsumer.Buffs.has("lucky_line") else 1.0
 	_timer = _rng.randf_range(2.0, 5.0) * lucky
 	_status.text = "You cast your line. Waiting for a nibble..."
+	AudioManager.play(&"splash")
 
 
 ## Skips the wait (used by tests and tools).
@@ -248,7 +249,7 @@ func _catch() -> void:
 				text += L.t(" Your bag and chest are full, so you let it swim away (it's in your journal).")
 	_status.text = text
 	_again.visible = true
-	AudioManager.play(&"bloom")
+	AudioManager.play(&"catch")
 	caught.emit(fish_id, last_result)
 
 

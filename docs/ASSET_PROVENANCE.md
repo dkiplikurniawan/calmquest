@@ -11,7 +11,8 @@ Every visual and audio element in CALMQUEST is original to this project. No thir
 | Creature, lore and quest text | original writing | `game/data/wildlife/`, `game/data/lore/`, `game/data/quests/` | MIT |
 | Noise textures | generated at runtime | Godot `FastNoiseLite` with the world seed | MIT |
 | UI theme, checkbox and slider icons | generated at runtime | `UiTheme` (images built pixel by pixel) | MIT |
-| Sound effects and the fallback ambient pad | synthesized at runtime | `SoundSynth` (sine partials and envelopes) | MIT |
+| Sound effects (incl. 0.4.0: gathering, crafting, cooking, placing, quest step, fishing splash and catch, rest swell, footsteps on six surfaces) and the fallback ambient pad | synthesized at runtime | `SoundSynth` (sine partials, envelopes and low-passed noise; no samples) | MIT |
+| `assets/music/rendered/` | **empty**: rendered recordings go here (see `docs/MUSIC_PIPELINE.md`) | none yet | record the sound library and licence here when files are added |
 | Music scores, placeholder music and ambience | generated offline | `tools/music/compose.py`, `tools/music/ambience.py` (see below) | MIT |
 | Font | engine default | Godot's built-in default font. **No custom font file is included yet.** The game uses an SIL OFL font (Nunito or Quicksand) automatically when the developer adds it to `assets/fonts/` together with its `OFL.txt` (see `assets/fonts/README.md`). Record it here when that happens. | Godot Engine MIT license (© Godot Engine contributors) |
 | CALMQUEST wordmark, menu backdrop (isles, fireflies), mood faces, HUD sun/moon arc | procedural drawing | `Wordmark`, `MenuBackdrop`, `MoodFace`, `Hud.DayArc` (`_draw()` code) | MIT |

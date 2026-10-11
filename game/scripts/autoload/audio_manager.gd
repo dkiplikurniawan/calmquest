@@ -12,14 +12,21 @@ const AMBIENCE_BUS := &"Ambience"
 const SFX_BUS := &"SFX"
 const UI_BUS := &"UI"
 const UI_SOUNDS: Array[StringName] = [&"ui_click", &"ui_hover"]
-const SFX_VOICES := 6
+const SFX_VOICES := 8
 const MIN_LINEAR_VOLUME := 0.001
+## Every play varies the pitch by up to +-4%, so repeats never sound mechanical.
+const PITCH_VARIATION := 0.04
+## Footsteps are quiet: this much below the other sound effects.
+const FOOTSTEP_DB := -6.0
 
 var _sounds: Dictionary = {}
 var _music_player: AudioStreamPlayer
 var _sfx_players: Array[AudioStreamPlayer] = []
 var _ui_player: AudioStreamPlayer
 var _next_voice: int = 0
+var _footstep_variant: int = 1
+## The last pitch used (for tests).
+var last_pitch: float = 1.0
 
 
 func _ready() -> void:
@@ -39,7 +46,9 @@ func _ready() -> void:
 		p.bus = SFX_BUS
 		add_child(p)
 		_sfx_players.append(p)
-	_sounds = SoundSynth.build_library()
+	var raw := SoundSynth.build_library()
+	for key: StringName in raw:
+		_sounds[key] = SoundSynth.to_wav(raw[key], SoundSynth.SFX_RATE, false)
 	apply_volumes()
 	GameSettings.settings_changed.connect(apply_volumes)
 
@@ -59,9 +68,24 @@ func play(sound: StringName, pitch: float = 1.0, volume_db: float = 0.0) -> void
 		_next_voice = (_next_voice + 1) % _sfx_players.size()
 	sound_played.emit(sound)
 	player.stream = stream
-	player.pitch_scale = pitch
+	last_pitch = varied_pitch(pitch, randf())
+	player.pitch_scale = last_pitch
 	player.volume_db = volume_db
 	player.play()
+
+
+## `unit` in 0..1 maps to pitch * (1 - 4%) .. pitch * (1 + 4%).
+static func varied_pitch(pitch: float, unit: float) -> float:
+	return pitch * (1.0 + PITCH_VARIATION * (clampf(unit, 0.0, 1.0) * 2.0 - 1.0))
+
+
+## A quiet footstep for a surface (alternating between two variations).
+func play_footstep(surface: String) -> void:
+	_footstep_variant = 3 - _footstep_variant
+	var sound := StringName("step_%s_%d" % [surface, _footstep_variant])
+	if not _sounds.has(sound):
+		sound = StringName("step_grass_%d" % _footstep_variant)
+	play(sound, 1.0, FOOTSTEP_DB)
 
 
 ## The V1 synthesized ambient pad. MusicManager uses it only as a fallback when

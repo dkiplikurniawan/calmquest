@@ -8,6 +8,8 @@ extends CharacterBody2D
 
 signal interaction_attempted(success: bool, nearest_distance: float)
 signal target_changed(target: Interactable)
+## One footstep, in time with the walk bob (two per bob cycle).
+signal footstep
 
 const SPEED := 220.0
 ## Comfortable faster stroll (Shift). No stamina: running never runs out.
@@ -30,6 +32,7 @@ var speed_bonus: float = 1.0
 var _input_block: float = 0.0
 var _t: float = 0.0
 var _walk: float = 0.0
+var _step_index: int = 0
 var _pulse: float = 0.0
 var _reach_ring: float = 0.0
 var _run_toggled: bool = false
@@ -129,6 +132,12 @@ func _process(delta: float) -> void:
 	_t += delta
 	var moving := velocity.length() > 20.0
 	_walk = move_toward(_walk, 1.0 if moving else 0.0, delta * 6.0)
+	# A footstep each time the bob crosses zero (the same sin(_t * 12) as _draw).
+	var step_index := int(floor(_t * 12.0 / PI))
+	if step_index != _step_index:
+		_step_index = step_index
+		if moving and _walk > 0.5:
+			footstep.emit()
 	_pulse = maxf(0.0, _pulse - delta * 2.5)
 	_reach_ring = maxf(0.0, _reach_ring - delta)
 	queue_redraw()

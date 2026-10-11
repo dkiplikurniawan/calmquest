@@ -376,6 +376,32 @@ func _check_player_flow(host: Control) -> void:
 		if (node as Interactable).show_marker:
 			balanced_marks += 1
 	check(balanced_marks == 0, "no extra rings in Balanced, only the target's")
+	for probe in probes:
+		probe.queue_free()
+	# Footsteps follow the walk bob, and the setting silences them.
+	var steps := [0]
+	direct.player.footstep.connect(func() -> void: steps[0] += 1)
+	direct.player.velocity = Vector2(150, 0)
+	for i in 60:
+		direct.player._process(1.0 / 60.0)
+	check(steps[0] >= 3 and steps[0] <= 5, "about 4 footsteps per second while walking (%d)" % steps[0])
+	steps[0] = 0
+	direct.player.velocity = Vector2.ZERO
+	for i in 60:
+		direct.player._process(1.0 / 60.0)
+	check(steps[0] == 0, "no footsteps when standing still")
+	var played := []
+	var on_sound := func(sound: StringName) -> void: played.append(String(sound))
+	AudioManager.sound_played.connect(on_sound)
+	var old_footsteps := GameSettings.footsteps
+	GameSettings.footsteps = true
+	direct._on_footstep()
+	check(played.size() == 1 and played[0].begins_with("step_"), "a footstep sound for the ground (%s)" % ", ".join(played))
+	GameSettings.footsteps = false
+	direct._on_footstep()
+	check(played.size() == 1, "Footsteps Off: silent")
+	GameSettings.footsteps = old_footsteps
+	AudioManager.sound_played.disconnect(on_sound)
 	direct.queue_free()
 	await get_tree().process_frame
 

@@ -19,6 +19,7 @@ const KEYS: PackedStringArray = [
 	"ambience_volume", "ui_volume", "music_mode", "hint_frequency", "weather_effects", "captions", "key_bindings",
 	"language", "mood_check", "session_summary", "mood_journal", "study_mode",
 	"control_hints", "hud_fade", "quest_tracker_compact", "window_mode", "vsync", "ui_scale_index",
+	"footsteps",
 ]
 
 const MUSIC_MODE_NAMES: PackedStringArray = ["Continuous music", "Music with quiet pauses", "Music off"]
@@ -38,7 +39,8 @@ const HINT_FREQUENCY_NAMES: PackedStringArray = ["Off", "Rare", "Normal", "Helpf
 
 var master_volume: float = 0.8
 var music_volume: float = 0.5
-var sfx_volume: float = 0.8
+## 0.4.0: a little quieter by default (measured balance in docs/MUSIC_PIPELINE.md).
+var sfx_volume: float = 0.7
 var fullscreen: bool = false
 var window_size_index: int = 0
 var text_scale_index: int = 0
@@ -70,7 +72,7 @@ var autosave_minutes: int = 5
 ## The save slot chosen last time (pre-selected on the slot screen).
 var last_slot: int = 1
 var ambience_volume: float = 0.6
-var ui_volume: float = 0.7
+var ui_volume: float = 0.6
 ## 0 = continuous, 1 = with quiet pauses between pieces, 2 = off.
 var music_mode: int = 0
 ## Lumi's unprompted nudges toward the followed quest: -1 = by mode (Gentle:
@@ -101,6 +103,8 @@ var quest_tracker_compact: bool = false
 ## switch, which is kept in sync for older settings files).
 var window_mode: int = WINDOWED
 var vsync: bool = true
+## Audio: quiet footsteps that follow the ground (grass, path, wood, sand, snow, stone).
+var footsteps: bool = true
 var ui_scale_index: int = 1
 ## Study Mode unlocked from the main menu (kept until "Leave Study Mode").
 ## The command-line flag --study turns it on for one run only (StudyMode.cli_active).
@@ -263,6 +267,7 @@ func _sanitize() -> void:
 	window_mode = clampi(int(window_mode), WINDOWED, BORDERLESS)
 	fullscreen = window_mode == FULLSCREEN
 	vsync = bool(vsync)
+	footsteps = bool(footsteps)
 	ui_scale_index = clampi(int(ui_scale_index), 0, UI_SCALES.size() - 1)
 
 

@@ -143,5 +143,8 @@
  "Mouse: move the mouse to show the menu icon in the top-right corner.": "Mouse: gerakkan mouse untuk menampilkan ikon menu di pojok kanan atas.",
  "Window: %s  (click to change)": "Jendela: %s  (klik untuk mengganti)",
  "Interface scale: %d%%  (click to change)": "Skala antarmuka: %d%%  (klik untuk mengganti)",
- "Show control hints: %s  (click to change)": "Tampilkan petunjuk tombol: %s  (klik untuk mengganti)"
+ "Show control hints: %s  (click to change)": "Tampilkan petunjuk tombol: %s  (klik untuk mengganti)",
+ "[gentle two-note chime]": "[denting lembut dua nada]",
+ "[splash and a happy chime]": "[cipratan dan denting riang]",
+ "Footsteps": "Langkah kaki"
 }

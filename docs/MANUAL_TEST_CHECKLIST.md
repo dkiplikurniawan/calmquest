@@ -61,6 +61,17 @@ Mark each item: ☐ not run / ✅ pass / ❌ fail (with a note).
 - ☐ Ambience per region, and rain sound on rainy days (none indoors).
 - ☐ Captions on: important sounds and music changes are shown as text.
 
+## Developer listening checklist (0.4.0)
+Do this once with headphones and once with speakers, at the default volumes:
+- ☐ **Every cue**, start to end: lumeria_theme, meadow (base, day and night layers), cottage, grove, creek, pinewood, coast, caves, sanctuary, highlands, finale, stinger_restore. Note anything harsh, piercing, muddy or too loud.
+- ☐ **Every loop seam:** let each looping cue run past its end at least twice. Listen for clicks, gaps or a jump in reverb.
+- ☐ **Crossfades:** walk across region borders, enter and leave the cottage and a cave. Nothing cuts off, and walking back and forth along a border does not restart the music.
+- ☐ **Night layers:** stay in the meadow through dusk and dawn. The piano layer replaces the flute gradually.
+- ☐ **Stingers:** restore something (a site step, the Heart Tree). The music dips under the stinger and comes back smoothly.
+- ☐ **Volume balance:** music against ambience in each region, and sound effects (gathering, crafting, cooking, placing, quest steps, fishing splash and catch) against the music. Nothing should startle.
+- ☐ **Footsteps:** grass, a path, a bridge or dock, coast sand, highland snow, a cave, and the cottage floor. They should be barely noticeable, and Settings > Audio > Footsteps off silences them.
+- ☐ If rendered files were added: they play instead of the placeholders, and the log no longer warns about placeholders.
+
 ## Input and accessibility (M11)
 - ☐ **Gamepad** (not tested with real hardware): move, interact, run, bag, hint, journal (with LB/RB tabs), pause, map, build mode (rotate, store, undo, LB/RB items), fishing (A to reel), and the use-item trigger. All menus can be navigated with the D-pad and A/B.
 - ☐ Key remapping: change keys, see a clash warning, restart the game (bindings kept), and reset to defaults.

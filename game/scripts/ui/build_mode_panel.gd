@@ -160,7 +160,7 @@ func place_here() -> bool:
 		_update_cursor()
 		return false
 	undo_stack.append({"action": "place", "p": p})
-	AudioManager.play(&"bloom", 1.2)
+	AudioManager.play(&"place")
 	overworld.lumi.react()
 	overworld.homestead.refresh_decor(area.id)
 	_refresh_items()

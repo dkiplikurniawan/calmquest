@@ -24,6 +24,7 @@ const TEST_SCRIPTS: PackedStringArray = [
 	"res://tests/unit/test_localization.gd",
 	"res://tests/unit/test_wellbeing.gd",
 	"res://tests/unit/test_study_mode.gd",
+	"res://tests/unit/test_audio_polish.gd",
 ]
 
 

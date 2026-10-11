@@ -451,3 +451,24 @@ All were fixed and checked again in screenshots.
   - display settings persistence and migration;
   - every screen and panel built in Indonesian.
 - The unit, smoke (656) and overworld (378) tests needed no changes.
+
+### P3 - Audio
+
+- **Orchestral render: not possible here, and not faked.** There is no MuseScore, FluidSynth, SoundFont or encoder on this machine.
+  - `MusicManager` now prefers `assets/music/rendered/<cue>.ogg|.wav` and falls back to the synthesized placeholder with one warning per run.
+  - `tools/music/render_music.py` automates the MuseScore render: seamless loop by wrapping the reverb tail, normalization to RMS -22 dBFS with a -1 dBFS ceiling, a numeric seam check, a loop chunk, and Ogg if `oggenc` exists.
+  - Its processing has 9 Python tests (`tools/music/tests`, now check 17 in `run_checks.ps1`). The seam check also confirms that the current placeholders loop smoothly. The MuseScore call itself has not run.
+  - `MUSIC_PIPELINE.md` has the exact steps.
+- **SFX refresh** (`SoundSynth`):
+  - softer attacks, fewer high partials and warm low-passed noise;
+  - new sounds for gathering (a soft pluck and rustle), crafting (a wooden knock and chime), cooking (bubbles and a chime), placing (a thud and a tiny chime), quest steps, the fishing splash and catch, and a slow "swell" for the rest spots and the finale;
+  - a quieter UI hover and click;
+  - every play varies the pitch by ±4% (`AudioManager.varied_pitch`).
+  - The library returns raw samples, so tests can check levels: every sound peaks at 0.5 or less and starts softly, footsteps at 0.2 or less, and the hover at 0.06 or less. The test caught "restore" at 0.518, which was lowered.
+- **Footsteps:** six surfaces (grass, path, wood, sand, snow, stone), two variations each. The surface comes from the world (paths, river crossings, docks, coast and highland regions) or the sub-level (cottage, caves). They fire on the walk bob's zero crossings, about 4 per second. Settings > Audio > Footsteps.
+- **Mix:**
+  - music files measure RMS -22 dBFS and ambience -27 dBFS (consistent);
+  - the default SFX volume was lowered from 0.8 to 0.7 and Interface from 0.7 to 0.6 for new players (existing settings are kept);
+  - the stinger duck (-9 dB, 0.6 s in, 2 s out) is unchanged.
+  - The numbers are in `MUSIC_PIPELINE.md`; listening is in the new developer listening checklist.
+- **Tests:** 7 new unit tests (`test_audio_polish.gd`: rendered preference and the single warning, surface rules and real-world surfaces, setting persistence, pitch bounds, gentle levels, missing audio), 4 new UI checks (footstep cadence, silence when still, the right surface sound, the setting off), and 9 Python tests for the render tool.

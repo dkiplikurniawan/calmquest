@@ -67,6 +67,38 @@ Each MIDI file:
 | `finale` | Festival of Light | full arrangement of the theme |
 | `stinger_restore` | restoration moments (about 11 s) | strings, harp |
 
+## Polish pass 0.4.0: status
+
+- **No orchestral render was made.** On 2026-10-11 the machine still had no MuseScore, FluidSynth, SoundFont, ffmpeg or Ogg encoder (checked, see `docs/V2_PROGRESS.md`). All 14 cues are still the **synthesized placeholders**. Nothing in the game or the docs calls them orchestral.
+- `MusicManager` now looks in `assets/music/rendered/` first (`<cue>.ogg`, then `<cue>.wav`) and falls back to the placeholder, with **one** warning per run. Dropping rendered files in that folder is enough: no code change is needed.
+- `tools/music/render_music.py` automates Steps 2-3 with MuseScore 4. Its processing (seamless loop, loudness, seam check, loop chunk) is unit-tested in `tools/music/tests/`, and the same seam check confirms the current placeholders loop smoothly. **The MuseScore step itself has not been run,** because MuseScore is not installed here.
+
+### Exact steps for the developer (MuseScore 4)
+
+1. Install MuseScore 4 from https://musescore.org (free). Optionally, install Muse Hub sounds and check their licence for a distributed game.
+2. Open a terminal in the project folder:
+   ```
+   python tools/music/render_music.py
+   ```
+   It finds `C:\Program Files\MuseScore 4\bin\MuseScore4.exe` (or pass `--musescore "path\to\MuseScore4.exe"`). For each cue it renders the MIDI, wraps the reverb tail onto the start of looping cues, normalizes to RMS -22 dBFS with a -1 dBFS peak ceiling, checks the seam, and writes `assets/music/rendered/<cue>.wav`. If `oggenc` is on the PATH it also writes `<cue>.ogg`.
+3. Read the printed report. Every looping cue should show `seam_ok: True`. If one does not, listen to it, and adjust it (for example with `--cues name` after changing the instrument mix in MuseScore).
+4. If MuseScore adds silence before the first note, the loop drifts. Listen to the first two seconds of a rendered loop. If there is a gap, trim it in an editor, or render that cue from the MuseScore GUI, then run `python tools/music/render_music.py --check`.
+5. Open the project in Godot once (to import the files), then run `tools/run_checks.ps1`.
+6. Record the sound library (for example "MuseScore 4 MS Basic"), its source and licence in `docs/ASSET_PROVENANCE.md`.
+7. Go through the developer listening checklist in `docs/MANUAL_TEST_CHECKLIST.md`.
+
+### Mix (measured, not listened to)
+
+| Layer | Level in the files | Default volume | Effective |
+|---|---|---|---|
+| Music placeholders | RMS -22.0 dBFS (all 14), peaks -4 to -11 dBFS | 0.5 (-6 dB) | about -28 dBFS RMS |
+| Ambience loops | RMS -27.0 dBFS (all 8) | 0.6 (-4.4 dB) | about -31 dBFS RMS |
+| Sound effects | peaks 0.05-0.5 (tested: never above 0.5) | **0.7** (was 0.8) | short and soft |
+| Footsteps | peaks at most 0.2, plus -6 dB in code | (SFX bus) | very quiet |
+| Interface | hover peak at most 0.06 | **0.6** (was 0.7) | barely audible |
+
+The SFX and Interface defaults were lowered a little, so effects sit gently above the music for new players. Existing `settings.cfg` files keep their values. Stingers duck the music by 9 dB over 0.6 s and return over 2 s. These are numbers, not listening, and they need checking by ear (see the checklist).
+
 ## Step 2: render with a real orchestral sound (manual)
 
 Only use a SoundFont or sample library whose licence clearly allows use in a distributed game. Record its name, source and licence in `docs/ASSET_PROVENANCE.md`.
@@ -94,12 +126,7 @@ fluidsynth -ni -F out.wav -r 48000 YourLicensedFont.sf2 assets/music/midi/grove.
 
 ## Step 4: integrate in Godot
 
-`MusicManager` (`game/scripts/autoload/music_manager.gd`) loads `res://assets/music/placeholder/<cue>.wav` today.
-
-To use real renders:
-1. Change `MUSIC_DIR` to `res://assets/music/ogg`.
-2. Change the extension in `load_loop()` to `.ogg`.
-3. For OGG, set `loop = true` in the import settings, or set `stream.loop = true` in code.
+Since 0.4.0 no code change is needed. Put `<cue>.ogg` or `<cue>.wav` into `assets/music/rendered/`. `MusicManager.music_path()` prefers them and sets looping in code. Pieces without a rendered file keep using their placeholder.
 
 Everything else stays the same:
 - crossfades (3 s), and a 2 s hysteresis so border-walking never restarts a track;

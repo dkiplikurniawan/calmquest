@@ -237,6 +237,15 @@ func distance_to_river(pos: Vector2) -> float:
 	return best
 
 
+## True on a bridge or stepping stones across a river.
+func is_on_crossing(pos: Vector2) -> bool:
+	for rv in rivers:
+		for c: Dictionary in rv["crossings"]:
+			if pos.distance_to(c["pos"]) < float(c["radius"]) * 0.6:
+				return true
+	return false
+
+
 static func _polyline_distance(pos: Vector2, pts: PackedVector2Array) -> float:
 	var best := INF
 	for i in range(pts.size() - 1):

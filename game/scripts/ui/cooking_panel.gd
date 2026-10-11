@@ -155,7 +155,7 @@ func _do_cook() -> void:
 		return
 	if GameState.craft(_selected, CraftingBook.COOKING_TIER, 1, use_storage):
 		_status.text = L.t("Cooked %s. Eat it with F from the hotbar whenever you like.") % ItemDB.display_name(String(GameState.crafting.get_recipe(_selected)["output"]["item"]))
-		AudioManager.play(&"bloom")
+		AudioManager.play(&"cook")
 		EventBus.progress_changed.emit()
 	else:
 		_status.text = "Not possible right now (missing ingredients, or no room in the bag)."

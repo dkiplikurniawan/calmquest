@@ -12,12 +12,17 @@ extends Node
 ## - Ambience loops per region (wind, waves, creek, cave drips, night insects,
 ##   birds) plus rain. The game runs fine if files are missing: it warns once and
 ##   falls back to the original synthesized pad.
-## Current music files are clearly labelled SYNTHESIZED PLACEHOLDERS rendered
-## from MIDI by tools/music/compose.py (see docs/MUSIC_PIPELINE.md).
+## Music files: rendered recordings in assets/music/rendered/ (Ogg, then WAV;
+## made by tools/music/render_music.py with MuseScore) are preferred. When a
+## piece has no rendered file, the SYNTHESIZED PLACEHOLDER rendered from MIDI by
+## tools/music/compose.py is used, with one warning (see docs/MUSIC_PIPELINE.md).
+## As of 0.4.0 no rendered files exist, so every piece uses its placeholder.
 
 signal cue_changed(cue: String)
 
 const MUSIC_DIR := "res://assets/music/placeholder"
+const RENDERED_DIR := "res://assets/music/rendered"
+const RENDERED_EXTENSIONS: PackedStringArray = ["ogg", "wav"]
 const AMBIENCE_DIR := "res://assets/ambience/placeholder"
 const CROSSFADE := 3.0
 const AMBIENCE_FADE := 2.0
@@ -49,6 +54,10 @@ const CUE_TITLES := {
 }
 
 var current_cue: String = ""
+## Where rendered music is looked for first (tests point it elsewhere).
+var rendered_dir: String = RENDERED_DIR
+## How many times the "using placeholders" warning was given (at most once).
+var placeholder_warnings: int = 0
 var current_ambience: String = ""
 var fallback_active: bool = false
 var night: float = 0.0
@@ -123,6 +132,48 @@ func load_loop(dir: String, file_name: String, loop: bool = true) -> AudioStream
 	return stream
 
 
+## The file used for a music piece: a rendered recording if there is one,
+## otherwise the synthesized placeholder.
+func music_path(file_name: String) -> String:
+	for ext in RENDERED_EXTENSIONS:
+		var path := "%s/%s.%s" % [rendered_dir, file_name, ext]
+		if ResourceLoader.exists(path):
+			return path
+	return "%s/%s.wav" % [MUSIC_DIR, file_name]
+
+
+func is_rendered(file_name: String) -> bool:
+	return not music_path(file_name).begins_with(MUSIC_DIR)
+
+
+## Loads a music piece, preferring the rendered recording.
+func load_music(file_name: String, loop: bool = true) -> AudioStream:
+	var path := music_path(file_name)
+	if not path.begins_with(MUSIC_DIR):
+		return _load_stream(path, loop)
+	if placeholder_warnings == 0:
+		placeholder_warnings += 1
+		push_warning("MusicManager: no rendered recording in %s; using the synthesized placeholders (see docs/MUSIC_PIPELINE.md)." % rendered_dir)
+	return load_loop(MUSIC_DIR, file_name, loop)
+
+
+func _load_stream(path: String, loop: bool) -> AudioStream:
+	var stream := load(path) as AudioStream
+	var ogg := stream as AudioStreamOggVorbis
+	if ogg != null:
+		var copy := ogg.duplicate() as AudioStreamOggVorbis
+		copy.loop = loop
+		return copy
+	var wav := stream as AudioStreamWAV
+	if wav != null:
+		var wav_copy := wav.duplicate() as AudioStreamWAV
+		wav_copy.loop_mode = AudioStreamWAV.LOOP_FORWARD if loop else AudioStreamWAV.LOOP_DISABLED
+		wav_copy.loop_begin = 0
+		wav_copy.loop_end = int(wav.get_length() * wav.mix_rate)
+		return wav_copy
+	return stream
+
+
 func _loops() -> bool:
 	return GameSettings.music_mode == 0
 
@@ -132,14 +183,14 @@ func music_stream(cue: String) -> AudioStream:
 		var sync := AudioStreamSynchronized.new()
 		sync.stream_count = MEADOW_LAYERS.size()
 		for i in MEADOW_LAYERS.size():
-			var s := load_loop(MUSIC_DIR, MEADOW_LAYERS[i], _loops())
+			var s := load_music(MEADOW_LAYERS[i], _loops())
 			if s == null:
 				return null
 			sync.set_sync_stream(i, s)
 		_meadow_sync = sync
 		_apply_meadow_layers()
 		return sync
-	return load_loop(MUSIC_DIR, cue, _loops())
+	return load_music(cue, _loops())
 
 
 func _apply_meadow_layers() -> void:
@@ -303,7 +354,7 @@ func set_rain(on: bool) -> void:
 func stinger(name_: String = "stinger_restore") -> void:
 	if GameSettings.music_mode == 2:
 		return
-	var stream := load_loop(MUSIC_DIR, name_, false)
+	var stream := load_music(name_, false)
 	if stream == null:
 		return
 	_stinger_player.stream = stream

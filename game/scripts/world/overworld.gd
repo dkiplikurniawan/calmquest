@@ -171,6 +171,8 @@ func _connect_signals() -> void:
 	meadow.tree_restoration_finished.connect(_on_tree_restoration_finished)
 	story.act1_finale_finished.connect(_on_act1_finale_finished)
 	player.target_changed.connect(_on_target_changed)
+	player.footstep.connect(_on_footstep)
+	EventBus.quest_step_completed.connect(func(_id: String, _step: int) -> void: AudioManager.play(&"quest_step"))
 	player.interaction_attempted.connect(_on_interaction_attempted)
 	hud.hint_requested.connect(_request_hint)
 	hud.journal_requested.connect(_open_journal)
@@ -507,6 +509,11 @@ func _refresh_hud() -> void:
 # Interactions, hints and story beats
 # =============================================================================
 
+func _on_footstep() -> void:
+	if GameSettings.footsteps:
+		AudioManager.play_footstep(Footsteps.surface_at(world, player.global_position, current_sublevel))
+
+
 func _on_target_changed(target: Interactable) -> void:
 	hud.set_prompt("" if target == null else target.get_prompt())
 	if target != null:
@@ -669,7 +676,7 @@ func _on_gather(g: Gatherable) -> void:
 		hud.show_dialogue(L.t("Your bag is full. You can make room, or craft a bag to carry more. The %s will wait here.") % ItemDB.display_name(g.item_id), 5.0)
 		return
 	streamer.remove_object(g.chunk, String(g.get_meta(WorldStreamer.OBJECT_ID_META)), g.respawn_days)
-	AudioManager.play(&"collect", randf_range(1.15, 1.3), -6.0)
+	AudioManager.play(&"gather", randf_range(0.95, 1.1))
 	EventBus.progress_changed.emit()
 
 

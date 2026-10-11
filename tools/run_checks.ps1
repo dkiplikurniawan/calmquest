@@ -108,6 +108,11 @@ $r = Invoke-Logged "i18n" $Python @("tools/i18n/extract.py")
 $summary = ($r.Text -split "`n" | Where-Object { $_ -match "^strings found" }) -join " "
 Add-Result "Translation catalog (id)" ($r.Code -eq 0) $summary
 
+# 5b. Music tool tests (seamless loops and loudness for rendered music)
+$r = Invoke-Logged "music_tools" $Python @("-m", "unittest", "discover", "-s", "tools/music/tests")
+$summary = ($r.Text -split "`n" | Where-Object { $_ -match "^Ran |^OK|^FAILED" }) -join " "
+Add-Result "Music tool tests" ($r.Code -eq 0) $summary
+
 # 6. Python analysis tests
 $r = Invoke-Logged "python_tests" $Python @("-m", "unittest", "discover", "-s", "analysis/tests")
 $summary = ($r.Text -split "`n" | Where-Object { $_ -match "^Ran |^OK|^FAILED" }) -join " "

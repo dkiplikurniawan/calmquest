@@ -198,7 +198,7 @@ func _craft(qty: int) -> void:
 	if GameState.craft(_selected_recipe, station_tier, qty, use_storage):
 		var out: Dictionary = GameState.crafting.get_recipe(_selected_recipe)["output"]
 		_status.text = L.t("Crafted %s x%d.") % [ItemDB.display_name(String(out["item"])), int(out["qty"]) * qty]
-		AudioManager.play(&"bloom")
+		AudioManager.play(&"craft")
 		crafted.emit(_selected_recipe)
 	else:
 		_status.text = "Not possible right now. There may be no room in your bag for the result."

@@ -67,6 +67,7 @@ func _ready() -> void:
 	_music_mode_button = UiKit.button("", _cycle_music_mode)
 	list.add_child(_music_mode_button)
 	list.add_child(UiKit.label("The music is designed to support a calm atmosphere. The current tracks are synthesized placeholders made from the game's own MIDI scores.", UiTheme.SUBTLE, true))
+	list.add_child(_check("Footsteps", "footsteps"))
 	list.add_child(_check("Captions for important sounds", "captions"))
 	list.add_child(HSeparator.new())
 

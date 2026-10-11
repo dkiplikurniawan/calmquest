@@ -42,6 +42,7 @@ const CAPTIONS := {
 	&"collect": "[soft chime]", &"bonus": "[sparkling chime]", &"lantern": "[lantern bell]",
 	&"discover": "[bright twinkle]", &"restore": "[warm rising melody]", &"bloom": "[gentle bloom]",
 	&"soft_deny": "[soft low tone]", &"night": "[deep, calm hum]",
+	&"quest_step": "[gentle two-note chime]", &"catch": "[splash and a happy chime]",
 }
 ## Key hints: id -> [action, label].
 const KEY_HINTS := {
