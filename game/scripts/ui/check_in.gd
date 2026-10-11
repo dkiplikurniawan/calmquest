@@ -1,7 +1,8 @@
 extends Control
-## Pre-game check-in: optional 0-10 self-report, a transparent mode suggestion
-## the player can override, and an explicit (unticked by default) consent box.
-## Skipping is always possible and never blocks the game.
+## Pre-game check-in (Study Mode): optional 0-10 self-report, a transparent
+## mode suggestion the player can override, and an explicit (unticked by
+## default) consent box. Skipping is always possible and never blocks the game.
+## Unchanged from V1; only where it leads changed (the study journey).
 
 var _slider: StressSlider
 var _recommendation: Label
@@ -67,7 +68,7 @@ func _ready() -> void:
 	_content.add_child(what)
 	_content.add_child(UiKit.label("If you leave this unticked, nothing about your session is saved and the game works the same.", UiTheme.SUBTLE, true))
 
-	var back := UiKit.button("Back", func() -> void: SceneRouter.go_to(SceneRouter.MAIN_MENU))
+	var back := UiKit.button("Back", func() -> void: SceneRouter.go_to(_back_scene()))
 	var skip := UiKit.button("Skip check-in", _skip)
 	var begin := UiKit.button("Begin Adventure", _begin, UiTheme.PRIMARY_BUTTON)
 	_content.add_child(UiKit.hbox([back, skip, begin]))
@@ -96,7 +97,7 @@ func _choose_mode(mode_id: StringName, by_player: bool) -> void:
 
 func _begin() -> void:
 	SessionState.begin_session(_slider.get_answer(), _selected_mode, _consent.button_pressed)
-	SceneRouter.go_to(SceneRouter.SLOT_SELECT)
+	_continue()
 
 
 ## Skipping ignores any slider answer. The mode stays Balanced unless the
@@ -104,10 +105,24 @@ func _begin() -> void:
 func _skip() -> void:
 	var mode := _selected_mode if _mode_chosen_by_player else AdaptiveComfortEngine.DEFAULT_MODE
 	SessionState.begin_session(null, mode, _consent.button_pressed)
-	SceneRouter.go_to(SceneRouter.SLOT_SELECT)
+	_continue()
+
+
+## Study Mode: straight into the fresh study journey. Otherwise (the check-in
+## opened some other way) the journey screen, as before.
+func _continue() -> void:
+	if StudyMode.is_active() and not StudyMode.participant_code.is_empty():
+		StudyMode.begin_play()
+		SceneRouter.go_to(SceneRouter.OVERWORLD)
+	else:
+		SceneRouter.go_to(SceneRouter.SLOT_SELECT)
+
+
+static func _back_scene() -> String:
+	return SceneRouter.STUDY_SETUP if StudyMode.is_active() else SceneRouter.MAIN_MENU
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"ui_cancel") and get_children().filter(func(c: Node) -> bool: return c is PrivacyPanel).is_empty():
 		get_viewport().set_input_as_handled()
-		SceneRouter.go_to(SceneRouter.MAIN_MENU)
+		SceneRouter.go_to(_back_scene())

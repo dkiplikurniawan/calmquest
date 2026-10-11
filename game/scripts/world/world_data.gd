@@ -163,6 +163,11 @@ func region_info(region_id: String) -> Dictionary:
 	return regions.get(region_id, {"name": region_id.capitalize(), "subtitle": "", "zoom": 1.0, "status": "unknown"})
 
 
+## Sea and cliffs frame the world; they are not places to "discover".
+func is_boundary_region(region_id: String) -> bool:
+	return String(region_info(region_id).get("status", "")) == "boundary"
+
+
 ## The region's name for display, in the current language.
 func region_display(region_id: String) -> String:
 	return L.t(region_name(region_id))

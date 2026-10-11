@@ -3,6 +3,9 @@ extends CanvasLayer
 ## Pause menu. The world pauses the tree while this is open; this layer keeps
 ## processing (PROCESS_MODE_ALWAYS) so its buttons work.
 ## It reports choices through signals; the world applies them.
+## Two layers: the default (Steam) menu offers Return to menu and Quit, which
+## lead to the optional "Before you go..." panel. In Study Mode the menu shows
+## a discreet badge and the research choices (Finish Session, Main Menu).
 
 signal resume_requested
 signal restart_requested
@@ -12,6 +15,10 @@ signal mode_requested(mode_id: StringName)
 signal guidance_toggled(enabled: bool)
 signal save_requested
 signal load_requested(slot: int)
+## Default layer: leave to the main menu / quit the game (the world shows the
+## session closing first when it is enabled).
+signal leave_requested
+signal quit_requested
 
 var _root: Control
 var _mode_buttons: Dictionary = {}
@@ -30,7 +37,15 @@ func _ready() -> void:
 	UiKit.adopt_theme(_root)
 	UiKit.overlay(_root)
 	var box := UiKit.centered_panel(_root, 640)
-	box.add_child(UiKit.label("Paused", UiTheme.HEADING))
+	var study := StudyMode.is_active()
+	var heading := UiKit.label("Paused", UiTheme.HEADING)
+	if study:
+		var badge := UiKit.label("Study Mode", UiTheme.SUBTLE)
+		badge.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		box.add_child(UiKit.hbox([heading, badge], BoxContainer.ALIGNMENT_BEGIN))
+	else:
+		box.add_child(heading)
 	_resume_button = UiKit.button("Resume", func() -> void: resume_requested.emit(), UiTheme.PRIMARY_BUTTON)
 	box.add_child(_resume_button)
 
@@ -56,16 +71,22 @@ func _ready() -> void:
 	box.add_child(HSeparator.new())
 
 	var settings := UiKit.button("Settings", _open_settings)
-	var restart := UiKit.button("Restart Session", func() -> void:
-		UiKit.confirm(_root, "Restart this session? Lights and garden progress in the meadow will reset. Your check-in answers and mode are kept.", "Restart", func() -> void: restart_requested.emit()))
-	box.add_child(UiKit.hbox([settings, restart]))
-	var save := UiKit.button("Save", func() -> void: save_requested.emit())
-	var load := UiKit.button("Load", _open_load)
-	box.add_child(UiKit.hbox([save, load]))
-	var finish := UiKit.button("Finish Session", func() -> void: finish_requested.emit())
-	var menu := UiKit.button("Main Menu", func() -> void:
-		UiKit.confirm(_root, _main_menu_warning(), "Leave", func() -> void: main_menu_requested.emit()))
-	box.add_child(UiKit.hbox([finish, menu]))
+	if study:
+		# The study journey is temporary: no saving, loading or restarting.
+		box.add_child(UiKit.hbox([settings]))
+		var finish := UiKit.button("Finish Session", func() -> void: finish_requested.emit())
+		var menu := UiKit.button("Main Menu", func() -> void:
+			UiKit.confirm(_root, _main_menu_warning(), "Leave", func() -> void: main_menu_requested.emit()))
+		box.add_child(UiKit.hbox([finish, menu]))
+	else:
+		var save := UiKit.button("Save", func() -> void: save_requested.emit())
+		var load := UiKit.button("Load", _open_load)
+		box.add_child(UiKit.hbox([settings, save, load]))
+		var leave := UiKit.button("Return to menu", func() -> void: leave_requested.emit())
+		var leave_row := [leave]
+		if not OS.has_feature("web"):
+			leave_row.append(UiKit.button("Quit Game", func() -> void: quit_requested.emit()))
+		box.add_child(UiKit.hbox(leave_row))
 	_storage_note = UiKit.label("", UiTheme.SUBTLE, true)
 	box.add_child(_storage_note)
 	visible = false
@@ -74,7 +95,8 @@ func _ready() -> void:
 func open(mode_id: StringName, guidance_on: bool) -> void:
 	visible = true
 	sync(mode_id, guidance_on)
-	_storage_note.text = L.t("Session data: %s") % (L.t("saved on this device when the session ends (you agreed)") if SessionState.consent_to_store else L.t("not saved (you did not opt in)"))
+	# The research storage note only matters in Study Mode; other players never store session data.
+	_storage_note.text = L.t("Session data: %s") % (L.t("saved on this device when the session ends (you agreed)") if SessionState.consent_to_store else L.t("not saved (you did not opt in)")) if StudyMode.is_active() else ""
 	_resume_button.call_deferred("grab_focus")
 
 

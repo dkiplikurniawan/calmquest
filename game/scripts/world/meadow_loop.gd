@@ -251,6 +251,7 @@ func _on_shrine_interacted(_target: Interactable) -> void:
 		lc.end_night(false)
 		return
 	if lc.start_night(SessionState.get_config(), GameSettings.motion_scale()):
+		StudyMode.log_event("activity_started", "lantern_catch")
 		shrine.night_active = true
 		ow.fade_night(true)
 		AudioManager.play(&"night")
@@ -268,6 +269,7 @@ func _on_lantern_interacted(lantern: Lantern) -> void:
 
 
 func _on_night_ended(completed: bool) -> void:
+	StudyMode.log_event("activity_finished", "lantern_catch")
 	var ow := overworld
 	shrine.night_active = false
 	ow.fade_night(false)

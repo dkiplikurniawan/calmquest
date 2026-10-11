@@ -17,10 +17,16 @@ ROOT = Path(__file__).resolve().parents[1]
 PATTERN = re.compile(r'res://[A-Za-z0-9_./\-]+')
 SCAN_SUFFIXES = {".godot", ".tscn", ".tres", ".gd"}
 SKIP_DIRS = {".godot", ".git", "analysis", "data", "docs"}
+# Files the game reads only when they exist (documented fallbacks). They are
+# listed here explicitly so every other reference is still required.
+OPTIONAL = {
+    "res://build_commit.txt",  # written by a build script; Study Mode leaves git_commit empty without it
+}
 
 
 def main() -> int:
     missing: list[tuple[str, str]] = []
+    optional_absent: set[str] = set()
     checked = 0
     for path in sorted(ROOT.rglob("*")):
         if path.suffix not in SCAN_SUFFIXES or any(part in SKIP_DIRS for part in path.relative_to(ROOT).parts):
@@ -31,9 +37,14 @@ def main() -> int:
             checked += 1
             target = ROOT / ref[len("res://"):]
             if not target.exists():
-                missing.append((str(path.relative_to(ROOT)), ref))
+                if ref in OPTIONAL:
+                    optional_absent.add(ref)
+                else:
+                    missing.append((str(path.relative_to(ROOT)), ref))
     for source, ref in missing:
         print(f"MISSING  {ref}  (referenced in {source})")
+    for ref in sorted(optional_absent):
+        print(f"optional, not present  {ref}")
     print(f"Checked {checked} res:// references: {len(missing)} missing")
     return 1 if missing else 0
 

@@ -1,9 +1,16 @@
 extends Control
 ## Main menu: Start Adventure, How to Play, Settings, Data & Privacy, Quit.
 
+## Clicks on the version label within this many seconds count toward the unlock.
+const UNLOCK_WINDOW_SECONDS := 4.0
+
 var _buttons: VBoxContainer
 var _first_button: Button
 var _status: Label
+var version_label: Label
+var study_badge: Label
+var _version_clicks: int = 0
+var _first_click_msec: int = 0
 
 
 func _ready() -> void:
@@ -50,6 +57,24 @@ func _ready() -> void:
 	footer.offset_bottom = -16
 	footer.add_theme_font_size_override("font_size", int(15 * GameSettings.get_text_scale()))
 	add_child(footer)
+
+	# A tiny version label. Clicking it 7 times opens the Study Mode unlock.
+	version_label = UiKit.label("v" + SaveManager.GAME_VERSION, UiTheme.LIGHT)
+	version_label.add_theme_font_size_override("font_size", int(13 * GameSettings.get_text_scale()))
+	version_label.modulate.a = 0.6
+	version_label.mouse_filter = Control.MOUSE_FILTER_STOP
+	version_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
+	version_label.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	version_label.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	version_label.offset_right = -12
+	version_label.offset_bottom = -8
+	version_label.gui_input.connect(_on_version_input)
+	add_child(version_label)
+	study_badge = UiKit.label("Study Mode", UiTheme.LIGHT)
+	study_badge.position = Vector2(16, 12)
+	study_badge.add_theme_font_size_override("font_size", int(15 * GameSettings.get_text_scale()))
+	add_child(study_badge)
+	_refresh_study_badge()
 	MusicManager.request_cue("lumeria_theme", true)
 	MusicManager.request_ambience("")
 	_first_button.call_deferred("grab_focus")
@@ -77,7 +102,64 @@ func _open_overlay(panel: Control) -> void:
 
 
 func _start() -> void:
-	SceneRouter.go_to(SceneRouter.CHECK_IN)
+	SceneRouter.go_to(start_target())
+
+
+## Start Adventure goes straight to the journeys; in Study Mode to the setup.
+static func start_target() -> String:
+	return SceneRouter.STUDY_SETUP if StudyMode.is_active() else SceneRouter.SLOT_SELECT
+
+
+func _refresh_study_badge() -> void:
+	study_badge.visible = StudyMode.is_active()
+
+
+func _on_version_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
+		register_version_click(Time.get_ticks_msec())
+
+
+## Counts clicks on the version label; the 7th quick click opens the unlock.
+func register_version_click(now_msec: int) -> bool:
+	if _version_clicks == 0 or now_msec - _first_click_msec > UNLOCK_WINDOW_SECONDS * 1000.0:
+		_version_clicks = 0
+		_first_click_msec = now_msec
+	_version_clicks += 1
+	if _version_clicks >= StudyMode.UNLOCK_CLICKS:
+		_version_clicks = 0
+		open_unlock_dialog()
+		return true
+	return false
+
+
+## The small "study unlock phrase" dialog.
+func open_unlock_dialog() -> Control:
+	var layer := UiKit.ConfirmLayer.new()
+	layer.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	layer.set_meta("unlock_dialog", true)
+	add_child(layer)
+	UiKit.overlay(layer)
+	var box := UiKit.centered_panel(layer, 460)
+	box.add_child(UiKit.label("Study unlock", UiTheme.HEADING))
+	box.add_child(UiKit.label("Enter the study unlock phrase.", UiTheme.SUBTLE, true))
+	var edit := LineEdit.new()
+	edit.custom_minimum_size.y = 44
+	box.add_child(edit)
+	var message := UiKit.label("", UiTheme.SUBTLE, true)
+	box.add_child(message)
+	var submit := func() -> void:
+		if StudyMode.try_unlock(edit.text):
+			layer.queue_free()
+			_refresh_study_badge()
+			_status.text = "Study Mode is on."
+		else:
+			message.text = "That phrase is not right."
+	edit.text_submitted.connect(func(_t: String) -> void: submit.call())
+	var cancel := UiKit.button("Cancel", layer.queue_free)
+	var ok := UiKit.button("Unlock", submit, UiTheme.PRIMARY_BUTTON)
+	box.add_child(UiKit.hbox([cancel, ok]))
+	edit.call_deferred("grab_focus")
+	return layer
 
 
 func _quit() -> void:

@@ -3,8 +3,10 @@ extends Node2D
 ## The open world of Lumeria (V2). Builds the world from WorldData, streams
 ## scenery chunks around the camera, tracks regions, and connects the player,
 ## Lumi, the HUD, menus, the meadow loop (MeadowLoop) and the Act 1 story
-## points (StoryContent). The research session flow (check-in, finish,
-## reflection) is unchanged from V1.
+## points (StoryContent). When a journey opens from the menu it shows the
+## optional start cards (mode, mood check); leaving from the pause menu shows
+## the optional "Before you go..." panel. In Study Mode the session has a fixed
+## length with a gentle end, then the research reflection (unchanged from V1).
 
 const TICK_SECONDS := 0.25
 const REGION_CONFIRM_SECONDS := 0.6
@@ -65,6 +67,7 @@ func _ready() -> void:
 	SessionState.ensure_session()
 	world = WorldData.load_from()
 	SaveManager.prepare_world(world.world_size())
+	Wellbeing.begin_play()
 	terrain.build(world)
 	var zones := meadow.build(self)
 	story.build(self)
@@ -98,6 +101,57 @@ func _ready() -> void:
 	SaveManager.set_active(true)
 	hud.update_hotbar(GameState.inventory)
 	_apply_lighting()
+	_begin_start_sequence()
+
+
+# =============================================================================
+# Start cards (mode, mood check) and the welcome
+# =============================================================================
+
+## Shows the cards the journey screen asked for, then Lumi's welcome. Opening
+## the world any other way (tests, the editor, Study Mode) shows no cards.
+func _begin_start_sequence() -> void:
+	var cards := SessionState.start_cards
+	SessionState.start_cards = {}
+	if StudyMode.is_active():
+		cards = {}
+	if bool(cards.get("mode_card", false)):
+		var card := ModeChoiceCard.new()
+		_open_overlay(card)
+		card.chosen.connect(func(mode_id: StringName) -> void:
+			_close_overlay()
+			SessionState.select_mode(mode_id)
+			_show_mood_check(cards))
+		return
+	_show_mood_check(cards)
+
+
+func _show_mood_check(cards: Dictionary) -> void:
+	if bool(cards.get("mood_check", false)) and GameSettings.mood_check:
+		var card := MoodCheckCard.new()
+		_open_overlay(card)
+		card.finished.connect(_on_mood_answered)
+		return
+	_show_welcome()
+
+
+func _on_mood_answered(face: Variant, dont_ask: bool) -> void:
+	_close_overlay()
+	if dont_ask:
+		GameSettings.set_setting("mood_check", false)
+	if face == null:
+		_show_welcome()
+		return
+	Wellbeing.start_face = face
+	lumi.react()
+	hud.show_dialogue(L.t(Wellbeing.reply_line()), 4.5)
+	if not SessionState.welcome_shown:
+		get_tree().create_timer(4.6).timeout.connect(func() -> void:
+			if is_inside_tree() and not hud.is_dialogue_visible():
+				_show_welcome())
+
+
+func _show_welcome() -> void:
 	if not SessionState.welcome_shown:
 		SessionState.welcome_shown = true
 		if GameSettings.lumi_chatter:
@@ -121,6 +175,8 @@ func _connect_signals() -> void:
 		pause_menu.close()
 		_show_completion())
 	pause_menu.main_menu_requested.connect(_leave_to_menu)
+	pause_menu.leave_requested.connect(func() -> void: _request_leave("menu"))
+	pause_menu.quit_requested.connect(func() -> void: _request_leave("quit"))
 	pause_menu.save_requested.connect(_manual_save)
 	pause_menu.load_requested.connect(_load_slot)
 	completion_panel.continue_requested.connect(_close_completion)
@@ -183,6 +239,8 @@ func _process(delta: float) -> void:
 	_apply_lighting()
 	_tick += delta
 	_update_region(delta)
+	if StudyMode.session_running:
+		_update_study_end()
 	if _tick >= TICK_SECONDS:
 		_tick = 0.0
 		_tick_world()
@@ -241,6 +299,8 @@ func _enter_region(region: String) -> void:
 	var info := world.region_info(region)
 	camera.set_target_zoom(float(info.get("zoom", WorldCamera.DEFAULT_ZOOM)))
 	EventBus.region_entered.emit(region, first)
+	if first and not world.is_boundary_region(region):
+		Wellbeing.note_new_place(String(info.get("name", region)))
 	if GameSettings.region_titles == 1 or (GameSettings.region_titles == 0 and first):
 		hud.show_region_title(String(info.get("name", region)), String(info.get("subtitle", "")))
 	if first and String(info.get("status", "")) == "stub" and not _stub_notice_shown.has(region):
@@ -435,6 +495,7 @@ func _on_interaction_attempted(success: bool, nearest_distance: float) -> void:
 
 func _request_hint() -> void:
 	var result := SessionState.engine.register_hint_request()
+	StudyMode.log_event("hint_requested", current_region)
 	var pos := player.global_position
 	var gentle := SessionState.get_config().mode_id == AdaptiveComfortEngine.MODE_GENTLE
 	var gate_hint := story.nearest_gate_hint(pos)
@@ -473,20 +534,12 @@ func _request_hint() -> void:
 func _on_tree_restoration_finished() -> void:
 	hud.show_dialogue(L.t(LumiGuide.tree_restored()) + L.t(" Lumi senses old lantern light to the north-west, in Firefly Grove."))
 	meadow.heart_tree.set_night_amount(night_amount)
-	if not SessionState.completion_offered:
-		SessionState.completion_offered = true
-		await get_tree().create_timer(COMPLETION_DELAY).timeout
-		if is_inside_tree() and not _modal_open:
-			_show_completion()
+	# The "Ready to rest for now?" panel no longer appears by itself (0.4.0):
+	# players leave from the pause menu, and study sessions have a fixed length.
 
 
 func _on_act1_finale_finished() -> void:
-	if GameState.has_flag("act1_completion_offered"):
-		return
-	GameState.set_flag("act1_completion_offered")
-	await get_tree().create_timer(COMPLETION_DELAY * 2.0).timeout
-	if is_inside_tree() and not _modal_open:
-		_show_completion()
+	pass
 
 
 func _on_quest_completed(quest_id: String) -> void:
@@ -908,6 +961,10 @@ func _open_overlay(panel: Control) -> void:
 	_set_modal(true)
 	_overlay = panel
 	hud.add_overlay(panel)
+	var activity := StudyMode.activity_for(panel)
+	if not activity.is_empty():
+		StudyMode.log_event("activity_started", activity)
+		panel.tree_exited.connect(func() -> void: StudyMode.log_event("activity_finished", activity))
 
 
 func _close_overlay() -> void:
@@ -992,6 +1049,7 @@ func _load_slot(slot: int) -> void:
 func _finish_session() -> void:
 	SaveManager.autosave("session finished")
 	SessionState.end_gameplay()
+	StudyMode.end_play()
 	SceneRouter.go_to(SceneRouter.REFLECTION)
 
 
@@ -1008,7 +1066,49 @@ func _restart_session() -> void:
 func _leave_to_menu() -> void:
 	SaveManager.autosave("returned to the main menu")
 	SessionState.abandon_session()
+	StudyMode.end_play()
 	SceneRouter.go_to(SceneRouter.MAIN_MENU)
+
+
+## Return to menu / Quit from the pause menu: "Before you go..." first, when
+## the player has it turned on. Autosaves exactly as before.
+func _request_leave(to: String) -> void:
+	pause_menu.close()
+	if not Wellbeing.wants_closing():
+		_leave(to)
+		return
+	var panel := SessionClosingPanel.new()
+	panel.leaving_to = to
+	_overlay = panel
+	hud.add_overlay(panel)
+	panel.keep_playing.connect(_close_overlay)
+	panel.leave.connect(func(face: Variant) -> void:
+		Wellbeing.end_face = face
+		_leave(to))
+
+
+func _leave(to: String) -> void:
+	Wellbeing.record_session_end()
+	if to == "quit":
+		SaveManager.autosave("quit")
+		SessionState.abandon_session()
+		get_tree().quit()
+	else:
+		_leave_to_menu()
+
+
+## Study Mode: after the set time, Lumi's gentle line, then (after the player
+## had time to finish) the reflection. Never during dialogue or a minigame:
+## overlays pause the world, so this does not even run while one is open.
+func _update_study_end() -> void:
+	hud.set_study_light(StudyMode.remaining_fraction())
+	var busy := hud.is_dialogue_visible() or lantern_catch.active or SceneRouter.is_busy()
+	match StudyMode.end_step(busy):
+		"announce":
+			lumi.react()
+			hud.show_dialogue(L.t(StudyMode.END_LINE), 8.0)
+		"finish":
+			_finish_session()
 
 
 static func format_duration(seconds: int) -> String:

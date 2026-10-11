@@ -1,6 +1,8 @@
 extends Control
-## "Choose a journey": pick one of three save slots after the check-in.
-## Continue loads the world exactly as it was saved; a new journey starts fresh.
+## "Choose a journey": pick one of three save slots (straight from Start
+## Adventure). Continue loads the world exactly as it was saved; a new journey
+## starts fresh and first shows the mode card. No research data is stored for
+## these sessions (Study Mode has its own flow).
 
 var _list: SlotList
 
@@ -25,12 +27,24 @@ func _ready() -> void:
 
 
 func _on_slot_chosen(slot: int, new_journey: bool) -> void:
+	var mode := AdaptiveComfortEngine.DEFAULT_MODE
 	if new_journey:
 		SaveManager.delete_slot(slot)
+	else:
+		mode = StringName(String(SaveManager.load_slot(slot).get("mode", String(mode))))
+	start_play_session(mode, new_journey)
 	SaveManager.current_slot = slot
 	SaveManager.reload_current()
 	GameSettings.set_setting("last_slot", slot)
 	SceneRouter.go_to(SceneRouter.OVERWORLD)
+
+
+## A play session without a check-in: no stress score (the engine's "skipped"
+## rule), the journey's own mode, and nothing stored for research.
+static func start_play_session(mode: StringName, new_journey: bool) -> void:
+	if not SessionState.session_active:
+		SessionState.begin_session(null, mode, false)
+	SessionState.start_cards = {"mode_card": new_journey, "mood_check": true}
 
 
 func _unhandled_input(event: InputEvent) -> void:

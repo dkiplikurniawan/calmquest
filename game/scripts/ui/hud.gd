@@ -61,6 +61,9 @@ const MAX_PICKUPS := 5
 ## Region titles wider than this (in pixels) are drawn smaller.
 const REGION_TITLE_MAX_WIDTH := 600.0
 var _root: Control
+## Study Mode only: a small sun that slowly fades as the session time passes
+## (there is never a visible countdown).
+var _study_light: StudyLight
 
 
 func _ready() -> void:
@@ -80,6 +83,9 @@ func _ready() -> void:
 	_build_region_card(root)
 	_build_hotbar(root)
 	_build_clock(root)
+	_study_light = StudyLight.new()
+	_study_light.visible = false
+	root.add_child(_study_light)
 
 
 func _build_objective(root: Control) -> void:
@@ -462,15 +468,46 @@ func _layout() -> void:
 	_pickup_box.position = Vector2(16.0, _hotbar.position.y - _pickup_box.size.y - 8.0)
 	_pickup_box.reset_size()
 	_clock_panel.position = Vector2(view.x - _clock_panel.size.x - 16.0, 72.0)
+	if _study_light.visible:
+		_study_light.position = Vector2(_clock_panel.position.x - _study_light.size.x - 8.0, _clock_panel.position.y + 4.0)
 	if _caption.visible:
 		_caption.position = Vector2(view.x - _caption.size.x - 20.0, view.y - _caption.size.y - 76.0)
 	if _minimap_panel != null and _minimap_panel.visible:
 		_minimap_panel.position = Vector2(view.x - _minimap_panel.size.x - 16.0, view.y - _minimap_panel.size.y - 16.0)
 
 
+## Study Mode: 1 at the start of the session, 0 when the time is up.
+func set_study_light(fraction: float) -> void:
+	_study_light.visible = true
+	_study_light.fraction = fraction
+
+
 func _place_centered(panel: Control, view: Vector2, y: float) -> void:
 	if panel.visible:
 		panel.position = Vector2((view.x - panel.size.x) / 2.0, y)
+
+
+## A small sun whose glow fades slowly over a study session.
+class StudyLight extends Control:
+	var fraction: float = 1.0:
+		set(value):
+			if absf(value - fraction) > 0.002:
+				fraction = value
+				queue_redraw()
+
+	func _init() -> void:
+		custom_minimum_size = Vector2(36, 36)
+		size = custom_minimum_size
+		mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	func _draw() -> void:
+		var c := size / 2.0
+		var a := 0.25 + 0.75 * fraction
+		draw_circle(c, 15.0, Palette.with_alpha(Palette.GOLD_SOFT, 0.35 * a))
+		draw_circle(c, 9.0, Palette.with_alpha(Palette.GOLD, a))
+		for i in 8:
+			var d := Vector2.from_angle(TAU * i / 8.0)
+			draw_line(c + d * 11.0, c + d * 15.0, Palette.with_alpha(Palette.GOLD, a), 2.0)
 
 
 ## Small arrow pointing toward the tracked quest target (shape cue + text label).

@@ -13,6 +13,7 @@ const GENTLE_CLOCK_NAMES: PackedStringArray = ["Normal speed", "Half speed", "Pa
 
 var _value_labels: Dictionary = {}
 var _language_button: Button
+var _mood_button: Button
 var _window_button: Button
 var _text_button: Button
 var _titles_button: Button
@@ -44,6 +45,14 @@ func _ready() -> void:
 	list.add_child(UiKit.label("Language", UiTheme.SUBTLE))
 	_language_button = UiKit.button("", _cycle_language)
 	list.add_child(_language_button)
+	list.add_child(HSeparator.new())
+
+	list.add_child(UiKit.label("Well-being", UiTheme.SUBTLE))
+	_mood_button = UiKit.button("", _toggle_mood_check)
+	list.add_child(_mood_button)
+	list.add_child(_check("Show session summary when I leave", "session_summary"))
+	list.add_child(_check("Keep a private mood journal on this device", "mood_journal"))
+	list.add_child(UiKit.label("All of this is optional, stays on this device and is never a measurement. The journal can be deleted any time in Data & Privacy.", UiTheme.SUBTLE, true))
 	list.add_child(HSeparator.new())
 
 	list.add_child(UiKit.label("Audio", UiTheme.SUBTLE))
@@ -239,6 +248,11 @@ func _cycle_language() -> void:
 	_refresh_cycle_buttons()
 
 
+func _toggle_mood_check() -> void:
+	GameSettings.set_setting("mood_check", not GameSettings.mood_check)
+	_refresh_cycle_buttons()
+
+
 func _cycle_region_titles() -> void:
 	GameSettings.set_setting("region_titles", (GameSettings.region_titles + 1) % REGION_TITLE_NAMES.size())
 	_refresh_cycle_buttons()
@@ -248,6 +262,7 @@ func _refresh_cycle_buttons() -> void:
 	if _window_button == null or _text_button == null or _titles_button == null or _music_mode_button == null or _hint_button == null:
 		return
 	_language_button.text = L.t("Language / Bahasa: %s  (click to change)") % L.LANGUAGES[L.current()]
+	_mood_button.text = L.t("Mood check when I start playing: %s  (click to change)") % (L.t("Ask") if GameSettings.mood_check else L.t("Don't ask"))
 	_titles_button.text = L.t("Region titles: %s  (click to change)") % L.t(REGION_TITLE_NAMES[GameSettings.region_titles])
 	for b in _time_buttons:
 		var value := ""

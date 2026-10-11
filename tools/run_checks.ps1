@@ -94,7 +94,7 @@ if ([string]::IsNullOrWhiteSpace($Godot) -or -not (Test-Path $Godot)) {
     $scenes = @(
         "res://game/scenes/main/splash.tscn", "res://game/scenes/ui/main_menu.tscn",
         "res://game/scenes/ui/check_in.tscn", "res://game/scenes/ui/slot_select.tscn", "res://game/scenes/world/overworld.tscn",
-        "res://game/scenes/ui/reflection.tscn", "res://game/scenes/ui/results.tscn"
+        "res://game/scenes/ui/reflection.tscn", "res://game/scenes/ui/results.tscn", "res://game/scenes/ui/study_setup.tscn"
     )
     foreach ($scene in $scenes) {
         $name = "scene_" + [System.IO.Path]::GetFileNameWithoutExtension($scene)

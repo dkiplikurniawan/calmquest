@@ -30,6 +30,8 @@ GameState="*res://game/scripts/autoload/game_state.gd"
 SessionState="*res://game/scripts/autoload/session_state.gd"
 QuestManager="*res://game/scripts/autoload/quest_manager.gd"
 SaveManager="*res://game/scripts/autoload/save_manager.gd"
+Wellbeing="*res://game/scripts/autoload/wellbeing.gd"
+StudyMode="*res://game/scripts/autoload/study_mode.gd"
 SceneRouter="*res://game/scripts/autoload/scene_router.gd"
 
 [display]

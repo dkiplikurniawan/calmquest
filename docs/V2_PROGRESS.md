@@ -339,3 +339,59 @@ Requested after V2: a language setting so the game can be played in English or B
 - **Screenshot review in Indonesian** (`capture_screenshots.tscn -- --lang=id`, 50 shots in `screenshots/id/`) found and fixed: an untranslated "(ready)" in crafting and cooking, the volume labels "Music" and "Ambience", progress and save error messages, a map hint that wrapped off-screen (shortened), a build-mode heading that pushed its panel over the toast (shortened), and long region titles covering the HUD (they now shrink to fit). The first capture was interrupted when the window lost focus and the game paused itself; the tool now resumes in that case.
 - **Tests:** 6 new unit tests (144 in total) and 9 new UI checks (39 in total). The test runners switch to English first, so a player's chosen language never affects English assertions. No existing test was removed or weakened.
 - **Not done:** a native speaker has not reviewed the translation, and the Indonesian text was only checked at the Normal text size in screenshots.
+
+## Polish pass (0.4.0)
+
+Instructions: `CALMQUEST_POLISH_PROMPT_V3.md`. Work happens on the git branch `polish-0.4.0`. The first commit is the untouched 0.3.1 baseline, and each milestone gets its own commit.
+
+**Baseline (before any change, 2026-10-11):** all 15 checks pass: 144 unit tests, 656 smoke, 378 overworld and 39 UI checks, 7 scenes, 1,481/1,481 catalog strings, 13 Python tests.
+
+**What the environment has (checked, not assumed):**
+- git: a repository with no commits, on `main`. The polish work is on the branch `polish-0.4.0`; `main` was left as it was.
+- **No MuseScore, no FluidSynth, no SoundFont, no ffmpeg or Ogg encoder.** An orchestral render is not possible here, so P3 documents the exact steps instead and keeps the synthesized placeholders. The music is not called orchestral anywhere.
+- **No font in `assets/fonts/`.** The custom font step stops there: the developer has to add an OFL font file (the prompt says not to download it). The default font stays.
+- Python 3.12 with numpy and scipy (used for the audio tooling and analysis).
+
+**Plan:**
+1. **P1, flow:** Start Adventure goes to the journey screen. A new journey shows one mode card. The optional mood check (five drawn faces), the session closing ("Before you go…") with a summary from real events, and the private mood journal (off by default) are added. The completion pop-up no longer appears by itself. Study Mode is a separate autoload with its own setup screen, a temporary save, a fixed duration with a gentle end, and its own CSV files. `analysis/analyze_study.py` and its tests are added.
+2. **P2, HUD and UI:** contextual key hints instead of the always-visible buttons, a sun/moon arc, a compact and fading quest tracker, a fading hotbar, toasts grouped below the player, a smaller banner, rings only on the nearest objects, in-world fishing, the About screen, a drawn wordmark, a richer menu backdrop, and new display and interface settings.
+3. **P3, audio:** SFX refresh with pitch variation, surface footsteps (with a setting), a mix check, finale and rest-spot moments, `MusicManager` preferring `assets/music/rendered/`, and a listening checklist.
+4. **P4, visuals:** ground detail, canopy shadows, a warm night (windows, lantern posts, fireflies, mist near water), Traveler and Lumi animation polish, an optional sprite pipeline, biome signatures, and the finale cinematic with credits (skippable, autosaves).
+5. **P5, rest:** 8-12 rest spots (map, journal "Quiet places") and "Breathe with Lumi".
+6. **P6:** docs, `STUDY_MODE.md`, version 0.4.0 in `project.godot`, screenshots in EN and ID, and the full validation.
+
+**Risks:**
+- *Research data contract:* `sessions.csv` must stay schema v1. Study data goes to new files that reuse `SessionRecord` and `CsvCodec`, and the existing tests must keep passing.
+- *The big integration tests* (656/378 checks) drive the HUD, the pause menu and the completion panel directly. Flow and HUD changes must keep their APIs, or the tests are updated only where the design changed on purpose (explained here).
+- *Tests must not open the new start cards:* the cards appear only when the menu flow asks for them, never when the overworld is opened directly.
+- *Performance:* more ground detail and night lights must stay within the light budget and `ViewCull`.
+- *Scope:* the finale cinematic and in-world fishing are the biggest risks. If something is not finished, it is labelled as a stub.
+- *Honesty:* no orchestral claim, no font claim, and no manual playtest claim.
+
+### P1 - Player flow and Study Mode
+
+**Default (Steam) flow:**
+- *Start Adventure* now opens "Choose a journey" directly. The check-in is no longer in the way.
+- A **new journey** shows one small mode card first (Balanced pre-selected). Continuing a journey keeps that journey's saved mode. The pause menu still changes it.
+- Then comes the optional **mood check**: a small card (not a full screen) asking "How are you feeling right now?" with **five drawn faces** (Tense, Uneasy, Okay, Calm, Peaceful). The faces differ by brows, eyes and mouth, never by color alone. Each has a text label, a tooltip and an `accessibility_name`. The card has *Skip* and *Don't ask again*. Lumi answers with one of three neutral lines that work for every answer.
+- **Leaving:** the pause menu now offers *Return to menu* and *Quit Game*. With Settings > Well-being on, these show **"Before you go…"**: 2-4 summary lines built only from what really happened this session (counter deltas since the world opened, first visits, quests finished; otherwise "A quiet walk is time well spent."), plus the optional faces. There is no comparison, change value or score. Autosave works as before (quit also autosaves).
+- **Private mood journal** (opt-in, off by default): `wellbeing_journal.json`, the Journal's "Feelings" page, and export and delete in Data & Privacy. A damaged journal is never overwritten.
+- Settings > **Well-being**: mood check Ask / Don't ask, session summary On / Off, mood journal Off / On.
+- No research data is stored in this flow: the session starts without a check-in and without consent.
+
+**Study Mode** (`StudyMode` autoload, [STUDY_MODE.md](STUDY_MODE.md)):
+- Activation with `--study`, or 7 clicks on the version label plus `LUMERIA-STUDY`.
+- Study setup checks the participant code (`P` + 2-3 digits) and sets the length (10/15/20) and language (default ID).
+- The existing check-in leads to a fresh journey in `saves/study_tmp.json`, which never touches slots 1-3 and is deleted afterwards.
+- No countdown: a fading sun next to the clock. After the set time Lumi gives the gentle line, and after up to 60 more seconds the reflection follows. This never happens during dialogue, a menu or a minigame.
+- The existing reflection and results follow, then *Next session* returns to the setup.
+- With consent, `study_sessions.csv` gets 6 study columns plus the 16 v1 columns (the same `SessionRecord`, `CsvCodec` and validation), and `study_events.csv` gets coarse events. `sessions.csv` still gets its normal v1 row.
+- Export of both files from Data & Privacy. `analysis/analyze_study.py` groups by participant and reuses the v1 validation from `analyze_sessions.py` (unchanged).
+
+**Deliberate changes to earlier behavior:**
+- The "Ready to rest for now?" completion panel no longer appears by itself after the Heart Tree and Act 1. It pushed players toward ending, and in the study a fixed length now decides the end. The panel still opens from *Finish Session* in Study Mode. The integration tests already closed it only when it was open, so no assertion changed.
+- *Restart Session* was removed from the pause menu. It was a V1 research control: the study journey is temporary, and players can *Load*. The code path (`SessionState.restart_gameplay`) and its smoke-test check remain.
+- The pause menu's research storage note is shown only in Study Mode. Other players never store session data.
+- The Data & Privacy and How to Play texts now say that the 0-10 check-in belongs to Study Mode, and they describe the mood check and journal.
+
+**Tests:** 19 new unit tests (`test_wellbeing.gd`, `test_study_mode.gd`), 33 new UI checks (main menu unlock, Study setup, mood card, closing panel, Settings, Journal tab, and a real world with the start cards), and 8 new Python tests (`test_analyze_study.py`). The Indonesian catalog has 117 new entries in `game/data/i18n/id/polish.json`, and 8 entries for removed texts were deleted.

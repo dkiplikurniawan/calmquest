@@ -17,12 +17,12 @@ Pause: Escape. A gamepad works too, and keys can be changed in Settings."],
 	["Gather, craft and make a home", "Branches, stones, flowers and more lie everywhere and grow back after a while. Craft at a workbench (I opens your bag and recipes). Restore the old cottage, decorate it, plant seeds in garden plots, fish at rippling water and cook at the pot. Crops never die, fish never get away for good, and nothing is ever lost."],
 	["Friends and the story", "Spirit villagers move in as the world brightens. Chat, bring gifts and help with their small requests; nothing ever expires. After the Heart of Lumeria wakes, five Hearthstones wait across the world, in any order you like."],
 	["Lantern Catch", "Visit the Lantern Shrine in Firefly Grove to begin a quiet night. Catch the slowly drifting lanterns with E. There are no lives and no countdown, and you can end the night at the shrine at any time."],
-	["Saving", "Your journey saves itself when you sleep, go through doors, finish quests and every few minutes. You can also save from the pause menu. Saves are separate from the optional reflection data."],
-	["Check-in and reflection", "Before playing you may rate how stressed you feel from 0 to 10, and again when you finish. Both are optional and can be skipped. They are a personal reflection, not a test or a diagnosis. The results screen simply compares your two answers."],
+	["Saving", "Your journey saves itself when you sleep, go through doors, finish quests and every few minutes. You can also save from the pause menu, and it saves when you return to the menu or quit."],
+	["Mood check and \"Before you go\"", "When a journey starts, Lumi may ask how you are feeling: tap a face or skip. When you leave from the pause menu, a short note recalls what you did. Both are optional, are not a test, and can be turned off in Settings > Well-being. Nothing is stored unless you turn on the private mood journal."],
 	["Gameplay modes", "Gentle: generous reach, guiding glow, automatic fishing, easy-going creatures, more hints.
 Balanced: the standard cozy pace.
 Playful: livelier lights, lanterns and fish, plus optional bonus challenges.
-The check-in can suggest a mode, but you always choose. Change it any time from the pause menu."],
+You choose a mode when a new journey starts, and can change it any time from the pause menu."],
 ]
 
 

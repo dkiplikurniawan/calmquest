@@ -50,6 +50,10 @@ var tree_restored_this_session: bool = false
 var lantern_nights_this_session: int = 0
 var completion_offered: bool = false
 var welcome_shown: bool = false
+## What the world shows when a journey opens from the menu (set by the journey
+## screen): {"mode_card": bool, "mood_check": bool}. Empty when the world is
+## opened any other way (tests, the editor, Study Mode).
+var start_cards: Dictionary = {}
 
 # --- World facts (delegated to GameState, read-only views kept for the V1 API) -------
 const LUMA_LIGHT := "luma_light"
@@ -152,8 +156,13 @@ func finalize_and_save(completed: bool) -> Dictionary:
 	if not consent_to_store:
 		last_save_result = {"ok": true, "saved": false, "message": "Not saved: you chose not to store session data. Nothing was written."}
 		return last_save_result
-	var result := storage.append_record(build_record(completed))
+	var record := build_record(completed)
+	var result := storage.append_record(record)
 	result["saved"] = result["ok"]
+	# Study Mode also keeps its own file (same record, plus the study columns).
+	if StudyMode.record_pending:
+		StudyMode.record_pending = false
+		result["study_saved"] = StudyMode.store_record(record)["ok"]
 	last_save_result = result
 	return last_save_result
 

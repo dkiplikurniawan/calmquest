@@ -4,7 +4,9 @@ CALMQUEST is designed to work fully without collecting anything. This page expla
 
 ## What is collected
 
-Nothing is collected unless the player ticks **"Save an anonymous record of this session on this device (optional)"** on the check-in screen. The box is **unticked by default** and must be ticked again for each new session.
+Nothing is collected from players. Since 0.4.0 the 0-10 check-in only appears in **Study Mode**, a hidden mode a researcher uses for a study. There, nothing is stored unless the participant ticks **"Save an anonymous record of this session on this device (optional)"** on the check-in screen. The box is **unticked by default** and must be ticked again for each new session.
+
+The optional **mood check** (five faces when a journey starts) and the faces in **"Before you go…"** are not stored at all, unless the player turns on the **private mood journal** (Settings > Well-being, off by default). See below.
 
 With consent, one row is written when the session ends. The 16 fields are listed in [DATA_DICTIONARY.md](DATA_DICTIONARY.md). They are:
 
@@ -40,6 +42,9 @@ Only on the player's computer, in Godot's user-data folder for this game:
 | `progress.cfg` | journal progress (hidden details found, times the Heart Tree was restored, Lantern Nights completed), with no answers | no (ordinary game save) |
 | `settings.cfg` | volume, display, accessibility and language settings, and key bindings | no |
 | `saves/slot_N.json` (+ `.bak.json`) | world saves: places, items, homes, villagers, quests (V2); never check-in or reflection answers | no (ordinary game save; delete from "Choose a journey") |
+| `wellbeing_journal.json` | the private mood journal: date and time, the faces chosen when starting and leaving (or nothing if skipped), minutes played, the short summary | the player's own opt-in (Settings > Well-being) |
+| `study_sessions.csv`, `study_events.csv` | Study Mode only: the participant code, language, build, session length and the 16 session fields; coarse events (region entered, activity started or finished, hint requested), no positions or keystrokes | yes (the participant's consent at the check-in) |
+| `saves/study_tmp.json` | Study Mode's temporary world; deleted when the study session ends | no |
 
 Only Windows was tested. The Linux and macOS paths are Godot's documented defaults.
 
@@ -55,6 +60,8 @@ Only Windows was tested. The Linux and macOS paths are Godot's documented defaul
 - **Open folder:** Data & Privacy -> *Open data folder*.
 - **Delete:** Data & Privacy -> *Delete session records* (with confirmation) permanently removes `sessions.csv`.
 - **Reset journal:** Data & Privacy -> *Reset journal progress* removes `progress.cfg`.
+- **Mood journal:** Settings > Well-being turns it on or off. Data & Privacy -> *Export mood journal...* and *Delete mood journal* (with confirmation); the Journal's "Feelings" page can delete it too.
+- **Study data:** in Study Mode, Data & Privacy -> *Export study data...* copies both study files into a folder the researcher picks; *Leave Study Mode* turns the mode off.
 
 The game reports when a write, export or deletion fails and never claims success after a failed file operation.
 

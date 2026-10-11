@@ -1,8 +1,9 @@
 class_name JournalPanel
 extends Control
 ## The Traveler's Journal (J): tabs for quests, the map, creatures, fish,
-## recipes, lore, collections and villagers. Read-only views of GameState,
-## QuestManager and SessionState; tabs fill in as the world is explored.
+## recipes, lore, collections and villagers (and "Feelings" when the private
+## mood journal is on). Read-only views of GameState, QuestManager and
+## SessionState; tabs fill in as the world is explored.
 ## Tabs switch with the mouse, or with Q / E (and [ / ]) on the keyboard.
 
 signal closed
@@ -31,6 +32,8 @@ func _ready() -> void:
 	_add_tab("Lore", _lore_tab())
 	_add_tab("Collections", _collections_tab())
 	_add_tab("Villagers", _villagers_tab())
+	if GameSettings.mood_journal and not StudyMode.is_active():
+		_add_tab("Feelings", _feelings_tab())
 	var close_button := UiKit.button("Close", close, UiTheme.PRIMARY_BUTTON)
 	box.add_child(close_button)
 	close_button.call_deferred("grab_focus")
@@ -277,6 +280,52 @@ func _collections_tab() -> Control:
 	_line(v, "\n".join(details))
 	_line(v, L.t("Across all visits: Heart Tree restored %d time(s), Lantern Nights completed %d.") % [s.progress.heart_tree_restorations, s.progress.lantern_nights_completed], UiTheme.SUBTLE)
 	return v
+
+
+## The private mood journal: the faces and the summary lines of past visits.
+## Just a gentle list: no charts, no averages, no streaks.
+func _feelings_tab() -> Control:
+	var v := _vbox()
+	_line(v, "Your private mood journal. It stays on this device. There are no scores here, just your visits.", UiTheme.SUBTLE)
+	var entries := Wellbeing.journal_entries()
+	if entries.is_empty():
+		_line(v, "Nothing here yet. A visit appears here when you leave from the pause menu.")
+	for i in range(entries.size() - 1, -1, -1):
+		var e: Dictionary = entries[i]
+		v.add_child(HSeparator.new())
+		_line(v, L.t("%s - %d min") % [String(e.get("local_time", "")).replace("T", " ").left(16), int(e.get("minutes", 0))], UiTheme.SUBTLE)
+		var row := HBoxContainer.new()
+		row.add_theme_constant_override("separation", 8)
+		for pair: Array in [["Start:", e.get("start_face")], ["End:", e.get("end_face")]]:
+			row.add_child(UiKit.label(pair[0]))
+			if Wellbeing.is_valid_face(pair[1]):
+				row.add_child(MoodFace.new(int(pair[1]), 30.0))
+				row.add_child(UiKit.label(Wellbeing.face_name(pair[1])))
+			else:
+				row.add_child(UiKit.label("(skipped)", UiTheme.SUBTLE))
+			row.add_child(UiKit.spacer(0))
+		v.add_child(row)
+		var lines: Array = e.get("summary", [])
+		if not lines.is_empty():
+			_line(v, "\n".join(PackedStringArray(lines)))
+	var delete := UiKit.button("Delete my mood journal", func() -> void:
+		UiKit.confirm(self, "Delete your private mood journal? This cannot be undone.", "Delete", func() -> void:
+			Wellbeing.delete_journal()
+			_refresh_tab("Feelings", _feelings_tab)))
+	delete.size_flags_horizontal = Control.SIZE_SHRINK_BEGIN
+	v.add_child(delete)
+	return v
+
+
+func _refresh_tab(title: String, builder: Callable) -> void:
+	var current := tabs.current_tab
+	for c in tabs.get_children():
+		if c.name == title:
+			(c as ScrollContainer).get_child(0).queue_free()
+			var fresh: Control = builder.call()
+			fresh.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			c.add_child(fresh)
+	tabs.current_tab = current
 
 
 func _wear(key: String) -> void:

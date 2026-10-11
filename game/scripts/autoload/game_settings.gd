@@ -17,7 +17,7 @@ const KEYS: PackedStringArray = [
 	"run_toggle", "reduced_camera_motion", "show_minimap", "show_compass", "region_titles",
 	"day_length_minutes", "time_mode", "gentle_clock", "autosave_minutes", "last_slot",
 	"ambience_volume", "ui_volume", "music_mode", "hint_frequency", "weather_effects", "captions", "key_bindings",
-	"language",
+	"language", "mood_check", "session_summary", "mood_journal", "study_mode",
 ]
 
 const MUSIC_MODE_NAMES: PackedStringArray = ["Continuous music", "Music with quiet pauses", "Music off"]
@@ -72,6 +72,15 @@ var captions: bool = false
 var key_bindings: Dictionary = {}
 ## Interface language: "en" (English) or "id" (Bahasa Indonesia).
 var language: String = "en"
+## Well-being: ask "How are you feeling right now?" when a journey starts (Ask / Don't ask).
+var mood_check: bool = true
+## Well-being: show "Before you go..." with a summary when leaving from the pause menu.
+var session_summary: bool = true
+## Well-being: keep the mood faces and summaries in user://wellbeing_journal.json (opt-in).
+var mood_journal: bool = false
+## Study Mode unlocked from the main menu (kept until "Leave Study Mode").
+## The command-line flag --study turns it on for one run only (StudyMode.cli_active).
+var study_mode: bool = false
 
 var last_error: String = ""
 ## Where settings are saved. Tests point this at a temporary file.
@@ -201,6 +210,10 @@ func _sanitize() -> void:
 	if typeof(key_bindings) != TYPE_DICTIONARY:
 		key_bindings = {}
 	language = String(language) if L.LANGUAGES.has(String(language)) else "en"
+	mood_check = bool(mood_check)
+	session_summary = bool(session_summary)
+	mood_journal = bool(mood_journal)
+	study_mode = bool(study_mode)
 
 
 ## The hint frequency in use (resolving "by mode").

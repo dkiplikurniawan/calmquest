@@ -4,7 +4,11 @@ CALMQUEST keeps **research data** and **game data** strictly separate. Saves nev
 
 | File (`%APPDATA%\CALMQUEST\`) | Purpose | Written when |
 |---|---|---|
-| `sessions.csv` | consented research session records, **schema v1, unchanged** (see [DATA_DICTIONARY.md](DATA_DICTIONARY.md)) | the player ticked consent at the check-in and the session ends |
+| `sessions.csv` | consented research session records, **schema v1, unchanged** (see [DATA_DICTIONARY.md](DATA_DICTIONARY.md)) | Study Mode only (0.4.0): the participant ticked consent at the check-in and the session ends |
+| `study_sessions.csv` | Study Mode records: 6 study columns + the 16 schema-v1 columns (see below) | Study Mode, with consent, when the study session ends |
+| `study_events.csv` | Study Mode's coarse event log (see below) | Study Mode, with consent, during the session |
+| `wellbeing_journal.json` | the **private mood journal** (opt-in, off by default; see below) | the journal is on and the player leaves |
+| `saves/study_tmp.json` | Study Mode's temporary journey; never one of slots 1-3 | during a study session; deleted when it ends |
 | `progress.cfg` | V1 journal counters (discoveries, Heart Tree restorations, Lantern Nights) | gameplay milestones (unchanged) |
 | `settings.cfg` | preferences, including key bindings | a setting changes |
 | `saves/slot_N.json` (N = 1-3) | **world saves** (V2) | autosave and manual save |
@@ -126,10 +130,67 @@ V1 keys are unchanged. Keys added in V2:
 | `captions` | bool | false | text captions for important sounds |
 | `key_bindings` | dict | {} | action → physical keycode (remapped main keys) |
 | `language` | string | "en" | interface language: `en` (English) or `id` (Bahasa Indonesia); unknown values fall back to `en` |
+| `mood_check` | bool | true | Well-being: ask "How are you feeling right now?" when a journey starts (Ask / Don't ask) |
+| `session_summary` | bool | true | Well-being: show "Before you go…" when leaving from the pause menu |
+| `mood_journal` | bool | false | Well-being: keep the private mood journal (`wellbeing_journal.json`) |
+| `study_mode` | bool | false | Study Mode unlocked from the main menu (kept until "Leave Study Mode"); `--study` on the command line turns it on for one run without saving |
 
-## Optional gameplay event log
+## Private mood journal (`wellbeing_journal.json`)
 
-Not implemented. If one is added later, it must:
-- use its own file and schema, documented here;
-- be covered by the consent flow;
-- never be mixed into `sessions.csv` without a defined join key.
+Opt-in (Settings > Well-being, **off by default**). Separate from `sessions.csv`, the world saves and the Study Mode files. Nothing about the mood check is stored while the journal is off. One entry is added when the player leaves from the pause menu (or closes the window), at most once per play session. A damaged file is never overwritten.
+
+```json
+{
+  "journal_version": 1,
+  "entries": [
+    {
+      "local_time": "2026-10-11T19:30:00",
+      "start_face": 4,
+      "end_face": null,
+      "minutes": 23,
+      "summary": ["You planted 3 seeds.", "You found a new place: Misty Pinewood."]
+    }
+  ]
+}
+```
+
+| Field | Type | Meaning |
+|---|---|---|
+| `local_time` | text | local date and time when the entry was written (no time zone) |
+| `start_face`, `end_face` | int 1-5 or `null` | the face chosen when starting / leaving: 1 Tense, 2 Uneasy, 3 Okay, 4 Calm, 5 Peaceful; `null` = skipped or not asked |
+| `minutes` | int | minutes played in that session |
+| `summary` | list of text | the summary lines shown in "Before you go…", in the language used at the time |
+
+The faces are a personal note, not a measurement, and are never compared, averaged or charted in the game. Data & Privacy exports or deletes the file.
+
+## Study Mode files
+
+Written only in Study Mode and only when the participant ticked the consent box at the check-in. See [STUDY_MODE.md](STUDY_MODE.md).
+
+### `study_sessions.csv` (study schema 1)
+
+The header is the 6 study columns followed by **all 16 schema-v1 columns in the same order and with the same meaning** as `sessions.csv` ([DATA_DICTIONARY.md](DATA_DICTIONARY.md)). The same CSV codec and `SessionRecord.validate()` rules apply, and a file with a different header is never modified.
+
+| Column | Type | Meaning |
+|---|---|---|
+| `study_schema_version` | int | `1` |
+| `participant_code` | text | `P` + 2-3 digits (`P01`-`P999`), validated at setup |
+| `language` | `en` / `id` | the interface language during the session |
+| `build_version` | text | `GAME_VERSION`, e.g. `0.4.0` |
+| `git_commit` | text or empty | read from `res://build_commit.txt` when a build script wrote it, else empty |
+| `target_duration_seconds` | int | 600, 900 or 1200 |
+| (16 v1 columns) | | unchanged; `score_delta = post_stress_score - pre_stress_score`, missing answers stay empty |
+
+`sessions.csv` keeps receiving its normal v1 row for the same session (with the same consent).
+
+### `study_events.csv`
+
+| Column | Meaning |
+|---|---|
+| `participant_code` | as above |
+| `session_id` | the same random ID as the session record (join key) |
+| `t_seconds` | seconds since the study session started (one decimal) |
+| `event` | `session_started`, `region_entered`, `activity_started`, `activity_finished`, `puzzle_solved`, `hint_requested`, `mode_changed`, `gentle_end`, `session_ended` (plus the rest-spot and breathing events from P5) |
+| `detail` | the region id, activity (`fishing`, `cooking`, `crafting`, `building`, `talking`, `lantern_catch`), puzzle id or mode id |
+
+Coarse and non-identifying: no keystrokes, no timing of individual inputs, and no position finer than the region.

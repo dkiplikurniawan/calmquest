@@ -45,7 +45,9 @@ func _ready() -> void:
 		box.add_child(HSeparator.new())
 		box.add_child(UiKit.label(_storage_text(), UiTheme.SUBTLE, true))
 
-	var again := UiKit.button("Play Again", func() -> void: SceneRouter.go_to(SceneRouter.CHECK_IN), UiTheme.PRIMARY_BUTTON)
+	# Study Mode: back to the setup for the next session or participant.
+	var again := UiKit.button("Next session" if StudyMode.is_active() else "Play Again", func() -> void:
+		SceneRouter.go_to(SceneRouter.STUDY_SETUP if StudyMode.is_active() else SceneRouter.SLOT_SELECT), UiTheme.PRIMARY_BUTTON)
 	var menu := UiKit.button("Main Menu", func() -> void: SceneRouter.go_to(SceneRouter.MAIN_MENU))
 	box.add_child(UiKit.hbox([again, menu]))
 	again.call_deferred("grab_focus")

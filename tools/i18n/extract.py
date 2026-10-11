@@ -42,7 +42,7 @@ IGNORE = {
     "CALMQUEST", "Walls", "HiddenBridge", "Smoke", "Label", "RichTextLabel", "PanelContainer", "Panel",
     "Button", "CheckBox", "HSlider", "HSeparator", "VSeparator", "VBoxContainer", "HBoxContainer",
     "TabContainer", "ScrollContainer", "MarginContainer", "CenterContainer", "LineEdit", "TextEdit",
-    "PondCollision", "GuidanceArrow", "GloomLayer", "Atmosphere", "Wildlife", "Ground", "GroundFeatures",
+    "LUMERIA-STUDY", "PondCollision", "GuidanceArrow", "GloomLayer", "Atmosphere", "Wildlife", "Ground", "GroundFeatures",
     "TerrainCollision", "Chunk_%d_%d", "SFX", "UI", "TooltipPanel",
     "TooltipLabel", "ProgressBar", "OptionButton", "ItemList", "Tree", "PopupMenu", "Window",
 }

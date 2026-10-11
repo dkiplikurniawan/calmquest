@@ -54,3 +54,6 @@
 
 - `user://progress.cfg`: journal progress (`heart_tree_restorations`, `lantern_nights_completed`, `discoveries`). It never contains self-reported answers.
 - `user://settings.cfg`: volume, display, accessibility and language preferences.
+- `user://study_sessions.csv` (Study Mode only, 0.4.0): the same 16 columns, preceded by 6 study columns (`study_schema_version`, `participant_code`, `language`, `build_version`, `git_commit`, `target_duration_seconds`). The 16 columns keep exactly the meaning described above. See [DATA_SCHEMA.md](DATA_SCHEMA.md) and [STUDY_MODE.md](STUDY_MODE.md).
+- `user://study_events.csv` (Study Mode only): coarse events joined by `session_id`.
+- `user://wellbeing_journal.json`: the private mood journal (opt-in). It is not session data and never contains the 0-10 answers.

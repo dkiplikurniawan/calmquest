@@ -15,6 +15,8 @@ signal save_failed(slot: int, message: String)
 const SAVE_DIR := "user://saves"
 const SAVE_VERSION := 2
 const SLOT_COUNT := 3
+## Study Mode's temporary journey (saves/study_tmp.json); never one of slots 1-3.
+const STUDY_SLOT := 0
 const GAME_VERSION := "0.3.1"
 
 ## -1 = no slot (e.g. a test or a scene run directly): nothing is written.
@@ -66,14 +68,20 @@ func _notification(what: int) -> void:
 # =============================================================================
 
 func slot_path(slot: int) -> String:
+	if slot == STUDY_SLOT:
+		return "%s/study_tmp.json" % save_dir
 	return "%s/slot_%d.json" % [save_dir, slot]
 
 
 func backup_path(slot: int) -> String:
+	if slot == STUDY_SLOT:
+		return "%s/study_tmp.bak.json" % save_dir
 	return "%s/slot_%d.bak.json" % [save_dir, slot]
 
 
 func temp_path(slot: int) -> String:
+	if slot == STUDY_SLOT:
+		return "%s/study_tmp.json.tmp" % save_dir
 	return "%s/slot_%d.json.tmp" % [save_dir, slot]
 
 
@@ -167,7 +175,9 @@ func start_new_journey(world_size: Vector2) -> void:
 	QuestManager.tracked_id = ""
 	pending_player = {}
 	playtime_seconds = 0.0
-	import_legacy_journal()
+	# A study journey always starts from the same fresh state.
+	if current_slot != STUDY_SLOT:
+		import_legacy_journal()
 	if current_slot >= 0:
 		save_slot(current_slot, "new journey")
 
@@ -202,7 +212,7 @@ func autosave(reason: String) -> bool:
 
 ## Atomic save. Returns true only if the new file was written and verified.
 func save_slot(slot: int, reason: String = "manual") -> bool:
-	if slot < 1 or slot > SLOT_COUNT:
+	if (slot < 1 or slot > SLOT_COUNT) and slot != STUDY_SLOT:
 		return _fail(slot, L.t("Invalid save slot %d.") % slot)
 	var text := JSON.stringify(build_save_data(), "\t")
 	var tmp := temp_path(slot)
