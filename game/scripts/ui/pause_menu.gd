@@ -82,6 +82,7 @@ func _ready() -> void:
 		var save := UiKit.button("Save", func() -> void: save_requested.emit())
 		var load := UiKit.button("Load", _open_load)
 		box.add_child(UiKit.hbox([settings, save, load]))
+		box.add_child(UiKit.hbox([UiKit.button("How to Play", func() -> void: _root.add_child(HowToPlayPanel.new()))]))
 		var leave := UiKit.button("Return to menu", func() -> void: leave_requested.emit())
 		var leave_row := [leave]
 		if not OS.has_feature("web"):

@@ -134,6 +134,12 @@ V1 keys are unchanged. Keys added in V2:
 | `session_summary` | bool | true | Well-being: show "Before you go…" when leaving from the pause menu |
 | `mood_journal` | bool | false | Well-being: keep the private mood journal (`wellbeing_journal.json`) |
 | `study_mode` | bool | false | Study Mode unlocked from the main menu (kept until "Leave Study Mode"); `--study` on the command line turns it on for one run without saving |
+| `control_hints` | int 0-2 | 1 | Interface: key hints always / sometimes / never |
+| `hud_fade` | bool | true | Interface: the quest tracker fades while walking, and the hotbar when unused |
+| `quest_tracker_compact` | bool | false | Interface: the tracker shows only the quest title |
+| `window_mode` | int 0-2 | 0 | Display: windowed / fullscreen / borderless. Older files with only `fullscreen = true` are read as fullscreen, and `fullscreen` is kept in sync |
+| `vsync` | bool | true | Display: vertical sync |
+| `ui_scale_index` | int 0-3 | 1 | Display: interface scale 90 / 100 / 115 / 130 %. The world camera compensates, so only the interface changes size |
 
 ## Private mood journal (`wellbeing_journal.json`)
 

@@ -211,7 +211,7 @@ func _on_tree_interacted(_target: Interactable) -> void:
 	heart_tree.set_night_amount(ow.night_amount)
 	AudioManager.play(&"restore")
 	ow.lumi.react()
-	ow.hud.show_toast("The Heart Tree is glowing again!")
+	ow.hud.show_banner("The Heart Tree is glowing again!")
 	changed.emit()
 
 

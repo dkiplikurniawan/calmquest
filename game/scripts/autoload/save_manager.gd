@@ -90,6 +90,21 @@ func set_save_dir(dir: String) -> void:
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(save_dir))
 
 
+## The journey saved most recently (1-3), or 0 when there is none (for Continue).
+func most_recent_slot() -> int:
+	var best := 0
+	var best_time := ""
+	for slot in range(1, SLOT_COUNT + 1):
+		var summary := slot_summary(slot)
+		if summary.is_empty():
+			continue
+		var saved_at := String(summary.get("saved_at", ""))
+		if best == 0 or saved_at > best_time:
+			best = slot
+			best_time = saved_at
+	return best
+
+
 func slot_exists(slot: int) -> bool:
 	return FileAccess.file_exists(slot_path(slot)) or FileAccess.file_exists(backup_path(slot))
 

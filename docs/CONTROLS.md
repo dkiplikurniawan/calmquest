@@ -20,7 +20,16 @@ All gameplay actions are registered in one table: `game/scripts/systems/input_se
 | Build mode | B | Q / C change item, R rotate, X store, Z undo |
 | Menus | Mouse, or arrow keys + Enter/Space | Visible golden focus ring |
 
-HUD buttons (Ask Lumi, Journal, Pause) are mouse-only and never take keyboard focus, so Space and E can't trigger them by accident.
+**Mouse (0.4.0):** the HUD no longer shows key buttons all the time. Move the mouse and a small menu icon fades in at the top right, under the sun/moon arc. It opens Ask Lumi, Journal, Map and Pause, and shows the current mode and the clock. These buttons are mouse-only and never take keyboard focus, so Space and E can't trigger them by accident.
+
+**Key hints:** Settings > Interface > *Show control hints*:
+- **Sometimes** (default): a short hint such as "[J] Journal" appears in the bottom-right corner when a control first becomes useful in a journey (interact, bag, use, build, journal, map), when Lumi has a hint, and after about 45 seconds without input.
+- **Always:** a small strip of the main keys stays visible.
+- **Never:** no hints.
+
+The hints always show the player's current key, including remapped keys.
+
+**Fishing (0.4.0)** happens in the world: the line and the bobber are in the water, and a small bar sits under the player. E, Space, a click anywhere or gamepad A acts. Esc or B leaves.
 
 ## Gamepad
 

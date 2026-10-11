@@ -13,7 +13,8 @@ Every visual and audio element in CALMQUEST is original to this project. No thir
 | UI theme, checkbox and slider icons | generated at runtime | `UiTheme` (images built pixel by pixel) | MIT |
 | Sound effects and the fallback ambient pad | synthesized at runtime | `SoundSynth` (sine partials and envelopes) | MIT |
 | Music scores, placeholder music and ambience | generated offline | `tools/music/compose.py`, `tools/music/ambience.py` (see below) | MIT |
-| Font | engine default | Godot's built-in default font | Godot Engine MIT license (© Godot Engine contributors) |
+| Font | engine default | Godot's built-in default font. **No custom font file is included yet.** The game uses an SIL OFL font (Nunito or Quicksand) automatically when the developer adds it to `assets/fonts/` together with its `OFL.txt` (see `assets/fonts/README.md`). Record it here when that happens. | Godot Engine MIT license (© Godot Engine contributors) |
+| CALMQUEST wordmark, menu backdrop (isles, fireflies), mood faces, HUD sun/moon arc | procedural drawing | `Wordmark`, `MenuBackdrop`, `MoodFace`, `Hud.DayArc` (`_draw()` code) | MIT |
 
 ## Music and ambience
 

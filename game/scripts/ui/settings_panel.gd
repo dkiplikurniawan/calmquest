@@ -14,6 +14,9 @@ const GENTLE_CLOCK_NAMES: PackedStringArray = ["Normal speed", "Half speed", "Pa
 var _value_labels: Dictionary = {}
 var _language_button: Button
 var _mood_button: Button
+var _window_mode_button: Button
+var _ui_scale_button: Button
+var _hints_button: Button
 var _window_button: Button
 var _text_button: Button
 var _titles_button: Button
@@ -68,9 +71,21 @@ func _ready() -> void:
 	list.add_child(HSeparator.new())
 
 	list.add_child(UiKit.label("Display", UiTheme.SUBTLE))
-	list.add_child(_check("Fullscreen", "fullscreen"))
+	_window_mode_button = UiKit.button("", func() -> void: _cycle("window_mode", GameSettings.WINDOW_MODE_NAMES.size()))
+	list.add_child(_window_mode_button)
 	_window_button = UiKit.button("", _cycle_window_size)
 	list.add_child(_window_button)
+	list.add_child(_check("VSync (smoother motion, steadier frame rate)", "vsync"))
+	_ui_scale_button = UiKit.button("", func() -> void: _cycle("ui_scale_index", GameSettings.UI_SCALES.size()))
+	list.add_child(_ui_scale_button)
+	list.add_child(HSeparator.new())
+
+	list.add_child(UiKit.label("Interface", UiTheme.SUBTLE))
+	_hints_button = UiKit.button("", func() -> void: _cycle("control_hints", GameSettings.CONTROL_HINT_NAMES.size()))
+	list.add_child(_hints_button)
+	list.add_child(_check("Fade the quest tracker while walking and the hotbar when unused", "hud_fade"))
+	list.add_child(_check("Quest tracker: show only the quest title", "quest_tracker_compact"))
+	list.add_child(UiKit.label("Mouse: move the mouse to show the menu icon in the top-right corner.", UiTheme.SUBTLE, true))
 	list.add_child(HSeparator.new())
 
 	list.add_child(UiKit.label("Readability", UiTheme.SUBTLE))
@@ -248,6 +263,12 @@ func _cycle_language() -> void:
 	_refresh_cycle_buttons()
 
 
+## Cycles an integer setting through 0..count-1.
+func _cycle(key: String, count: int) -> void:
+	GameSettings.set_setting(key, (int(GameSettings.get(key)) + 1) % count)
+	_refresh_cycle_buttons()
+
+
 func _toggle_mood_check() -> void:
 	GameSettings.set_setting("mood_check", not GameSettings.mood_check)
 	_refresh_cycle_buttons()
@@ -259,7 +280,7 @@ func _cycle_region_titles() -> void:
 
 
 func _refresh_cycle_buttons() -> void:
-	if _window_button == null or _text_button == null or _titles_button == null or _music_mode_button == null or _hint_button == null:
+	if _window_button == null or _text_button == null or _titles_button == null or _music_mode_button == null or _hint_button == null or _hints_button == null:
 		return
 	_language_button.text = L.t("Language / Bahasa: %s  (click to change)") % L.LANGUAGES[L.current()]
 	_mood_button.text = L.t("Mood check when I start playing: %s  (click to change)") % (L.t("Ask") if GameSettings.mood_check else L.t("Don't ask"))
@@ -278,7 +299,10 @@ func _refresh_cycle_buttons() -> void:
 		b.text = L.t("%s: %s  (click to change)") % [L.t(String(b.get_meta("title"))), value]
 	var s: Vector2i = GameSettings.WINDOW_SIZES[GameSettings.window_size_index]
 	_window_button.text = L.t("Window size: %d x %d  (click to change)") % [s.x, s.y]
-	_window_button.disabled = GameSettings.fullscreen
+	_window_button.disabled = GameSettings.window_mode != GameSettings.WINDOWED
+	_window_mode_button.text = L.t("Window: %s  (click to change)") % L.t(GameSettings.WINDOW_MODE_NAMES[GameSettings.window_mode])
+	_ui_scale_button.text = L.t("Interface scale: %d%%  (click to change)") % int(round(GameSettings.ui_scale() * 100.0))
+	_hints_button.text = L.t("Show control hints: %s  (click to change)") % L.t(GameSettings.CONTROL_HINT_NAMES[GameSettings.control_hints])
 	_text_button.text = L.t("Text size: %s  (click to change)") % L.t(UiTheme.TEXT_SCALE_NAMES[GameSettings.text_scale_index])
 	_music_mode_button.text = L.t("Music: %s  (click to change)") % L.t(GameSettings.MUSIC_MODE_NAMES[GameSettings.music_mode])
 	var hint_name := L.t("By mode (Gentle: Helpful, Balanced: Normal, Playful: Rare)") if GameSettings.hint_frequency < 0 else L.t(GameSettings.HINT_FREQUENCY_NAMES[GameSettings.hint_frequency])

@@ -178,7 +178,7 @@ func _on_puzzle_solved(puzzle_id: String) -> void:
 	EventBus.puzzle_solved.emit(puzzle_id)
 	AudioManager.play(&"restore")
 	overworld.lumi.react()
-	overworld.hud.show_toast("Crystal Creek is awake!")
+	overworld.hud.show_banner("Crystal Creek is awake!")
 	overworld.hud.show_dialogue("The heart crystal is singing! Far to the north-west, the moonlit veil over the sanctuary is fading.", 6.0)
 	if moon_gate != null:
 		moon_gate.open_gate()
@@ -198,7 +198,7 @@ func _on_altar_interacted(_target: Interactable) -> void:
 	altar.play_restoration()
 	AudioManager.play(&"restore")
 	overworld.lumi.react()
-	hud.show_toast("The Heart of Lumeria awakens...")
+	hud.show_banner("The Heart of Lumeria awakens...")
 
 
 func _on_altar_restored() -> void:

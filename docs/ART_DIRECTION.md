@@ -72,6 +72,25 @@ All art is original and drawn procedurally in GDScript (`_draw`) or shaders. The
 - **Caves:** a clear contrast between dark rock with a lighter rock face where it meets the floor, and a pale floor. The chasm is near-black with sparkles, and the light bridge is pale blue.
 - **The village grows visibly:** tents become homes with lit windows at night, then lantern strings, a market stall, and a campfire with music notes.
 
+## Polish pass (0.4.0): interface
+
+- **A calm HUD:**
+  - a compact quest tracker in the top-left, with the guidance arrow and distance as its last line. It fades a little while walking and returns fully on quest updates, and can collapse to the title.
+  - a small sun/moon arc with the day number in the top-right, instead of "Day 12 11:31";
+  - a hotbar that fades when unused;
+  - a mouse menu icon that appears only when the mouse moves;
+  - no always-visible key buttons.
+- **Nothing over the player:**
+  - region titles sit in the upper tenth of the screen (shrinking long names to fit);
+  - toasts sit at 60% of the height, below the player and Lumi. Pickups within 2 seconds merge into one short toast, and at most two toasts show at once;
+  - large banners are kept for a few major moments: the Heart Tree, Crystal Creek, the Heart of Lumeria, a Hearthstone, and the Light's return.
+- **Rings:** the golden ring is only ever on the one object the player would use. Gentle mode adds soft cream markers on the 2 nearest other objects within reach, never on far ones.
+- **Fishing in the world:** a bobber with ripples and a line from the player's hand in the water, and a small dark bar under the player. The bar is larger, with an outline, with High contrast or a larger text size.
+- **Main menu:**
+  - a drawn **CALMQUEST wordmark**: cream letters with a dark outline, a warm glow and a thin light line under the word, with Lumi floating over it and a short trail of sparkles;
+  - a backdrop of three layers of floating isles with parallax (and slight mouse parallax), fireflies that loop and blink, motes, stars, and a sky that drifts between dusk and twilight over 150 seconds. *Reduce motion* holds the sky and stops the drifting.
+- **Fonts:** a rounded OFL font (Nunito or Quicksand) is used automatically once its file is placed in `assets/fonts/` (see the README there). Until then, Godot's default font is used.
+
 ## Layering (V2)
 
 | z / layer | Content |

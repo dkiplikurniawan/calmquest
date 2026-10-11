@@ -136,6 +136,7 @@ func _run() -> void:
 	await get_tree().process_frame
 
 	await _check_player_flow(host)
+	await _check_hud_and_ui(host)
 
 	# --- Language: English <-> Bahasa Indonesia ----------------------------------------
 	var settings := SettingsPanel.new()
@@ -334,6 +335,47 @@ func _check_player_flow(host: Control) -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	check(direct._overlay == null and not get_tree().paused, "a world opened directly shows no cards")
+	# Rings: the golden ring only on the target, soft markers only on the 2 nearest (Gentle).
+	SessionState.select_mode(AdaptiveComfortEngine.MODE_GENTLE)
+	direct.teleport_to(direct.world.player_spawn)
+	await get_tree().process_frame
+	var probes: Array[Interactable] = []
+	for i in 5:
+		var probe := Interactable.new()
+		probe.interactable_id = "ring_probe_%d" % i
+		probe.position = direct.player.position + Vector2(40.0 + i * 28.0, 0.0)
+		direct.entities.add_child(probe)
+		probes.append(probe)
+	await get_tree().process_frame
+	direct.player.update_target()
+	direct._update_markers()
+	var marked: Array = []
+	var unmarked_near: Array = []
+	var limit := SessionState.get_config().interaction_radius * Overworld.MARKER_RADIUS_FACTOR
+	var targeted := 0
+	for node in get_tree().get_nodes_in_group(Interactable.GROUP):
+		var it := node as Interactable
+		var gap := direct.player.global_position.distance_to(it.get_interaction_point()) - it.reach_bonus
+		if it.is_targeted:
+			targeted += 1
+		if it.show_marker:
+			marked.append(gap)
+		elif gap < limit and it.can_interact() and it != direct.player.current_target:
+			unmarked_near.append(gap)
+	check(targeted <= 1, "the golden ring is on one object at most")
+	check(marked.size() == Overworld.MAX_NEARBY_MARKERS and unmarked_near.size() >= 1, "Gentle markers on only the %d nearest of several objects (%d marked, %d not)" % [Overworld.MAX_NEARBY_MARKERS, marked.size(), unmarked_near.size()])
+	var nearest_ok := true
+	for g in marked:
+		for u in unmarked_near:
+			nearest_ok = nearest_ok and float(g) <= float(u)
+	check(nearest_ok, "the markers are on the nearest objects, none far away")
+	SessionState.select_mode(AdaptiveComfortEngine.MODE_BALANCED)
+	direct._update_markers()
+	var balanced_marks := 0
+	for node in get_tree().get_nodes_in_group(Interactable.GROUP):
+		if (node as Interactable).show_marker:
+			balanced_marks += 1
+	check(balanced_marks == 0, "no extra rings in Balanced, only the target's")
 	direct.queue_free()
 	await get_tree().process_frame
 
@@ -343,6 +385,222 @@ func _check_player_flow(host: Control) -> void:
 	GameSettings.study_mode = saved_settings[3]
 	GameState.counters = saved_counters
 	get_tree().paused = false
+
+
+## 0.4.0 P2: the calm HUD, key hints, toasts, rings, in-world fishing, the
+## main menu and About, display settings, and every screen in Indonesian.
+func _check_hud_and_ui(host: Control) -> void:
+	var saved := [GameSettings.control_hints, GameSettings.hud_fade, GameSettings.quest_tracker_compact,
+		GameSettings.window_mode, GameSettings.vsync, GameSettings.ui_scale_index, GameSettings.high_contrast, GameSettings.text_scale_index]
+
+	# HUD: no always-visible key buttons; the corner menu stays hidden until the mouse moves.
+	var hud := Hud.new()
+	add_child(hud)
+	await get_tree().process_frame
+	var visible_key_buttons := 0
+	for b in hud.find_children("*", "Button", true, false):
+		if (b as Button).is_visible_in_tree() and (b as Button).text.contains("("):
+			visible_key_buttons += 1
+	check(visible_key_buttons == 0, "no always-visible key buttons in the HUD")
+	check(hud._menu.modulate.a < 0.05 and not hud._menu.is_open(), "the mouse menu icon is hidden until the mouse moves")
+	hud._menu._input(InputEventMouseMotion.new())
+	for i in 30:
+		hud._menu._process(0.05)
+	check(hud._menu.modulate.a > 0.9, "moving the mouse shows the menu icon")
+	var requested := []
+	hud.journal_requested.connect(func() -> void: requested.append("journal"))
+	hud._menu.icon.pressed.emit()
+	check(hud._menu.is_open(), "the icon opens the small menu")
+	for b in hud._menu.list.get_children():
+		if b is Button and String(b.get_meta("label")) == "Journal":
+			(b as Button).pressed.emit()
+	check(requested == ["journal"] and not hud._menu.is_open(), "the menu opens the journal (mouse users still have a way in)")
+
+	# Control hints follow the setting.
+	GameSettings.control_hints = GameSettings.HINTS_NEVER
+	hud._apply_interface_settings()
+	check(not hud.show_key_hint("journal") and not hud.is_key_hint_visible() and not hud.is_hint_strip_visible(), "Never: no key hints")
+	GameSettings.control_hints = GameSettings.HINTS_SOMETIMES
+	hud._apply_interface_settings()
+	check(hud.show_key_hint("journal") and hud.is_key_hint_visible() and hud._key_hint_label.text == "[J] Journal", "Sometimes: a brief contextual hint")
+	check(not hud.is_hint_strip_visible(), "Sometimes: no permanent strip")
+	GameSettings.control_hints = GameSettings.HINTS_ALWAYS
+	hud._apply_interface_settings()
+	check(hud.is_hint_strip_visible() and hud._hint_strip_label.text.contains("[H] Ask Lumi"), "Always: a small strip of keys")
+	GameSettings.control_hints = GameSettings.HINTS_SOMETIMES
+	hud._apply_interface_settings()
+
+	# Toasts: pickups within 2 s are grouped; at most 2 toasts at a time.
+	hud.show_pickup("pinecone", 5)
+	hud.show_pickup("mushroom", 4)
+	hud.show_pickup("pinecone", 1)
+	var texts := hud.toast_texts()
+	check(texts.size() == 1 and texts[0] == "+6 Pinecone, +4 Forest Mushroom", "pickups are grouped into one toast (%s)" % ", ".join(texts))
+	hud.show_toast("Waystone discovered")
+	hud.show_toast("Done: Fix the roof")
+	hud.show_banner("Hearthstone found!")
+	check(hud.toast_texts().size() == 2 and hud.toast_texts()[1] == "Hearthstone found!", "at most 2 toasts, the newest kept")
+	hud._update_toasts(2.1)
+	hud.show_pickup("branch", 2)
+	check(hud.toast_texts().has("+2 Fallen Branch"), "a later pickup starts a new toast")
+
+	# Region titles and toasts never cover the player.
+	hud.show_region_title("Frostbloom Highlands", "Soft snow, frost flowers and the aurora")
+	await get_tree().process_frame
+	hud._layout()
+	var player_rect := hud.player_screen_rect()
+	check(not hud.region_card_rect().intersects(player_rect), "the region title stays above the player")
+	check(not hud.toast_area_rect().intersects(player_rect), "toasts stay below the player")
+	check(hud.region_card_rect().end.y <= hud.get_viewport().get_visible_rect().size.y / 3.0 + 1.0, "the region title is in the upper third")
+
+	# The tracker fades while walking and returns on quest updates; the hotbar fades when unused.
+	GameSettings.hud_fade = true
+	hud.set_objective("Gather light")
+	hud.set_moving(true)
+	for i in 40:
+		hud._update_fades(0.25)
+	check(hud.tracker_alpha() < 0.7, "the tracker fades a little while walking")
+	check(hud.hotbar_alpha() < 0.5, "the hotbar fades when unused")
+	hud.set_progress("Light carried: 3")
+	hud.select_hotbar(1)
+	for i in 4:
+		hud._update_fades(0.25)
+	check(hud.tracker_alpha() > 0.95 and hud.hotbar_alpha() > 0.95, "a quest update and hotbar input bring them back")
+	GameSettings.quest_tracker_compact = true
+	hud._apply_interface_settings()
+	check(not hud._progress_row.visible, "the tracker can collapse to the title")
+	GameSettings.quest_tracker_compact = false
+	hud._apply_interface_settings()
+	hud.queue_free()
+
+	# In-world fishing: keyboard, mouse and gamepad, in every mode, with a larger fallback bar.
+	var spot := FishingSpot.new()
+	spot.water = "pond"
+	var pond_holder := Node2D.new()
+	add_child(pond_holder)
+	pond_holder.add_child(spot)
+	for mode: StringName in [AdaptiveComfortEngine.MODE_GENTLE, AdaptiveComfortEngine.MODE_BALANCED, AdaptiveComfortEngine.MODE_PLAYFUL]:
+		for device in ["keyboard", "mouse", "gamepad"]:
+			var panel := FishingPanel.new()
+			host.add_child(panel)
+			panel.setup(spot, "whispering_meadow", mode)
+			panel.skip_wait()
+			if panel.stage != FishingPanel.Stage.BITE:
+				check(false, "a fish bites (%s, %s)" % [mode, device])
+				panel.close_panel()
+				continue
+			var ev: InputEvent
+			match device:
+				"keyboard":
+					ev = InputEventAction.new()
+					(ev as InputEventAction).action = InputSetup.INTERACT
+					(ev as InputEventAction).pressed = true
+					panel._unhandled_input(ev)
+				"mouse":
+					ev = InputEventMouseButton.new()
+					(ev as InputEventMouseButton).button_index = MOUSE_BUTTON_LEFT
+					(ev as InputEventMouseButton).pressed = true
+					panel._on_view_input(ev)
+				"gamepad":
+					ev = InputEventJoypadButton.new()
+					(ev as InputEventJoypadButton).button_index = JOY_BUTTON_A
+					(ev as InputEventJoypadButton).pressed = true
+					panel._unhandled_input(ev)
+			var expected := FishingPanel.Stage.CAUGHT if mode == AdaptiveComfortEngine.MODE_GENTLE else FishingPanel.Stage.REEL
+			check(panel.stage == expected, "fishing reacts to the %s in %s mode" % [device, mode])
+			if panel.stage == FishingPanel.Stage.REEL:
+				for i in 400:
+					panel.fish_pos = panel.zone + panel.zone_width() / 2.0
+					panel._reel_step(0.05, false)
+					if panel.stage == FishingPanel.Stage.CAUGHT:
+						break
+				check(panel.stage == FishingPanel.Stage.CAUGHT, "the fish is caught, no fail state (%s, %s)" % [mode, device])
+			if device == "keyboard":
+				check(panel.bobber != null and panel.bobber.is_inside_tree() and not panel.get_children().any(func(c: Node) -> bool: return c is ColorRect), "the bobber is in the world and nothing dims it (%s)" % mode)
+			panel.close_panel()
+			await get_tree().process_frame
+	GameSettings.high_contrast = true
+	var large := FishingPanel.new()
+	host.add_child(large)
+	large.setup(spot, "whispering_meadow", AdaptiveComfortEngine.MODE_BALANCED)
+	check(large.is_large() and large.bar_size() == FishingPanel.LARGE_BAR_SIZE, "High contrast uses the larger fishing bar")
+	large.close_panel()
+	GameSettings.high_contrast = saved[6]
+	pond_holder.queue_free()
+
+	# Main menu: Continue / Start / Settings / About / Data & Privacy / Quit, no disclaimer.
+	var menu: Control = load("res://game/scenes/ui/main_menu.tscn").instantiate()
+	host.add_child(menu)
+	await get_tree().process_frame
+	var menu_text := _all_label_text(menu)
+	check(not menu_text.contains("not a medical"), "the disclaimer moved off the main menu")
+	var order := PackedStringArray()
+	for b in menu.find_children("*", "Button", true, false):
+		if (b as Button).visible:
+			order.append((b as Button).text)
+	var expected_order := ["Start Adventure", "Settings", "About", "Data & Privacy", "Quit Game"]
+	if SaveManager.most_recent_slot() > 0:
+		expected_order.push_front("Continue")
+	check(Array(order) == expected_order, "menu order: %s" % ", ".join(order))
+	check(menu.find_children("*", "Wordmark", true, false).size() == 1, "the drawn CALMQUEST wordmark")
+	menu.queue_free()
+	var about: Control = load("res://game/scenes/ui/about.tscn").instantiate()
+	host.add_child(about)
+	await get_tree().process_frame
+	var about_text := _all_label_text(about)
+	check(about_text.contains("It is not a medical, diagnostic or therapeutic tool."), "the About screen shows the disclaimer")
+	check(about_text.contains("Godot") and about_text.contains(SaveManager.GAME_VERSION), "About shows credits, licenses and the version")
+	check(_find_button(about, "How to Play") != null, "How to Play is reachable from About")
+	about.queue_free()
+	check(UiTheme.custom_font_path() != "" or GameSettings.ui_theme.default_font == null, "without a font file the default font is used")
+
+	# Display settings persist (and older settings files are migrated).
+	GameSettings.set_setting("window_mode", GameSettings.BORDERLESS)
+	GameSettings.set_setting("vsync", false)
+	GameSettings.set_setting("ui_scale_index", 3)
+	GameSettings.set_setting("control_hints", GameSettings.HINTS_ALWAYS)
+	GameSettings.window_mode = GameSettings.WINDOWED
+	GameSettings.vsync = true
+	GameSettings.ui_scale_index = 1
+	GameSettings.control_hints = GameSettings.HINTS_SOMETIMES
+	GameSettings.load_settings()
+	check(GameSettings.window_mode == GameSettings.BORDERLESS and not GameSettings.vsync and GameSettings.ui_scale_index == 3 and GameSettings.control_hints == GameSettings.HINTS_ALWAYS, "display and interface settings persist")
+	check(is_equal_approx(get_tree().root.content_scale_factor, 1.3), "the interface scale is applied")
+	var legacy := ConfigFile.new()
+	legacy.set_value(GameSettings.SECTION, "fullscreen", true)
+	legacy.save(TEST_SETTINGS)
+	GameSettings.load_settings()
+	check(GameSettings.window_mode == GameSettings.FULLSCREEN, "an older settings file with fullscreen on becomes Fullscreen")
+	GameSettings.set_setting("window_mode", saved[3])
+	GameSettings.set_setting("vsync", saved[4])
+	GameSettings.set_setting("ui_scale_index", saved[5])
+	GameSettings.control_hints = saved[0]
+	GameSettings.hud_fade = saved[1]
+	GameSettings.quest_tracker_compact = saved[2]
+	GameSettings.text_scale_index = saved[7]
+
+	# Every screen builds in Indonesian too.
+	GameSettings.set_setting("language", "id")
+	for scene in ["res://game/scenes/ui/main_menu.tscn", "res://game/scenes/ui/about.tscn", "res://game/scenes/ui/study_setup.tscn", "res://game/scenes/ui/check_in.tscn", "res://game/scenes/ui/slot_select.tscn"]:
+		var screen: Control = load(scene).instantiate()
+		host.add_child(screen)
+		await get_tree().process_frame
+		check(screen.is_inside_tree() and screen.get_child_count() > 0, "%s builds in Indonesian" % scene.get_file())
+		screen.queue_free()
+	for panel: Control in [SettingsPanel.new(), PrivacyPanel.new(), JournalPanel.new(), HowToPlayPanel.new(), MoodCheckCard.new(), ModeChoiceCard.new(), SessionClosingPanel.new()]:
+		host.add_child(panel)
+		await get_tree().process_frame
+		var heading := panel.find_children("*", "Label", true, false)
+		check(panel.get_child_count() > 0 and not heading.is_empty(), "%s builds in Indonesian" % panel.get_script().get_global_name())
+		panel.queue_free()
+	var hud_id := Hud.new()
+	add_child(hud_id)
+	await get_tree().process_frame
+	hud_id.show_pickup("pinecone", 2)
+	check(hud_id.toast_texts()[0] == "+2 Buah Pinus", "toasts are translated")
+	hud_id.queue_free()
+	GameSettings.set_setting("language", "en")
+	await get_tree().process_frame
 
 
 func _unlock_dialog(menu: Node) -> Control:

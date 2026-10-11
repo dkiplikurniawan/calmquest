@@ -1,13 +1,16 @@
 class_name FishingPanel
 extends Control
-## The gentle fishing minigame.
-##   1. Wait for a nibble (the line bobs; a ripple appears).
+## The gentle fishing minigame, shown in the world (0.4.0): the line and the
+## bobber are drawn in the water at the fishing spot, and a small, soft bar
+## sits just below the player. Nothing covers the world.
+##   1. Wait for a nibble (the bobber bobs; a ripple appears).
 ##   2. When a fish bites, press E / Space / click within a comfortable window.
 ##   3. Reel: hold E / Space / the mouse button to move the green zone right,
 ##      let go and it drifts left. Keep the fish inside the zone to fill the bar.
 ## Nothing is ever lost: a missed bite just swims away, and the bar never
 ## "fails". Gentle mode catches automatically after the bite; Playful is a
-## little livelier. Esc or "Done" leaves at any time.
+## little livelier. Esc or "Done" leaves at any time. With High contrast or a
+## larger text size the bar is bigger and clearer.
 
 signal closed
 signal caught(fish_id: String, result: Dictionary)
@@ -18,6 +21,10 @@ const BITE_WINDOW := {&"gentle": 4.0, &"balanced": 2.4, &"playful": 1.8}
 const ZONE_WIDTH := {&"gentle": 0.4, &"balanced": 0.32, &"playful": 0.24}
 const REEL_GAIN := 0.24
 const REEL_LOSS := 0.05
+const BAR_SIZE := Vector2(320, 40)
+const LARGE_BAR_SIZE := Vector2(460, 60)
+## The bar panel sits beside the player, this far from them.
+const BESIDE_PLAYER := 70.0
 
 var spot: FishingSpot
 var region: String = ""
@@ -28,6 +35,10 @@ var progress: float = 0.0
 var zone: float = 0.3
 var fish_pos: float = 0.5
 var last_result: Dictionary = {}
+## The player (for drawing the line from the rod); set by the world.
+var player_node: Node2D
+var bobber: Bobber
+var bar_panel: PanelContainer
 var _fish_target: float = 0.5
 var _retarget: float = 0.0
 var _timer: float = 0.0
@@ -46,27 +57,50 @@ func setup(s: FishingSpot, region_id: String, mode: StringName) -> void:
 	_rng.randomize()
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	UiKit.overlay(self)
-	var box := UiKit.centered_panel(self, 660)
-	box.add_child(UiKit.label("Fishing", UiTheme.HEADING))
-	_status = UiKit.label("", &"", true)
-	_status.custom_minimum_size = Vector2(600, 56)
-	box.add_child(_status)
+	# A transparent layer: a click anywhere acts, like E. The world stays visible.
+	mouse_filter = Control.MOUSE_FILTER_STOP
+	gui_input.connect(_on_view_input)
+	bar_panel = PanelContainer.new()
+	bar_panel.theme_type_variation = UiTheme.HUD_PANEL
+	add_child(bar_panel)
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 6)
+	bar_panel.add_child(box)
+	box.add_child(UiKit.label("Fishing", UiTheme.SUBTLE))
 	_view = Control.new()
-	_view.custom_minimum_size = Vector2(600, 170)
+	_view.custom_minimum_size = bar_size()
 	_view.mouse_filter = Control.MOUSE_FILTER_PASS
 	_view.draw.connect(_draw_view)
-	_view.gui_input.connect(_on_view_input)
 	box.add_child(_view)
+	_status = UiKit.label("", UiTheme.HUD, true)
+	_status.custom_minimum_size = Vector2(bar_size().x, 0)
+	box.add_child(_status)
 	# Buttons are for the mouse; on the keyboard E / Space act and Esc leaves,
 	# so a focused button can never swallow the reel key.
 	_again = UiKit.button("Keep fishing (E)", _start_wait, UiTheme.PRIMARY_BUTTON)
 	_again.visible = false
 	_again.focus_mode = Control.FOCUS_NONE
+	_again.custom_minimum_size.y = 40
 	var done := UiKit.button("Done (Esc)", close_panel)
 	done.focus_mode = Control.FOCUS_NONE
+	done.custom_minimum_size.y = 40
 	box.add_child(UiKit.hbox([_again, done]))
+	if spot != null and spot.is_inside_tree():
+		bobber = Bobber.new()
+		bobber.panel = self
+		spot.get_parent().add_child(bobber)
+		bobber.global_position = spot.global_position
 	_start_wait()
+
+
+## The accessibility fallback: a larger, clearer bar with High contrast or a
+## larger text size.
+func is_large() -> bool:
+	return GameSettings.high_contrast or GameSettings.text_scale_index >= 1
+
+
+func bar_size() -> Vector2:
+	return LARGE_BAR_SIZE if is_large() else BAR_SIZE
 
 
 func zone_width() -> float:
@@ -109,7 +143,24 @@ func _process(delta: float) -> void:
 			_timer -= delta
 			if _timer <= 0.0:
 				_start_wait()
+	_place_bar()
 	_view.queue_redraw()
+	if bobber != null:
+		bobber.queue_redraw()
+
+
+## Beside the player (right, or left near the screen edge), never over them.
+func _place_bar() -> void:
+	var view := get_viewport_rect().size
+	bar_panel.reset_size()
+	var p := view / 2.0
+	if player_node != null and is_instance_valid(player_node) and player_node.is_inside_tree():
+		p = player_node.get_global_transform_with_canvas().origin + Vector2(0, -40)
+	var x := p.x + BESIDE_PLAYER
+	if x + bar_panel.size.x > view.x - 16.0:
+		x = p.x - BESIDE_PLAYER - bar_panel.size.x
+	var y := clampf(p.y - bar_panel.size.y / 2.0, 16.0, view.y - bar_panel.size.y - 16.0)
+	bar_panel.position = Vector2(x, y)
 
 
 func _bite() -> void:
@@ -213,6 +264,11 @@ func close_panel() -> void:
 	queue_free()
 
 
+func _exit_tree() -> void:
+	if bobber != null and is_instance_valid(bobber):
+		bobber.queue_free()
+
+
 func _on_view_input(event: InputEvent) -> void:
 	if event is InputEventMouseButton and (event as InputEventMouseButton).pressed and (event as InputEventMouseButton).button_index == MOUSE_BUTTON_LEFT:
 		press()
@@ -227,38 +283,67 @@ func _unhandled_input(event: InputEvent) -> void:
 		press()
 
 
+## The small tension bar near the player.
 func _draw_view() -> void:
 	var size := _view.size
-	var water := Rect2(Vector2.ZERO, Vector2(size.x, size.y - 50))
-	_view.draw_rect(water, Palette.WATER_DEEP)
-	for i in 4:
-		var y := 18.0 + i * 26.0
-		var x := fposmod(_t * 20.0 * GameSettings.motion_scale() + i * 90.0, size.x + 80.0) - 40.0
-		_view.draw_line(Vector2(x, y), Vector2(x + 40, y), Palette.with_alpha(Palette.IVORY, 0.35), 2.0)
-	# Line and bobber.
-	var bob := Vector2(size.x * 0.5, water.size.y * 0.5)
-	var dip := 0.0
-	if stage == Stage.WAIT:
-		dip = sin(_t * 2.0) * 3.0
-	elif stage == Stage.BITE:
-		dip = 8.0 + sin(_t * 18.0) * 4.0
-	_view.draw_line(Vector2(size.x * 0.5, 0), bob + Vector2(0, dip), Palette.with_alpha(Palette.IVORY, 0.8), 1.5)
-	_view.draw_circle(bob + Vector2(0, dip), 9.0, Color("#e9867a"))
-	_view.draw_circle(bob + Vector2(0, dip - 4), 5.0, Palette.IVORY)
-	if stage == Stage.BITE:
-		var k := fposmod(_t * 2.0, 1.0)
-		_view.draw_arc(bob + Vector2(0, 8), 14.0 + k * 30.0, 0.0, TAU, 24, Palette.with_alpha(Palette.IVORY, 1.0 - k), 2.0)
-		_view.draw_string(get_theme_default_font(), bob + Vector2(18, -14), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 30, Palette.GOLD)
-	# Reel bar.
-	var bar := Rect2(Vector2(20, size.y - 40), Vector2(size.x - 40, 26))
-	_view.draw_rect(bar, Palette.with_alpha(Palette.NIGHT_DEEP, 0.5))
-	if stage == Stage.REEL:
-		var z := Rect2(bar.position + Vector2(bar.size.x * zone, 0), Vector2(bar.size.x * zone_width(), bar.size.y))
-		_view.draw_rect(z, Palette.with_alpha(Palette.MINT, 0.85))
-		_view.draw_rect(z, Palette.SAGE_DARK, false, 2.0)
-		var fx := bar.position.x + bar.size.x * fish_pos
-		ItemArt.draw(_view, Vector2(fx, bar.get_center().y), 24.0, fish_id)
-		var p := Rect2(Vector2(bar.position.x, bar.position.y - 12), Vector2(bar.size.x * progress, 6))
-		_view.draw_rect(p, Palette.GOLD)
-	elif stage == Stage.CAUGHT:
-		ItemArt.draw(_view, bob + Vector2(0, -10), 56.0, fish_id)
+	var large := is_large()
+	var bar := Rect2(Vector2(0, size.y * 0.35), Vector2(size.x, size.y * 0.65))
+	_view.draw_rect(bar, Palette.with_alpha(Palette.NIGHT_DEEP, 0.75 if large else 0.5))
+	if large:
+		_view.draw_rect(bar, Palette.INK, false, 2.0)
+	match stage:
+		Stage.REEL:
+			var z := Rect2(bar.position + Vector2(bar.size.x * zone, 0), Vector2(bar.size.x * zone_width(), bar.size.y))
+			_view.draw_rect(z, Palette.with_alpha(Palette.MINT, 0.9))
+			_view.draw_rect(z, Palette.SAGE_DARK, false, 3.0 if large else 2.0)
+			var fx := bar.position.x + bar.size.x * fish_pos
+			ItemArt.draw(_view, Vector2(fx, bar.get_center().y), bar.size.y * 0.85, fish_id)
+			_view.draw_rect(Rect2(Vector2(0, 0), Vector2(size.x * progress, size.y * 0.22)), Palette.GOLD)
+			_view.draw_rect(Rect2(Vector2(0, 0), Vector2(size.x, size.y * 0.22)), Palette.with_alpha(Palette.INK, 0.4), false, 1.0)
+		Stage.BITE:
+			var k := 0.5 + 0.5 * sin(_t * 10.0)
+			_view.draw_rect(bar, Palette.with_alpha(Palette.GOLD_SOFT, 0.25 + 0.35 * k))
+			_view.draw_string(get_theme_default_font(), bar.get_center() + Vector2(-6, 10), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, int(bar.size.y * 0.9), Palette.GOLD)
+		Stage.CAUGHT:
+			ItemArt.draw(_view, bar.get_center(), bar.size.y * 0.9, fish_id)
+
+
+## The line and the bobber in the water at the fishing spot (world space).
+## Keeps animating while the world is paused for the minigame.
+class Bobber extends Node2D:
+	var panel: FishingPanel
+
+	func _init() -> void:
+		process_mode = Node.PROCESS_MODE_ALWAYS
+		z_index = 5
+
+	func _draw() -> void:
+		if panel == null or not is_instance_valid(panel):
+			return
+		var t := panel._t
+		var dip := 0.0
+		match panel.stage:
+			FishingPanel.Stage.WAIT:
+				dip = sin(t * 2.0) * 3.0 * GameSettings.motion_scale()
+			FishingPanel.Stage.BITE:
+				dip = 7.0 + sin(t * 18.0) * 4.0 * maxf(GameSettings.motion_scale(), 0.4)
+		var bob := Vector2(0, dip)
+		# The line from the rod tip (just above the player's hand) to the bobber.
+		var tip := Vector2(0, -160)
+		if panel.player_node != null and is_instance_valid(panel.player_node):
+			tip = to_local(panel.player_node.global_position + Vector2(16 if panel.player_node.global_position.x < global_position.x else -16, -46))
+		var mid := (tip + bob) / 2.0 + Vector2(0, 18)
+		draw_polyline(PackedVector2Array([tip, mid, bob]), Palette.with_alpha(Palette.IVORY, 0.85), 1.5, true)
+		# Soft ripples around the bobber.
+		for i in 2:
+			var k := fposmod(t * 0.6 * maxf(GameSettings.motion_scale(), 0.4) + i * 0.5, 1.0)
+			draw_arc(bob + Vector2(0, 6), 10.0 + k * 26.0, 0.0, TAU, 24, Palette.with_alpha(Palette.IVORY, 0.45 * (1.0 - k)), 1.5, true)
+		draw_circle(bob, 8.0, Color("#e9867a"))
+		draw_circle(bob + Vector2(0, -4), 4.5, Palette.IVORY)
+		draw_arc(bob, 8.0, 0.0, TAU, 16, Palette.INK, 1.2, true)
+		if panel.stage == FishingPanel.Stage.BITE:
+			var k := fposmod(t * 2.0, 1.0)
+			draw_arc(bob + Vector2(0, 8), 14.0 + k * 30.0, 0.0, TAU, 24, Palette.with_alpha(Palette.IVORY, 1.0 - k), 2.0)
+			draw_string(ThemeDB.fallback_font, bob + Vector2(14, -16), "!", HORIZONTAL_ALIGNMENT_LEFT, -1, 30, Palette.GOLD)
+		elif panel.stage == FishingPanel.Stage.CAUGHT:
+			ItemArt.draw(self, bob + Vector2(0, -34), 44.0, panel.fish_id)

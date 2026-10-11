@@ -485,5 +485,5 @@ func grant_hearthstone(id: String) -> void:
 		if left > 0:
 			GameState.storage.add(item, left)
 	GameState.add_counter("hearthstones")
-	overworld.hud.show_toast("Hearthstone found!")
+	overworld.hud.show_banner("Hearthstone found!")
 	SaveManager.autosave("found a Hearthstone")

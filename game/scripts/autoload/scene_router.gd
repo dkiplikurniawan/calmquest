@@ -15,6 +15,7 @@ const SLOT_SELECT := "res://game/scenes/ui/slot_select.tscn"
 const REFLECTION := "res://game/scenes/ui/reflection.tscn"
 const RESULTS := "res://game/scenes/ui/results.tscn"
 const STUDY_SETUP := "res://game/scenes/ui/study_setup.tscn"
+const ABOUT := "res://game/scenes/ui/about.tscn"
 
 var _fade: ColorRect
 var _busy: bool = false

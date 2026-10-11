@@ -17,6 +17,11 @@ const COMPLETION_DELAY := 1.4
 const MODAL_INPUT_BLOCK := 0.25
 const RESTORATION_SECONDS := 6.0
 const TRAVEL_OFFSET := Vector2(0, 90)
+## Gentle mode shows soft markers on at most this many objects besides the target.
+const MAX_NEARBY_MARKERS := 2
+## Seconds without input before an idle key hint (Settings > Interface: Sometimes).
+const IDLE_HINT_SECONDS := 45.0
+const IDLE_HINTS := ["hint", "journal", "map", "pause"]
 const TARGET_NAMES := {
 	"heart_tree": "the Heart Tree", "ws_grove": "the grove's waystone", "lantern_shrine": "the Lantern Shrine",
 	"ws_creek": "the creek's waystone", "creek_puzzle": "the crystal puzzle", "moon_altar": "the moon altar",
@@ -60,6 +65,9 @@ var _shown_language: String = ""
 var current_sublevel: String = ""
 ## Seconds since the last progress, for Lumi's optional nudges (hint frequency).
 var idle_progress_seconds: float = 0.0
+## Seconds since the last key or button press (for idle key hints).
+var idle_input_seconds: float = 0.0
+var _idle_hint_index: int = 0
 const NUDGE_SECONDS := {1: 600.0, 2: 300.0, 3: 150.0}
 
 
@@ -167,6 +175,9 @@ func _connect_signals() -> void:
 	hud.hint_requested.connect(_request_hint)
 	hud.journal_requested.connect(_open_journal)
 	hud.pause_requested.connect(_open_pause)
+	hud.map_requested.connect(func() -> void:
+		if not _modal_open:
+			open_map())
 	pause_menu.resume_requested.connect(_close_pause)
 	pause_menu.mode_requested.connect(_on_mode_requested)
 	pause_menu.guidance_toggled.connect(func(on: bool) -> void: SessionState.engine.set_guidance_enabled(on))
@@ -233,6 +244,9 @@ func _apply_pending_player() -> void:
 
 func _process(delta: float) -> void:
 	ViewCull.view = camera.screen_world_rect()
+	hud.set_moving(player.velocity.length() > 20.0)
+	hud.set_player_screen_position(player.get_global_transform_with_canvas().origin)
+	_update_idle_hint(delta)
 	_update_nudge(delta)
 	ItemConsumer.Buffs.tick(delta)
 	player.speed_bonus = 1.15 if ItemConsumer.Buffs.has("easy_stroll") else 1.0
@@ -311,6 +325,8 @@ func _enter_region(region: String) -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey or event is InputEventJoypadButton or event is InputEventMouseButton:
+		idle_input_seconds = 0.0
 	if _modal_open:
 		return
 	if event.is_action_pressed(InputSetup.PAUSE):
@@ -430,13 +446,22 @@ func _update_guidance() -> void:
 		arrow.set_target(pos)
 
 
+## Gentle mode's soft markers: only on the few nearest objects within reach
+## (the golden ring is always only on the one the player would use).
 func _update_markers() -> void:
 	var config := SessionState.get_config()
 	var limit := config.interaction_radius * MARKER_RADIUS_FACTOR
+	var candidates: Array = []
 	for node in get_tree().get_nodes_in_group(Interactable.GROUP):
 		var it := node as Interactable
-		var near := player.global_position.distance_to(it.get_interaction_point()) - it.reach_bonus < limit
-		it.set_marker_visible(config.show_nearby_markers and near and it.can_interact())
+		var gap := player.global_position.distance_to(it.get_interaction_point()) - it.reach_bonus
+		if config.show_nearby_markers and gap < limit and it.can_interact() and it != player.current_target:
+			candidates.append([gap, it])
+		else:
+			it.set_marker_visible(false)
+	candidates.sort_custom(func(a: Array, b: Array) -> bool: return float(a[0]) < float(b[0]))
+	for i in candidates.size():
+		(candidates[i][1] as Interactable).set_marker_visible(i < MAX_NEARBY_MARKERS)
 
 
 func _update_compass() -> void:
@@ -484,6 +509,38 @@ func _refresh_hud() -> void:
 
 func _on_target_changed(target: Interactable) -> void:
 	hud.set_prompt("" if target == null else target.get_prompt())
+	if target != null:
+		maybe_key_hint("interact")
+
+
+# =============================================================================
+# Contextual key hints (Settings > Interface > Show control hints)
+# =============================================================================
+
+## Shows a key hint the first time a control becomes useful in this journey
+## (only when the setting is "Sometimes"; "Always" shows a strip instead).
+func maybe_key_hint(id: String) -> bool:
+	if GameSettings.control_hints != GameSettings.HINTS_SOMETIMES:
+		return false
+	var seen := GameState.system_state("ui_hints")
+	if seen.has(id):
+		return false
+	if hud.show_key_hint(id):
+		seen[id] = true
+		return true
+	return false
+
+
+## After a while without any input, one gentle reminder (rotating).
+func _update_idle_hint(delta: float) -> void:
+	idle_input_seconds += delta
+	if idle_input_seconds < IDLE_HINT_SECONDS or GameSettings.control_hints != GameSettings.HINTS_SOMETIMES:
+		return
+	idle_input_seconds = 0.0
+	if hud.is_dialogue_visible():
+		return
+	hud.show_key_hint(IDLE_HINTS[_idle_hint_index % IDLE_HINTS.size()])
+	_idle_hint_index += 1
 
 
 func _on_interaction_attempted(success: bool, nearest_distance: float) -> void:
@@ -618,6 +675,11 @@ func _on_gather(g: Gatherable) -> void:
 
 func _on_item_gained(item_id: String, qty: int) -> void:
 	hud.show_pickup(item_id, qty)
+	if item_id != SessionState.LUMA_LIGHT:
+		if ItemDB.category(item_id) == "food":
+			maybe_key_hint("use")
+		else:
+			maybe_key_hint("bag")
 	if GameState.counter("obtained:" + item_id) == qty and item_id != SessionState.LUMA_LIGHT:
 		lumi.react()
 		hud.show_toast(L.t("New: %s") % ItemDB.display_name(item_id))
@@ -811,6 +873,9 @@ func _update_nudge(delta: float) -> void:
 		return
 	lumi.react()
 	hud.show_dialogue("(%s) %s" % [QuestManager.tracked_step_text(), hint], 7.0)
+	# Lumi has a hint: remind the player which key asks for more.
+	if GameSettings.control_hints == GameSettings.HINTS_SOMETIMES:
+		hud.show_key_hint("hint")
 
 
 ## A new morning: announce the weather once (rain waters every crop).
@@ -885,6 +950,7 @@ func open_fishing(spot: FishingSpot) -> void:
 		hud.show_dialogue("Fish are rising here. A fishing rod (the fisher's notes by the creek explain how) would let you try.", 5.0)
 		return
 	var panel := FishingPanel.new()
+	panel.player_node = player
 	_open_overlay(panel)
 	panel.setup(spot, world.region_at(spot.global_position), SessionState.get_config().mode_id)
 	panel.closed.connect(func() -> void:
@@ -961,6 +1027,7 @@ func _open_overlay(panel: Control) -> void:
 	_set_modal(true)
 	_overlay = panel
 	hud.add_overlay(panel)
+	hud.set_prompt("")
 	var activity := StudyMode.activity_for(panel)
 	if not activity.is_empty():
 		StudyMode.log_event("activity_started", activity)
@@ -970,6 +1037,7 @@ func _open_overlay(panel: Control) -> void:
 func _close_overlay() -> void:
 	_overlay = null
 	_set_modal(false)
+	_on_target_changed(player.current_target if is_instance_valid(player.current_target) else null)
 
 
 func _set_modal(open: bool) -> void:

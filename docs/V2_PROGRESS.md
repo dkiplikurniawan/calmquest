@@ -395,3 +395,59 @@ Instructions: `CALMQUEST_POLISH_PROMPT_V3.md`. Work happens on the git branch `p
 - The Data & Privacy and How to Play texts now say that the 0-10 check-in belongs to Study Mode, and they describe the mood check and journal.
 
 **Tests:** 19 new unit tests (`test_wellbeing.gd`, `test_study_mode.gd`), 33 new UI checks (main menu unlock, Study setup, mood card, closing panel, Settings, Journal tab, and a real world with the start cards), and 8 new Python tests (`test_analyze_study.py`). The Indonesian catalog has 117 new entries in `game/data/i18n/id/polish.json`, and 8 entries for removed texts were deleted.
+
+### P2 - HUD and UI cleanup
+
+**HUD** (`hud.gd` rewritten, same public API, so the world, the tests and the capture tool needed no changes):
+- **The always-visible buttons are gone** ("Mode: Gentle", "Ask Lumi (H)", "Journal (J)", "Pause (Esc)"). Mouse users get a small menu icon in the top-right that fades in when the mouse moves. It opens Ask Lumi, Journal, Map and Pause, and shows the mode and the clock.
+- **Contextual key hints** (Settings > Interface: Always / Sometimes / Never, default Sometimes):
+  - when a control first becomes useful in a journey (interact, bag, use, build, journal, map; remembered in the world save);
+  - when Lumi's nudge fires;
+  - after 45 seconds without input.
+  - The hints always show the current (possibly remapped) key.
+- **Time:** a small sun/moon arc with the day number replaces "Day 12 11:31". The exact clock is in the mouse menu.
+- **Quest tracker:** a compact title, step and guidance line (the old separate compass panel is merged in). It fades to 55% while walking and returns fully on quest updates. It can collapse to the title.
+- **The hotbar** fades to 35% after 6 s unused and returns on any hotbar input.
+- **Toasts:**
+  - pickups within 2 s merge into one toast ("+6 Pinecone, +4 Forest Mushroom"), and at most 2 toasts show;
+  - they are placed below the player, or above them when the prompt area is in the way, using the player's real screen position (the camera is clamped inside rooms and at the world's edge);
+  - large banners are kept for five major moments.
+- **Region titles** sit in the upper part, below the tracker if they would touch it, and never over the player.
+- **Rings:** the golden ring was already only on the one target. Gentle's soft markers are now limited to the 2 nearest objects within reach (they used to mark every object within reach).
+- **The prompt** is hidden while an overlay is open.
+
+**Fishing in the world:** `FishingPanel` keeps its logic and API (no fail state, Gentle auto-catch, keyboard, mouse and gamepad). It no longer dims or covers the world: a bobber with ripples and a line from the player's hand sits in the water, and a small bar sits beside the player. The bar is larger, with an outline, with High contrast or a larger text size.
+
+**Main menu and About:**
+- The menu order is Continue (the most recently saved journey, when one exists), Start Adventure, Settings, About, Data & Privacy, Quit.
+- The title is a drawn **wordmark** with Lumi as the light motif.
+- The backdrop has three parallax layers of isles, fireflies, and a dusk/twilight drift over 150 s that holds still with *Reduce motion*.
+- **About** has the disclaimer (moved off the main menu), the credits (from `game/data/credits.json`), the licenses, the version and *How to Play*. How to Play is also in the pause menu now.
+- The developer name in `credits.json` is currently the repository's git user name ("dkiplikurniawan"). Replace it with the name players should see.
+
+**Settings:**
+- *Display:* Window (Windowed / Fullscreen / Borderless; older files with only `fullscreen` are migrated), resolution, VSync, and interface scale 90-130 % (the canvas scales and the world camera zooms out by the same factor, so only the interface grows).
+- *Interface:* control hints, HUD fade, and the compact tracker.
+
+**Font:** `assets/fonts/` has no font file. As the prompt says, it was not downloaded. `UiTheme` uses Nunito or Quicksand automatically once the file is there (`assets/fonts/README.md` lists the exact files and `OFL.txt`). Until then the default font is used, and a test checks that fallback.
+
+**Found in screenshot review:**
+- toasts covered the player inside the cottage (the camera is clamped there);
+- the fishing bar covered the toasts and the old prompt;
+- "B: Build mode" was shown twice;
+- the day label was under the arc;
+- the region title touched the tracker.
+
+All were fixed and checked again in screenshots.
+
+**Tests:**
+- 65 new UI checks (137 in total):
+  - no visible key buttons, the mouse menu, the three hint settings;
+  - grouped toasts and the cap of 2, and toasts and titles avoiding the player;
+  - tracker and hotbar fades, and the compact tracker;
+  - rings with 5 probe objects (exactly 2 Gentle markers on the nearest, none in Balanced);
+  - fishing with keyboard, mouse and gamepad in all three modes (18 runs) plus the large bar;
+  - the menu order, the wordmark, About and the disclaimer, the font fallback;
+  - display settings persistence and migration;
+  - every screen and panel built in Indonesian.
+- The unit, smoke (656) and overworld (378) tests needed no changes.

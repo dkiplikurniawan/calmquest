@@ -1,5 +1,8 @@
 extends Control
-## Main menu: Start Adventure, How to Play, Settings, Data & Privacy, Quit.
+## Main menu: Continue (when a journey exists), Start Adventure, Settings,
+## About, Data & Privacy, Quit. The disclaimer, credits and How to Play live on
+## the About screen; a tiny version label stays here (7 clicks on it open the
+## Study Mode unlock).
 
 ## Clicks on the version label within this many seconds count toward the unlock.
 const UNLOCK_WINDOW_SECONDS := 4.0
@@ -7,6 +10,7 @@ const UNLOCK_WINDOW_SECONDS := 4.0
 var _buttons: VBoxContainer
 var _first_button: Button
 var _status: Label
+var continue_button: Button
 var version_label: Label
 var study_badge: Label
 var _version_clicks: int = 0
@@ -21,42 +25,39 @@ func _ready() -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(center)
 	var column := VBoxContainer.new()
-	column.add_theme_constant_override("separation", 10)
+	column.add_theme_constant_override("separation", 8)
 	column.custom_minimum_size.x = 420
 	center.add_child(column)
 
-	var title := UiKit.label("CALMQUEST", UiTheme.TITLE)
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	var title := Wordmark.new(int(72 * GameSettings.get_text_scale()))
+	title.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	column.add_child(title)
 	var subtitle := UiKit.label("The Lost Light", UiTheme.LIGHT)
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(subtitle)
-	column.add_child(UiKit.spacer(18))
+	column.add_child(UiKit.spacer(16))
 
 	_buttons = VBoxContainer.new()
 	_buttons.add_theme_constant_override("separation", 10)
 	column.add_child(_buttons)
-	_first_button = UiKit.button("Start Adventure", _start, UiTheme.PRIMARY_BUTTON)
-	_buttons.add_child(_first_button)
-	_buttons.add_child(UiKit.button("How to Play", func() -> void: _open_overlay(HowToPlayPanel.new())))
+	var latest := SaveManager.most_recent_slot()
+	if latest > 0 and not StudyMode.is_active():
+		continue_button = UiKit.button("Continue", func() -> void: _continue(latest), UiTheme.PRIMARY_BUTTON)
+		_buttons.add_child(continue_button)
+	var start := UiKit.button("Start Adventure", _start, &"" if continue_button != null else UiTheme.PRIMARY_BUTTON)
+	_buttons.add_child(start)
+	_first_button = continue_button if continue_button != null else start
 	_buttons.add_child(UiKit.button("Settings", func() -> void: _open_overlay(SettingsPanel.new())))
+	_buttons.add_child(UiKit.button("About", func() -> void: SceneRouter.go_to(SceneRouter.ABOUT)))
 	_buttons.add_child(UiKit.button("Data & Privacy", func() -> void: _open_overlay(PrivacyPanel.new())))
 	if not OS.has_feature("web"):
 		_buttons.add_child(UiKit.button("Quit Game", _quit))
 
-	column.add_child(UiKit.spacer(10))
+	column.add_child(UiKit.spacer(8))
 	_status = UiKit.label("", UiTheme.LIGHT, true)
 	_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	column.add_child(_status)
 	_show_last_save_status()
-
-	var footer := UiKit.label("A cozy, well-being-oriented game prototype. It is not a medical, diagnostic or therapeutic tool.", UiTheme.LIGHT, true)
-	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	footer.set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
-	footer.offset_top = -56
-	footer.offset_bottom = -16
-	footer.add_theme_font_size_override("font_size", int(15 * GameSettings.get_text_scale()))
-	add_child(footer)
 
 	# A tiny version label. Clicking it 7 times opens the Study Mode unlock.
 	version_label = UiKit.label("v" + SaveManager.GAME_VERSION, UiTheme.LIGHT)
@@ -110,8 +111,21 @@ static func start_target() -> String:
 	return SceneRouter.STUDY_SETUP if StudyMode.is_active() else SceneRouter.SLOT_SELECT
 
 
+## Continue: the most recently saved journey, with its own mode (and the
+## optional mood check), straight into the world.
+func _continue(slot: int) -> void:
+	var mode := StringName(String(SaveManager.load_slot(slot).get("mode", String(AdaptiveComfortEngine.DEFAULT_MODE))))
+	load("res://game/scripts/ui/slot_select.gd").call("start_play_session", mode, false)
+	SaveManager.current_slot = slot
+	SaveManager.reload_current()
+	GameSettings.set_setting("last_slot", slot)
+	SceneRouter.go_to(SceneRouter.OVERWORLD)
+
+
 func _refresh_study_badge() -> void:
 	study_badge.visible = StudyMode.is_active()
+	if continue_button != null:
+		continue_button.visible = not StudyMode.is_active()
 
 
 func _on_version_input(event: InputEvent) -> void:

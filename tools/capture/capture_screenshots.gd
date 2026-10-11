@@ -10,6 +10,7 @@ extends Node
 ## Another language (for checking translations and text overflow), saved to
 ## screenshots/<code>/ without changing the player's settings:
 ##   godot --path . res://tools/capture/capture_screenshots.tscn -- --lang=id
+## A different output folder (absolute path): -- --out=C:/somewhere
 
 const BASE_OUT_DIR := "res://screenshots"
 const OVERWORLD := "res://game/scenes/world/overworld.tscn"
@@ -26,11 +27,18 @@ func _ready() -> void:
 	get_tree().root.add_child.call_deferred(placeholder)
 	await get_tree().process_frame
 	get_tree().current_scene = placeholder
+	# English unless --lang asks otherwise (the player's own language setting is
+	# not used, and nothing is saved).
+	L.set_language("en")
 	for arg in OS.get_cmdline_user_args():
 		if arg.begins_with("--lang=") and L.LANGUAGES.has(arg.trim_prefix("--lang=")):
 			L.set_language(arg.trim_prefix("--lang="))
 	if L.current() != "en":
 		out_dir = "%s/%s" % [BASE_OUT_DIR, L.current()]
+	# --out=<folder> writes somewhere else (e.g. a scratch folder for a quick look).
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("--out="):
+			out_dir = arg.trim_prefix("--out=")
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(out_dir))
 	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path("user://capture_tmp"))
 	SessionState.progress = ProgressStore.new("user://capture_tmp/progress.cfg")

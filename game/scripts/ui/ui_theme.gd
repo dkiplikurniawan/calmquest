@@ -18,6 +18,15 @@ const PRIMARY_BUTTON := &"PrimaryButton"
 const MODE_BUTTON := &"ModeButton"
 const DIALOGUE_PANEL := &"DialoguePanel"
 const HUD_PANEL := &"HudPanel"
+## An open-license (SIL OFL) rounded font, used when its file is present in
+## assets/fonts/ (see assets/fonts/README.md). Otherwise Godot's default font
+## is used. The first file found wins.
+const FONT_CANDIDATES: PackedStringArray = [
+	"res://assets/fonts/Nunito-VariableFont_wght.ttf",
+	"res://assets/fonts/Nunito-Regular.ttf",
+	"res://assets/fonts/Quicksand-VariableFont_wght.ttf",
+	"res://assets/fonts/Quicksand-Regular.ttf",
+]
 
 
 static func build(text_scale: float = 1.0, high_contrast: bool = false) -> Theme:
@@ -29,6 +38,9 @@ static func build(text_scale: float = 1.0, high_contrast: bool = false) -> Theme
 	var fs := func(px: float) -> int: return int(round(px * text_scale))
 
 	t.default_font_size = fs.call(BASE_FONT_SIZE)
+	var font := custom_font()
+	if font != null:
+		t.default_font = font
 
 	# --- Labels ---------------------------------------------------------------
 	t.set_color("font_color", "Label", ink)
@@ -130,6 +142,24 @@ static func build(text_scale: float = 1.0, high_contrast: bool = false) -> Theme
 	t.set_color("font_hovered_color", "TabContainer", ink)
 	t.set_constant("side_margin", "TabContainer", 0)
 	return t
+
+
+## The path of the custom font in use, or "" (the default font is used).
+static func custom_font_path() -> String:
+	for path in FONT_CANDIDATES:
+		if ResourceLoader.exists(path) or FileAccess.file_exists(path):
+			return path
+	return ""
+
+
+static func custom_font() -> Font:
+	var path := custom_font_path()
+	if path.is_empty():
+		return null
+	var font := load(path) as Font
+	if font == null:
+		push_warning("UiTheme: %s could not be loaded; using the default font." % path)
+	return font
 
 
 static func _label_variation(t: Theme, type_name: StringName, size: int, color: Color, outline: Color, outline_size: int) -> void:

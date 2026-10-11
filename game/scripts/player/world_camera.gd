@@ -51,8 +51,10 @@ func snap() -> void:
 	reset_smoothing()
 
 
+## The UI scale enlarges the whole canvas; the camera zooms out by the same
+## factor so the world itself is shown at the same size.
 func _wanted_zoom() -> float:
-	return DEFAULT_ZOOM if GameSettings.reduced_camera_motion else target_zoom
+	return (DEFAULT_ZOOM if GameSettings.reduced_camera_motion else target_zoom) / GameSettings.ui_scale()
 
 
 func _process(delta: float) -> void:

@@ -21,6 +21,11 @@ SKIP_DIRS = {".godot", ".git", "analysis", "data", "docs"}
 # listed here explicitly so every other reference is still required.
 OPTIONAL = {
     "res://build_commit.txt",  # written by a build script; Study Mode leaves git_commit empty without it
+    # An OFL font the developer adds (assets/fonts/README.md); the default font is used without it.
+    "res://assets/fonts/Nunito-VariableFont_wght.ttf",
+    "res://assets/fonts/Nunito-Regular.ttf",
+    "res://assets/fonts/Quicksand-VariableFont_wght.ttf",
+    "res://assets/fonts/Quicksand-Regular.ttf",
 }
 
 

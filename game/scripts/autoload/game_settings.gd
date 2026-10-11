@@ -18,9 +18,22 @@ const KEYS: PackedStringArray = [
 	"day_length_minutes", "time_mode", "gentle_clock", "autosave_minutes", "last_slot",
 	"ambience_volume", "ui_volume", "music_mode", "hint_frequency", "weather_effects", "captions", "key_bindings",
 	"language", "mood_check", "session_summary", "mood_journal", "study_mode",
+	"control_hints", "hud_fade", "quest_tracker_compact", "window_mode", "vsync", "ui_scale_index",
 ]
 
 const MUSIC_MODE_NAMES: PackedStringArray = ["Continuous music", "Music with quiet pauses", "Music off"]
+## Settings > Interface > Show control hints.
+const HINTS_ALWAYS := 0
+const HINTS_SOMETIMES := 1
+const HINTS_NEVER := 2
+const CONTROL_HINT_NAMES: PackedStringArray = ["Always", "Sometimes", "Never"]
+## Settings > Display > Window.
+const WINDOWED := 0
+const FULLSCREEN := 1
+const BORDERLESS := 2
+const WINDOW_MODE_NAMES: PackedStringArray = ["Windowed", "Fullscreen", "Borderless"]
+## Settings > Display > UI scale (the world is shown at the same size).
+const UI_SCALES: Array[float] = [0.9, 1.0, 1.15, 1.3]
 const HINT_FREQUENCY_NAMES: PackedStringArray = ["Off", "Rare", "Normal", "Helpful"]
 
 var master_volume: float = 0.8
@@ -78,6 +91,17 @@ var mood_check: bool = true
 var session_summary: bool = true
 ## Well-being: keep the mood faces and summaries in user://wellbeing_journal.json (opt-in).
 var mood_journal: bool = false
+## Interface: key hints Always / Sometimes (when learning, idle, Lumi's hints) / Never.
+var control_hints: int = HINTS_SOMETIMES
+## Interface: the quest tracker fades while walking and the hotbar when unused.
+var hud_fade: bool = true
+## Interface: show only the quest title in the tracker.
+var quest_tracker_compact: bool = false
+## Display: windowed, fullscreen or borderless (replaces the old fullscreen
+## switch, which is kept in sync for older settings files).
+var window_mode: int = WINDOWED
+var vsync: bool = true
+var ui_scale_index: int = 1
 ## Study Mode unlocked from the main menu (kept until "Leave Study Mode").
 ## The command-line flag --study turns it on for one run only (StudyMode.cli_active).
 var study_mode: bool = false
@@ -109,6 +133,9 @@ func load_settings() -> void:
 	for key in KEYS:
 		if cfg.has_section_key(SECTION, key):
 			set(key, cfg.get_value(SECTION, key))
+	# Settings saved before 0.4.0 only had the fullscreen switch.
+	if not cfg.has_section_key(SECTION, "window_mode"):
+		window_mode = FULLSCREEN if bool(fullscreen) else WINDOWED
 	_sanitize()
 
 
@@ -130,8 +157,10 @@ func set_setting(key: String, value: Variant) -> void:
 		push_warning("GameSettings: unknown setting '%s'." % key)
 		return
 	set(key, value)
+	if key == "fullscreen":
+		window_mode = FULLSCREEN if bool(value) else (WINDOWED if window_mode == FULLSCREEN else window_mode)
 	_sanitize()
-	if key in ["fullscreen", "window_size_index"]:
+	if key in ["fullscreen", "window_size_index", "window_mode", "vsync", "ui_scale_index"]:
 		apply_display()
 	if key in ["text_scale_index", "high_contrast"]:
 		apply_theme()
@@ -164,14 +193,28 @@ func apply_theme() -> void:
 		(node as Control).theme = ui_theme
 
 
+func ui_scale() -> float:
+	return UI_SCALES[ui_scale_index]
+
+
 func apply_display() -> void:
+	# UI scale: the whole canvas is scaled and the world camera zooms out by
+	# the same amount (WorldCamera), so only the interface gets bigger.
+	get_tree().root.content_scale_factor = ui_scale()
 	if DisplayServer.get_name() == "headless":
 		return
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if vsync else DisplayServer.VSYNC_DISABLED)
 	var window := get_window()
-	if fullscreen:
+	window.borderless = window_mode == BORDERLESS
+	if window_mode == FULLSCREEN:
 		window.mode = Window.MODE_FULLSCREEN
 		return
 	window.mode = Window.MODE_WINDOWED
+	if window_mode == BORDERLESS:
+		var rect := DisplayServer.screen_get_usable_rect(window.current_screen)
+		window.size = rect.size
+		window.position = rect.position
+		return
 	var target := WINDOW_SIZES[window_size_index]
 	var screen := window.current_screen
 	var usable := DisplayServer.screen_get_usable_rect(screen)
@@ -214,6 +257,13 @@ func _sanitize() -> void:
 	session_summary = bool(session_summary)
 	mood_journal = bool(mood_journal)
 	study_mode = bool(study_mode)
+	control_hints = clampi(int(control_hints), HINTS_ALWAYS, HINTS_NEVER)
+	hud_fade = bool(hud_fade)
+	quest_tracker_compact = bool(quest_tracker_compact)
+	window_mode = clampi(int(window_mode), WINDOWED, BORDERLESS)
+	fullscreen = window_mode == FULLSCREEN
+	vsync = bool(vsync)
+	ui_scale_index = clampi(int(ui_scale_index), 0, UI_SCALES.size() - 1)
 
 
 ## The hint frequency in use (resolving "by mode").

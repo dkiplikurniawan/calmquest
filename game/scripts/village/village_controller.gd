@@ -266,7 +266,7 @@ func play_finale(fast: bool = false) -> void:
 	GameState.set_flag("act3_complete")
 	GameState.set_flag("lumeria_restored")
 	overworld.lumi.react()
-	hud.show_toast("The Light returns to all of Lumeria")
+	hud.show_banner("The Light returns to all of Lumeria")
 	if not fast:
 		await get_tree().create_timer(2.5).timeout
 	for id in ids:
