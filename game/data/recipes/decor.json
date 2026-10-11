@@ -1,0 +1,20 @@
+{
+  "recipes": [
+    {"id": "wooden_chair", "output": {"item": "wooden_chair", "qty": 1}, "inputs": [{"item": "plank", "qty": 2}, {"item": "branch", "qty": 1}], "station": "workbench", "discover": "start"},
+    {"id": "round_table", "output": {"item": "round_table", "qty": 1}, "inputs": [{"item": "plank", "qty": 3}], "station": "workbench", "discover": "start"},
+    {"id": "potted_plant", "output": {"item": "potted_plant", "qty": 1}, "inputs": [{"item": "clay", "qty": 2}, {"item": "fiber", "qty": 2}], "station": "workbench", "discover": "start"},
+    {"id": "wooden_fence", "output": {"item": "wooden_fence", "qty": 4}, "inputs": [{"item": "branch", "qty": 3}, {"item": "twine", "qty": 1}], "station": "workbench", "discover": "start"},
+    {"id": "stone_path", "output": {"item": "stone_path", "qty": 4}, "inputs": [{"item": "stone", "qty": 3}], "station": "hand", "discover": "start"},
+    {"id": "garden_lantern", "output": {"item": "garden_lantern", "qty": 1}, "inputs": [{"item": "branch", "qty": 2}, {"item": "luma_light", "qty": 1}], "station": "workbench", "discover": "start"},
+    {"id": "woven_rug", "output": {"item": "woven_rug", "qty": 1}, "inputs": [{"item": "fiber", "qty": 8}, {"item": "wildflower", "qty": 2}], "station": "workbench", "discover": "flag:cottage_roof"},
+    {"id": "flower_vase", "output": {"item": "flower_vase", "qty": 1}, "inputs": [{"item": "clay", "qty": 1}, {"item": "wildflower", "qty": 3}], "station": "hand", "discover": "flag:cottage_window"},
+    {"id": "floor_lamp", "output": {"item": "floor_lamp", "qty": 1}, "inputs": [{"item": "branch", "qty": 2}, {"item": "glowcap", "qty": 2}], "station": "workbench", "discover": "flag:cottage_hearth"},
+    {"id": "small_shelf", "output": {"item": "small_shelf", "qty": 1}, "inputs": [{"item": "plank", "qty": 2}], "station": "workbench_2", "discover": "flag:cottage_bookshelf"},
+    {"id": "cushion", "output": {"item": "cushion", "qty": 1}, "inputs": [{"item": "fiber", "qty": 4}, {"item": "wildflower", "qty": 1}], "station": "hand", "discover": "flag:cottage_bed"},
+    {"id": "lumi_bed", "output": {"item": "lumi_bed", "qty": 1}, "inputs": [{"item": "twine", "qty": 3}, {"item": "fiber", "qty": 4}], "station": "workbench", "discover": "flag:cottage_bed"},
+    {"id": "garden_bench", "output": {"item": "garden_bench", "qty": 1}, "inputs": [{"item": "plank", "qty": 4}, {"item": "stone", "qty": 2}], "station": "workbench_2", "discover": "flag:cottage_workbench"},
+    {"id": "flower_planter", "output": {"item": "flower_planter", "qty": 1}, "inputs": [{"item": "plank", "qty": 2}, {"item": "wildflower", "qty": 3}], "station": "workbench", "discover": "start"},
+    {"id": "wind_chime", "output": {"item": "wind_chime", "qty": 1}, "inputs": [{"item": "shell", "qty": 4}, {"item": "twine", "qty": 1}], "station": "workbench", "discover": "note:note_shipwright"},
+    {"id": "crystal_lamp", "output": {"item": "crystal_lamp", "qty": 1}, "inputs": [{"item": "crystal_shard", "qty": 2}, {"item": "plank", "qty": 1}], "station": "workbench", "discover": "flag:creek_awakened"}
+  ]
+}

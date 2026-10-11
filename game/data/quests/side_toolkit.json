@@ -1,0 +1,18 @@
+{
+  "quests": [
+    {
+      "id": "side_toolkit",
+      "type": "side",
+      "title": "A Traveler's Toolkit",
+      "description": "Fallen branches and soft fibers lie all over the meadow. A little crafting goes a long way.",
+      "requires": [],
+      "steps": [
+        {"text": "Gather meadow fiber", "condition": {"counter": "obtained:fiber", "at_least": 3}, "progress": {"counter": "obtained:fiber", "target": 3}},
+        {"text": "Braid twine from fiber (I opens crafting)", "condition": {"counter": "crafted:twine", "at_least": 1}},
+        {"text": "Gather fallen branches", "condition": {"counter": "obtained:branch", "at_least": 2}, "progress": {"counter": "obtained:branch", "target": 2}},
+        {"text": "Make a plank at the workbench near the cottage", "target": "workbench", "condition": {"counter": "crafted:plank", "at_least": 1}}
+      ],
+      "hints": ["Fiber and branches lie in the grass all over the meadow. The workbench is beside the cottage."]
+    }
+  ]
+}

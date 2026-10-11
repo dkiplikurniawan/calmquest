@@ -1,0 +1,70 @@
+{
+  "quests": [
+    {
+      "id": "side_field_sketches",
+      "type": "side",
+      "title": "Field Sketches",
+      "description": "Lumeria is full of shy, gentle creatures. Watching quietly is the best way to meet them.",
+      "requires": [],
+      "steps": [
+        {"text": "Stand or walk calmly near a creature to sketch it", "condition": {"counter": "creatures_sketched", "at_least": 1}},
+        {"text": "Sketch six different creatures", "condition": {"counter": "creatures_sketched", "at_least": 6}, "progress": {"counter": "creatures_sketched", "target": 6}},
+        {"text": "Befriend a creature with treats it likes (E)", "condition": {"counter": "creature_friends", "at_least": 1}}
+      ],
+      "hints": ["Creatures come closer when you stand still. Running makes them shy. Each creature has favourite treats, shown when you greet it."]
+    },
+    {
+      "id": "side_dimming_pines",
+      "type": "side",
+      "title": "The Dimming Pines",
+      "description": "Gloom has settled over parts of Misty Pinewood. It isn't dangerous, only sad and grey.",
+      "requires": ["act1_heart_of_lumeria"],
+      "steps": [
+        {"text": "Visit Misty Pinewood, south-west of the meadow", "target": "ws_pinewood", "condition": {"region": "misty_pinewood"}},
+        {"text": "Make a Bright Lantern at a workbench", "target": "workbench", "condition": {"any": [{"counter": "obtained:bright_lantern", "at_least": 1}, {"counter": "gloom_cleared", "at_least": 1}]}},
+        {"text": "Clear a patch of gloom with its light", "target": "gloom_pine_1", "condition": {"counter": "gloom_cleared", "at_least": 1}},
+        {"text": "Comfort a Gloomling", "target": "gloomling_pine_path", "condition": {"counter": "gloomlings_calmed", "at_least": 1}}
+      ],
+      "hints": ["A Bright Lantern needs your lantern, 3 crystal shards, 1 sea glass and 2 glowcaps. Gloomlings are only shy: light, a song or food all help."]
+    },
+    {
+      "id": "side_fox_family",
+      "type": "side",
+      "title": "A Family in the Fog",
+      "description": "Somewhere in the pinewood, a mother fox is waiting for her kits.",
+      "requires": ["act1_heart_of_lumeria"],
+      "steps": [
+        {"text": "Find the fox den in the north-west of the pinewood", "target": "fox_den", "condition": {"any": [{"flag": "fox_den_visited"}, {"counter": "kits_home", "at_least": 1}]}},
+        {"text": "Lead the lost kits home from the gloom", "target": "fox_den", "condition": {"flag": "fox_family_home"}, "progress": {"counter": "kits_home", "target": 3}}
+      ],
+      "hints": ["The kits hide in the pinewood's gloom patches. Clear the gloom, press E by a kit, and it will follow you to the den."]
+    },
+    {
+      "id": "side_lighthouse",
+      "type": "side",
+      "title": "Light on the Water",
+      "description": "The old lighthouse on the Sunpetal Coast has been dark for a long time.",
+      "requires": ["act1_heart_of_lumeria"],
+      "steps": [
+        {"text": "Find the lighthouse on the Sunpetal Coast", "target": "lighthouse", "condition": {"region": "sunpetal_coast"}},
+        {"text": "Mend the lighthouse door and stairs", "target": "lighthouse", "condition": {"flag": "site_lighthouse_stairs"}},
+        {"text": "Fit a new lens and relight the lamp", "target": "lighthouse", "condition": {"flag": "lighthouse_lit"}}
+      ],
+      "hints": ["Driftwood, shells and sea glass wash up all along the coast. Glowcaps grow in Firefly Grove, resin in the pinewood."]
+    },
+    {
+      "id": "side_wreck_isle",
+      "type": "side",
+      "title": "Across the Calm Sea",
+      "description": "Out past the lighthouse, a little isle holds an old shipwreck.",
+      "requires": ["act1_heart_of_lumeria"],
+      "steps": [
+        {"text": "Read the shipwright's plans near the lighthouse", "target": "note_shipwright", "condition": {"any": [{"flag": "read:note_shipwright"}, {"counter": "obtained:small_boat", "at_least": 1}]}},
+        {"text": "Build a Small Boat at the cottage workbench", "condition": {"counter": "obtained:small_boat", "at_least": 1}},
+        {"text": "Sail from the lighthouse dock to the Wreck Isle", "target": "dock_lighthouse", "condition": {"region": "sunpetal_isles"}},
+        {"text": "Set the wreck's signal lanterns right", "target": "wreck_signal", "condition": {"flag": "wreck_signal_solved"}}
+      ],
+      "hints": ["The captain's log on the isle explains the signal. The lever always starts it over."]
+    }
+  ]
+}

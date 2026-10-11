@@ -1,0 +1,28 @@
+{
+  "requests": [
+    {"id": "req_doormat", "from": "bramble", "text": "Bramble would love some meadow fiber for a new doormat.", "deliver": {"item": "fiber", "qty": 6},
+     "reward": {"items": [{"item": "seed_carrot", "qty": 3}], "friendship": 8}},
+    {"id": "req_moth_sketch", "from": "pip", "text": "Pip wants a sketch of a Lantern Moth (they come out at night).", "check": {"flag": "sketched:lantern_moth"},
+     "reward": {"items": [{"item": "luma_light", "qty": 1}], "friendship": 8}},
+    {"id": "req_mushrooms", "from": "mossa", "text": "Mossa is short on forest mushrooms for tonight's soup.", "deliver": {"item": "mushroom", "qty": 3},
+     "reward": {"items": [{"item": "mushroom_soup", "qty": 1}], "friendship": 8}},
+    {"id": "req_carrots", "from": "bramble", "text": "Bramble is curious how your carrots turned out. Could you share two?", "deliver": {"item": "carrot", "qty": 2},
+     "reward": {"items": [{"item": "garden_plot", "qty": 1}], "friendship": 8}},
+    {"id": "req_sea_glass", "from": "pip", "text": "Pip is collecting sea glass in every color. Two pieces, please!", "deliver": {"item": "sea_glass", "qty": 2},
+     "reward": {"items": [{"item": "crystal_lamp", "qty": 1}], "friendship": 8}},
+    {"id": "req_sardine", "from": "wren", "text": "Wren bets you can't catch a Tide Sardine. (You can.)", "check": {"flag": "caught:tide_sardine"},
+     "reward": {"items": [{"item": "shell", "qty": 4}], "friendship": 8}},
+    {"id": "req_lanterns", "from": "pip", "text": "Pip thinks your homestead needs more light. Place two Garden Lanterns there.", "check": {"counter": "placed:garden_lantern", "at_least": 2},
+     "reward": {"items": [{"item": "luma_light", "qty": 1}], "friendship": 6}},
+    {"id": "req_bread", "from": "mossa", "text": "Mossa wants to taste your Sun Bread. Bake one at the cottage pot.", "deliver": {"item": "wheat_bread", "qty": 1},
+     "reward": {"items": [{"item": "seed_pumpkin", "qty": 2}], "friendship": 10}},
+    {"id": "req_owl", "from": "fennel", "text": "Fennel needs a Hush Owl sketch for a bedtime story.", "check": {"flag": "sketched:hush_owl"},
+     "reward": {"items": [{"item": "moon_dew", "qty": 2}], "friendship": 8}},
+    {"id": "req_driftwood", "from": "wren", "text": "Wren is mending her hut. Four pieces of driftwood would help.", "deliver": {"item": "driftwood", "qty": 4},
+     "reward": {"items": [{"item": "wind_chime", "qty": 1}], "friendship": 8}},
+    {"id": "req_pumpkin", "from": "fennel", "text": "Fennel promised the kits a pumpkin lantern. Could you grow one?", "deliver": {"item": "pumpkin", "qty": 1},
+     "reward": {"items": [{"item": "strawberry_jam", "qty": 1}], "friendship": 10}},
+    {"id": "req_isle", "from": "wren", "text": "Wren wants to know if Little Gull Isle still has its gulls. Sail there and see.", "check": {"flag": "sailed_to:dock_west_isle"},
+     "reward": {"items": [{"item": "seed_luma", "qty": 2}], "friendship": 8}}
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "quests": [
+    {
+      "id": "side_first_harvest",
+      "type": "side",
+      "title": "The First Harvest",
+      "description": "An old gardener left notes near the cottage. Lumeria's soil is patient and kind.",
+      "requires": ["side_toolkit"],
+      "steps": [
+        {"text": "Read the gardener's note near the cottage", "target": "note_gardener", "condition": {"any": [{"flag": "read:note_gardener"}, {"counter": "planted", "at_least": 1}]}},
+        {"text": "Make a watering can and a garden plot at the workbench", "target": "workbench", "condition": {"all": [{"counter": "obtained:watering_can", "at_least": 1}, {"any": [{"counter": "obtained:garden_plot", "at_least": 1}, {"counter": "planted", "at_least": 1}]}]}},
+        {"text": "Place the plot on your homestead (B) and plant seeds", "target": "homestead", "condition": {"counter": "planted", "at_least": 1}},
+        {"text": "Water your sprouts (rain helps too)", "target": "homestead", "condition": {"any": [{"counter": "watered", "at_least": 1}, {"counter": "harvested", "at_least": 1}]}},
+        {"text": "Harvest your first crop", "target": "homestead", "condition": {"counter": "harvested", "at_least": 1}}
+      ],
+      "hints": ["Crops grow one step for every day they were watered. They never wilt, so there is no hurry at all."]
+    },
+    {
+      "id": "side_forgotten_garden",
+      "type": "side",
+      "title": "The Forgotten Garden",
+      "description": "Somewhere in Firefly Grove, old hedges hide a garden nobody has visited in years.",
+      "requires": ["side_first_harvest"],
+      "steps": [
+        {"text": "Revive the withered plant with your watering can", "target": "forgotten_garden", "condition": {"flag": "withered_revived:forgotten_garden"}},
+        {"text": "Open the old chest inside", "target": "forgotten_garden", "condition": {"flag": "garden_chest_opened:forgotten_garden"}}
+      ],
+      "hints": ["The hedges are west of the grove's waystone. Only the withered plant's gap leads inside."]
+    },
+    {
+      "id": "side_old_whiskers",
+      "type": "side",
+      "title": "The Old Whiskers",
+      "description": "Fishers whisper about a very old, very gentle catfish near the creek bridge.",
+      "requires": ["side_toolkit"],
+      "steps": [
+        {"text": "Read the fisher's notes by the creek", "target": "note_fisher", "condition": {"any": [{"flag": "read:note_fisher"}, {"counter": "obtained:fishing_rod", "at_least": 1}]}},
+        {"text": "Make a fishing rod at a workbench", "target": "workbench", "condition": {"counter": "obtained:fishing_rod", "at_least": 1}},
+        {"text": "Catch your first fish at any ripples", "condition": {"counter": "fish_caught", "at_least": 1}},
+        {"text": "Catch five different kinds of fish", "condition": {"counter": "fish_species", "at_least": 5}, "progress": {"counter": "fish_species", "target": 5}},
+        {"text": "Meet Old Whiskers at the creek bridge", "target": "fish_creek_bridge", "condition": {"flag": "caught:old_whiskers"}}
+      ],
+      "hints": ["Different fish swim in the creek, the ponds and the sea. Some only come out at night or in the rain."]
+    }
+  ]
+}

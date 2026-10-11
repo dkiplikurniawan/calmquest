@@ -1,0 +1,46 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="CALMQUEST: The Lost Light"
+config/description="A cozy 2D fantasy adventure with transparent, preference-based adaptive gameplay and optional pre/post-session self-reflection."
+config/version="0.1.0"
+run/main_scene="res://game/scenes/main/splash.tscn"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="CALMQUEST"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[autoload]
+
+GameSettings="*res://game/scripts/autoload/game_settings.gd"
+AudioManager="*res://game/scripts/autoload/audio_manager.gd"
+MusicManager="*res://game/scripts/autoload/music_manager.gd"
+EventBus="*res://game/scripts/autoload/event_bus.gd"
+TimeManager="*res://game/scripts/autoload/time_manager.gd"
+GameState="*res://game/scripts/autoload/game_state.gd"
+SessionState="*res://game/scripts/autoload/session_state.gd"
+QuestManager="*res://game/scripts/autoload/quest_manager.gd"
+SaveManager="*res://game/scripts/autoload/save_manager.gd"
+SceneRouter="*res://game/scripts/autoload/scene_router.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="expand"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(0.168627, 0.211765, 0.333333, 1)

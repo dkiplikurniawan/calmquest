@@ -1,0 +1,68 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://game/scripts/world/overworld.gd" id="1_overworld"]
+[ext_resource type="Script" path="res://game/scripts/world/terrain.gd" id="2_terrain"]
+[ext_resource type="Script" path="res://game/scripts/world/meadow_ground.gd" id="3_meadow_ground"]
+[ext_resource type="PackedScene" path="res://game/scenes/player/player.tscn" id="4_player"]
+[ext_resource type="PackedScene" path="res://game/scenes/companion/lumi.tscn" id="5_lumi"]
+[ext_resource type="PackedScene" path="res://game/scenes/minigames/lantern_catch.tscn" id="6_lantern_catch"]
+[ext_resource type="Script" path="res://game/scripts/world/world_streamer.gd" id="7_streamer"]
+[ext_resource type="Script" path="res://game/scripts/world/meadow_loop.gd" id="8_meadow_loop"]
+[ext_resource type="Script" path="res://game/scripts/world/story_content.gd" id="9_story"]
+[ext_resource type="Script" path="res://game/scripts/ui/hud.gd" id="10_hud"]
+[ext_resource type="Script" path="res://game/scripts/homestead/homestead_controller.gd" id="13_homestead"]
+[ext_resource type="Script" path="res://game/scripts/world/region_features.gd" id="14_features"]
+[ext_resource type="Script" path="res://game/scripts/caves/caves_controller.gd" id="15_caves"]
+[ext_resource type="Script" path="res://game/scripts/village/village_controller.gd" id="16_village"]
+[ext_resource type="Script" path="res://game/scripts/ui/pause_menu.gd" id="11_pause"]
+[ext_resource type="Script" path="res://game/scripts/ui/session_complete.gd" id="12_complete"]
+
+[node name="Overworld" type="Node2D"]
+script = ExtResource("1_overworld")
+
+[node name="NightTint" type="CanvasModulate" parent="."]
+
+[node name="Terrain" type="Node2D" parent="."]
+script = ExtResource("2_terrain")
+
+[node name="MeadowGround" type="Node2D" parent="."]
+script = ExtResource("3_meadow_ground")
+
+[node name="Entities" type="Node2D" parent="."]
+y_sort_enabled = true
+
+[node name="Player" parent="Entities" instance=ExtResource("4_player")]
+
+[node name="Lumi" parent="." instance=ExtResource("5_lumi")]
+
+[node name="LanternCatch" parent="." instance=ExtResource("6_lantern_catch")]
+
+[node name="WorldStreamer" type="Node" parent="."]
+script = ExtResource("7_streamer")
+
+[node name="MeadowLoop" type="Node" parent="."]
+script = ExtResource("8_meadow_loop")
+
+[node name="StoryContent" type="Node" parent="."]
+script = ExtResource("9_story")
+
+[node name="Homestead" type="Node" parent="."]
+script = ExtResource("13_homestead")
+
+[node name="Features" type="Node" parent="."]
+script = ExtResource("14_features")
+
+[node name="Caves" type="Node" parent="."]
+script = ExtResource("15_caves")
+
+[node name="Village" type="Node" parent="."]
+script = ExtResource("16_village")
+
+[node name="Hud" type="CanvasLayer" parent="."]
+script = ExtResource("10_hud")
+
+[node name="PauseMenu" type="CanvasLayer" parent="."]
+script = ExtResource("11_pause")
+
+[node name="SessionComplete" type="CanvasLayer" parent="."]
+script = ExtResource("12_complete")

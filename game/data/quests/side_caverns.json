@@ -1,0 +1,20 @@
+{
+  "quests": [
+    {
+      "id": "side_echo_caverns",
+      "type": "side",
+      "title": "Echoes Below",
+      "description": "Two sealed caves hum with old light: one in Misty Pinewood, one above Crystal Creek.",
+      "requires": ["act1_heart_of_lumeria"],
+      "steps": [
+        {"text": "Enter Whispering Hollow in the south-west of the pinewood (a Bright Lantern lights the way)", "target": "cave_pinewood", "condition": {"flag": "visited_cave:cave_hollow"}},
+        {"text": "Light the braziers in the right order", "target": "cave_pinewood", "condition": {"flag": "puzzle_solved:hollow_braziers"}},
+        {"text": "Slide the stone blocks onto the plates", "target": "cave_pinewood", "condition": {"flag": "puzzle_solved:hollow_blocks"}},
+        {"text": "Find a way across the chasm", "target": "cave_pinewood", "condition": {"flag": "puzzle_solved:hollow_bridge"}},
+        {"text": "Read the Song of the Crystals and make a Crystal Tuner", "target": "cave_pinewood", "condition": {"counter": "obtained:crystal_tuner", "at_least": 1}},
+        {"text": "Wake the Singing Grotto above Crystal Creek", "target": "cave_creek", "condition": {"flag": "hearthstone_caverns"}}
+      ],
+      "hints": ["Every cave puzzle has a reset lever, and you can leave a cave whenever you like. Press H inside for hints."]
+    }
+  ]
+}

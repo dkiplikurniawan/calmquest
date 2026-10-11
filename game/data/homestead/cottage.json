@@ -1,0 +1,42 @@
+{
+  "interior": {
+    "origin": [12000, 400],
+    "cell": 64,
+    "cols": 11,
+    "rows": 8,
+    "door": [5, 7],
+    "keep_clear": [[5, 6], [5, 7], [4, 7], [6, 7]]
+  },
+  "homestead": {
+    "poi": "homestead",
+    "cell": 64,
+    "cols": 10,
+    "rows": 7
+  },
+  "steps": [
+    {"id": "roof", "title": "Fix the roof", "cells": [[0, 1]], "requires": [],
+     "inputs": [{"item": "plank", "qty": 4}, {"item": "fiber", "qty": 6}],
+     "done_text": "No more drafts! The cottage feels sheltered again."},
+    {"id": "hearth", "title": "Light the hearth", "cells": [[5, 1]], "requires": ["roof"],
+     "inputs": [{"item": "stone", "qty": 6}, {"item": "clay", "qty": 2}, {"item": "branch", "qty": 3}],
+     "done_text": "The hearth crackles softly. Warm light fills the room, and smoke curls from the chimney."},
+    {"id": "window", "title": "Repair the window", "cells": [[8, 1]], "requires": [],
+     "inputs": [{"item": "sea_glass", "qty": 2}, {"item": "plank", "qty": 1}],
+     "done_text": "Sunlight, and at night a warm glow, shines through the new window."},
+    {"id": "bed", "title": "Build a bed", "cells": [[1, 5], [2, 5], [1, 6], [2, 6]], "requires": [],
+     "inputs": [{"item": "plank", "qty": 4}, {"item": "fiber", "qty": 6}, {"item": "wildflower", "qty": 2}],
+     "done_text": "A soft bed! Sleep here to rest until morning (your journey is saved)."},
+    {"id": "workbench", "title": "Restore the workbench", "cells": [[8, 6], [9, 6]], "requires": [],
+     "inputs": [{"item": "plank", "qty": 3}, {"item": "stone", "qty": 3}, {"item": "twine", "qty": 2}],
+     "done_text": "The old workbench is steady again. It can make finer things."},
+    {"id": "cooking_pot", "title": "Set up the cooking pot", "cells": [[4, 1]], "requires": ["hearth"],
+     "inputs": [{"item": "clay", "qty": 3}, {"item": "stone", "qty": 2}],
+     "done_text": "A cooking pot hangs by the hearth, ready for recipes."},
+    {"id": "storage_chest", "title": "Build a storage chest", "cells": [[10, 6]], "requires": [],
+     "inputs": [{"item": "plank", "qty": 5}, {"item": "twine", "qty": 2}],
+     "done_text": "A roomy chest. Crafting nearby can use what's inside."},
+    {"id": "bookshelf", "title": "Build a bookshelf", "cells": [[2, 1]], "requires": [],
+     "inputs": [{"item": "plank", "qty": 4}, {"item": "branch", "qty": 2}],
+     "done_text": "A bookshelf for your journal, notes and collections."}
+  ]
+}

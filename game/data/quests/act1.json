@@ -1,0 +1,67 @@
+{
+  "quests": [
+    {
+      "id": "act1_lost_lights",
+      "type": "main",
+      "act": 1,
+      "title": "Follow the Lost Lights",
+      "description": "The meadow's light has drifted away. Gather it and bring it home to the Heart Tree.",
+      "requires": [],
+      "steps": [
+        {"text": "Gather light for the Heart Tree", "target": "heart_tree",
+         "condition": {"any": [{"counter": "lights_collected", "at_least": 8}, {"flag": "heart_tree_restored"}]},
+         "progress": {"counter": "lights_collected", "target": 8}},
+        {"text": "Bring the light to the Heart Tree", "target": "heart_tree",
+         "condition": {"flag": "heart_tree_restored"}}
+      ],
+      "hints": ["Lights float all around Whispering Meadow. Press H and I'll point toward the nearest one."]
+    },
+    {
+      "id": "act1_firefly_grove",
+      "type": "main",
+      "act": 1,
+      "title": "Lanterns of Firefly Grove",
+      "description": "The Heart Tree remembers a grove where lanterns once filled the night sky.",
+      "requires": ["act1_lost_lights"],
+      "steps": [
+        {"text": "Follow the path north-west to Firefly Grove", "target": "ws_grove",
+         "condition": {"region": "firefly_grove"}},
+        {"text": "Relight the grove's waystone", "target": "ws_grove",
+         "condition": {"waystone": "ws_grove"}},
+        {"text": "Hold a Lantern Night at the shrine", "target": "lantern_shrine",
+         "condition": {"counter": "lantern_nights", "at_least": 1}}
+      ],
+      "hints": ["Waystones let you travel back here any time, for free. The shrine is in the grove's clearing."]
+    },
+    {
+      "id": "act1_crystal_creek",
+      "type": "main",
+      "act": 1,
+      "title": "Awaken Crystal Creek",
+      "description": "The lanterns' light points east, to crystals that have fallen asleep by the water.",
+      "requires": ["act1_firefly_grove"],
+      "steps": [
+        {"text": "Travel east to Crystal Creek", "target": "ws_creek",
+         "condition": {"region": "crystal_creek"}},
+        {"text": "Guide the sun's beam to the heart crystal", "target": "creek_puzzle",
+         "condition": {"flag": "creek_awakened"}}
+      ],
+      "hints": ["The crystal puzzle is just south-west of the creek's waystone. There is no wrong move; the lever resets it."]
+    },
+    {
+      "id": "act1_heart_of_lumeria",
+      "type": "main",
+      "act": 1,
+      "title": "Restore the Heart of Lumeria",
+      "description": "With the creek awake, the moonlit veil to the north has faded.",
+      "requires": ["act1_crystal_creek"],
+      "steps": [
+        {"text": "Enter the Moonlit Sanctuary to the north", "target": "moon_altar",
+         "condition": {"region": "moonlit_sanctuary"}},
+        {"text": "Restore the Heart of Lumeria at the moon altar", "target": "moon_altar",
+         "condition": {"flag": "heart_of_lumeria_restored"}}
+      ],
+      "hints": ["The sanctuary is straight north of the Heart Tree."]
+    }
+  ]
+}

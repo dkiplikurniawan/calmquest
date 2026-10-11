@@ -1,0 +1,6 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://tests/smoke/overworld_test.gd" id="1_overworld_test"]
+
+[node name="OverworldTest" type="Node"]
+script = ExtResource("1_overworld_test")

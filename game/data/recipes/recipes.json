@@ -1,0 +1,26 @@
+{
+  "stations": {"hand": 0, "workbench": 1, "workbench_2": 2},
+  "recipes": [
+    {"id": "twine", "output": {"item": "twine", "qty": 1}, "inputs": [{"item": "fiber", "qty": 3}],
+     "station": "hand", "discover": "start"},
+    {"id": "plank", "output": {"item": "plank", "qty": 1}, "inputs": [{"item": "branch", "qty": 2}],
+     "station": "workbench", "discover": "start"},
+    {"id": "gathering_bag", "output": {"item": "gathering_bag", "qty": 1}, "inputs": [{"item": "twine", "qty": 4}, {"item": "fiber", "qty": 2}],
+     "station": "workbench", "discover": "start"},
+    {"id": "watering_can", "output": {"item": "watering_can", "qty": 1}, "inputs": [{"item": "clay", "qty": 3}, {"item": "plank", "qty": 1}],
+     "station": "workbench", "discover": "note:note_gardener"},
+    {"id": "garden_plot", "output": {"item": "garden_plot", "qty": 1}, "inputs": [{"item": "plank", "qty": 2}, {"item": "clay", "qty": 2}], "station": "workbench", "discover": "note:note_gardener"},
+    {"id": "fishing_rod", "output": {"item": "fishing_rod", "qty": 1}, "inputs": [{"item": "reed", "qty": 2}, {"item": "twine", "qty": 2}, {"item": "branch", "qty": 1}],
+     "station": "workbench", "discover": "note:note_fisher"},
+    {"id": "travelers_pack", "output": {"item": "travelers_pack", "qty": 1}, "inputs": [{"item": "twine", "qty": 6}, {"item": "plank", "qty": 2}, {"item": "resin", "qty": 2}],
+     "station": "workbench_2", "discover": "note:note_woodcutter"},
+    {"id": "bright_lantern", "output": {"item": "bright_lantern", "qty": 1}, "inputs": [{"item": "lantern", "qty": 1}, {"item": "crystal_shard", "qty": 3}, {"item": "sea_glass", "qty": 1}, {"item": "glowcap", "qty": 2}],
+     "station": "workbench", "discover": "flag:act1_complete"},
+    {"id": "small_boat", "output": {"item": "small_boat", "qty": 1}, "inputs": [{"item": "driftwood", "qty": 6}, {"item": "plank", "qty": 4}, {"item": "resin", "qty": 3}, {"item": "twine", "qty": 2}],
+     "station": "workbench_2", "discover": "note:note_shipwright"},
+    {"id": "crystal_tuner", "output": {"item": "crystal_tuner", "qty": 1}, "inputs": [{"item": "crystal_shard", "qty": 4}, {"item": "moon_dew", "qty": 2}, {"item": "plank", "qty": 1}],
+     "station": "workbench_2", "discover": "note:note_crystal"},
+    {"id": "climbing_rope", "output": {"item": "climbing_rope", "qty": 1}, "inputs": [{"item": "twine", "qty": 8}, {"item": "resin", "qty": 2}],
+     "station": "workbench_2", "discover": "note:note_mountaineer"}
+  ]
+}

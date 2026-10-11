@@ -1,0 +1,18 @@
+{
+  "stations": {"hearth": 10},
+  "recipes": [
+    {"id": "berry_compote", "output": {"item": "berry_compote", "qty": 1}, "inputs": [{"item": "berry", "qty": 3}], "station": "hearth", "discover": "start"},
+    {"id": "mushroom_soup", "output": {"item": "mushroom_soup", "qty": 1}, "inputs": [{"item": "mushroom", "qty": 2}, {"item": "wildflower", "qty": 1}], "station": "hearth", "discover": "experiment"},
+    {"id": "glowcap_stew", "output": {"item": "glowcap_stew", "qty": 1}, "inputs": [{"item": "glowcap", "qty": 2}, {"item": "mushroom", "qty": 1}], "station": "hearth", "discover": "experiment"},
+    {"id": "flower_tea", "output": {"item": "flower_tea", "qty": 1}, "inputs": [{"item": "wildflower", "qty": 2}, {"item": "moon_dew", "qty": 1}], "station": "hearth", "discover": "experiment"},
+    {"id": "forest_skewer", "output": {"item": "forest_skewer", "qty": 1}, "inputs": [{"item": "mushroom", "qty": 1}, {"item": "berry", "qty": 2}, {"item": "branch", "qty": 1}], "station": "hearth", "discover": "experiment"},
+    {"id": "carrot_soup", "output": {"item": "carrot_soup", "qty": 1}, "inputs": [{"item": "carrot", "qty": 2}, {"item": "mushroom", "qty": 1}], "station": "hearth", "discover": "experiment"},
+    {"id": "wheat_bread", "output": {"item": "wheat_bread", "qty": 1}, "inputs": [{"item": "wheat", "qty": 3}], "station": "hearth", "discover": "experiment"},
+    {"id": "pumpkin_pie", "output": {"item": "pumpkin_pie", "qty": 1}, "inputs": [{"item": "pumpkin", "qty": 1}, {"item": "wheat", "qty": 2}, {"item": "berry", "qty": 1}], "station": "hearth", "discover": "experiment"},
+    {"id": "strawberry_jam", "output": {"item": "strawberry_jam", "qty": 1}, "inputs": [{"item": "strawberry", "qty": 3}], "station": "hearth", "discover": "experiment"},
+    {"id": "fish_stew", "output": {"item": "fish_stew", "qty": 1}, "inputs": [{"item": "tide_sardine", "qty": 2}, {"item": "carrot", "qty": 1}], "station": "hearth", "discover": "experiment"},
+    {"id": "grilled_trout", "output": {"item": "grilled_trout", "qty": 1}, "inputs": [{"item": "crystal_trout", "qty": 1}, {"item": "branch", "qty": 1}], "station": "hearth", "discover": "experiment"},
+    {"id": "creek_skewer", "output": {"item": "creek_skewer", "qty": 1}, "inputs": [{"item": "pebble_minnow", "qty": 2}, {"item": "reed", "qty": 1}], "station": "hearth", "discover": "experiment"},
+    {"id": "luma_tea", "output": {"item": "luma_tea", "qty": 1}, "inputs": [{"item": "luma_bloom", "qty": 1}, {"item": "moon_dew", "qty": 1}], "station": "hearth", "discover": "experiment"}
+  ]
+}

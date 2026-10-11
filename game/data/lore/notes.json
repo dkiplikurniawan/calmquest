@@ -1,0 +1,32 @@
+{
+  "notes": [
+    {"id": "note_gardener", "title": "A Gardener's Scribble",
+     "text": "Clay from the creek, a plank for the handle, and the little can never runs dry. Water the sleepy sprouts and they will wake, slowly and in their own time. They never wilt here. Lumeria is patient. (Tucked inside the page: a few carrot and wheat seeds.)",
+     "teaches": "Watering Can, Garden Plot",
+     "gives": [{"item": "seed_carrot", "qty": 4}, {"item": "seed_wheat", "qty": 4}]},
+    {"id": "note_fisher", "title": "Notes from the Bridge",
+     "text": "Two creek reeds, two lengths of twine and a straight branch make a fine rod. The fish of the creek are shy but never unkind; if one swims away, simply wait for the next ripple.",
+     "teaches": "Fishing Rod"},
+    {"id": "note_woodcutter", "title": "The Woodcutter's Ledger",
+     "text": "We never cut the living pines. Fallen branches, resin and patience were all we needed. A good pack holds everything for a long walk under the tall trees.",
+     "teaches": "Traveler's Pack"},
+    {"id": "note_shipwright", "title": "Driftwood Plans",
+     "text": "Six pieces of driftwood, four planks, resin to seal the seams and a little twine. The isles are close, and the sea is gentle in Lumeria. Launch from the old dock by the lighthouse.",
+     "teaches": "Small Boat"},
+    {"id": "note_crystal", "title": "Song of the Crystals",
+     "text": "Crystals sleep in sealed doors deep in the caverns. Four shards and two drops of moon dew make a tuner that hums them awake.",
+     "teaches": "Crystal Tuner"},
+    {"id": "note_mountaineer", "title": "A Climber's Promise",
+     "text": "The old mountain path fell long ago. With a long rope of braided twine sealed with resin, the way to the frost flowers could be made safe again.",
+     "teaches": "Climbing Rope"},
+    {"id": "note_captain", "title": "The Captain's Log",
+     "text": "Our signal is simple, so no sailor of Lumeria ever forgets it. Gold for the sunrise in the east. The sea's own blue for the south. Rose for dusk in the west. And green for home, always north. Set the lanterns right and the hold will open for a friend.",
+     "teaches": ""},
+    {"id": "note_highlands", "title": "Frost on the Shrine Stones",
+     "text": "The old shrine wakes when its three ice prisms look at it together. On clear nights afterwards, the aurora dances so low you could almost touch it. Bring warm tea.",
+     "teaches": ""},
+    {"id": "note_epilogue", "title": "A Note Left at the Altar",
+     "text": "To whoever brought the light home: thank you. The meadow sings again, the pines are green, the sea is bright and the caves hum. Rest whenever you like. Lumeria will be here, every morning, as gentle as you were with it.",
+     "teaches": ""}
+  ]
+}

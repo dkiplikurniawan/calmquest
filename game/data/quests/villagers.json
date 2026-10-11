@@ -1,0 +1,66 @@
+{
+  "quests": [
+    {
+      "id": "villager_bramble", "type": "villager", "title": "Bramble's Window Box",
+      "description": "Bramble, the moss gardener, dreams of a home full of flowers.",
+      "requires": [], "unlock": {"flag": "villager_arrived:bramble"},
+      "steps": [
+        {"text": "Help build Bramble's Burrow in the village", "target": "home_bramble", "condition": {"flag": "home_built:bramble"}},
+        {"text": "Bring Bramble 5 wildflowers", "target": "home_bramble", "deliver": {"villager": "bramble", "item": "wildflower", "qty": 5}, "condition": {"flag": "delivered:bramble:wildflower"}},
+        {"text": "Grow and harvest a carrot", "target": "homestead", "condition": {"counter": "harvested:carrot", "at_least": 1}}
+      ],
+      "rewards": {"items": [{"item": "flower_planter", "qty": 1}], "friendship": {"villager": "bramble", "points": 12}},
+      "hints": ["The village is east of the Heart Tree and south of the creek path. Wildflowers grow all over the meadow."]
+    },
+    {
+      "id": "villager_pip", "type": "villager", "title": "Pip's First Delivery",
+      "description": "Pip wants to be Lumeria's courier, but first needs to know the way around.",
+      "requires": [], "unlock": {"flag": "villager_arrived:pip"},
+      "steps": [
+        {"text": "Help build Pip's Lantern Loft", "target": "home_pip", "condition": {"flag": "home_built:pip"}},
+        {"text": "Relight four waystones so Pip can find the routes", "condition": {"counter": "waystones_relit", "at_least": 4}, "progress": {"counter": "waystones_relit", "target": 4}},
+        {"text": "Bring Pip 2 drops of moon dew for the lantern", "target": "home_pip", "deliver": {"villager": "pip", "item": "moon_dew", "qty": 2}, "condition": {"flag": "delivered:pip:moon_dew"}}
+      ],
+      "rewards": {"items": [{"item": "luma_light", "qty": 2}], "friendship": {"villager": "pip", "points": 12}},
+      "hints": ["Moon dew is found in the Moonlit Sanctuary."]
+    },
+    {
+      "id": "villager_mossa", "type": "villager", "title": "A Recipe Swap",
+      "description": "Mossa trades recipes only with cooks she trusts.",
+      "requires": [], "unlock": {"flag": "villager_arrived:mossa"},
+      "steps": [
+        {"text": "Help build Mossa's Kitchen Cottage", "target": "home_mossa", "condition": {"flag": "home_built:mossa"}},
+        {"text": "Cook three different dishes at your cottage pot", "condition": {"counter": "dish_kinds", "at_least": 3}, "progress": {"counter": "dish_kinds", "target": 3}},
+        {"text": "Bring Mossa a Fisher's Stew", "target": "home_mossa", "deliver": {"villager": "mossa", "item": "fish_stew", "qty": 1}, "condition": {"flag": "delivered:mossa:fish_stew"}}
+      ],
+      "rewards": {"items": [{"item": "glowcap_stew", "qty": 2}], "friendship": {"villager": "mossa", "points": 12}},
+      "hints": ["Experimenting at the pot never uses ingredients up. Fisher's Stew is two tide sardines and a carrot."]
+    },
+    {
+      "id": "villager_wren", "type": "villager", "title": "Tales of the Tide",
+      "description": "Wren wants a fellow sailor to share stories with.",
+      "requires": [], "unlock": {"flag": "villager_arrived:wren"},
+      "steps": [
+        {"text": "Help build Wren's Driftwood Hut", "target": "home_wren", "condition": {"flag": "home_built:wren"}},
+        {"text": "Catch a Sunpetal Snapper in the sea", "condition": {"flag": "caught:sunpetal_snapper"}},
+        {"text": "Sail to Little Gull Isle from the west beach", "target": "dock_west_beach", "condition": {"flag": "sailed_to:dock_west_isle"}},
+        {"text": "Bring Wren 3 sea shells", "target": "home_wren", "deliver": {"villager": "wren", "item": "shell", "qty": 3}, "condition": {"flag": "delivered:wren:shell"}}
+      ],
+      "rewards": {"items": [{"item": "sea_glass", "qty": 3}], "friendship": {"villager": "wren", "points": 12}},
+      "hints": ["Snappers bite in the sea by day. The west beach has a dock too."]
+    },
+    {
+      "id": "villager_fennel", "type": "villager", "title": "Stories by the Fire",
+      "description": "Fennel collects stories, and you've been finding a lot of them.",
+      "requires": [], "unlock": {"flag": "villager_arrived:fennel"},
+      "steps": [
+        {"text": "Help build Fennel's Story Tree", "target": "home_fennel", "condition": {"flag": "home_built:fennel"}},
+        {"text": "Read five old notes around Lumeria", "condition": {"counter": "notes_read", "at_least": 5}, "progress": {"counter": "notes_read", "target": 5}},
+        {"text": "Sketch eight different creatures", "condition": {"counter": "creatures_sketched", "at_least": 8}, "progress": {"counter": "creatures_sketched", "target": 8}},
+        {"text": "Bring Fennel a Pumpkin Pie for story night", "target": "home_fennel", "deliver": {"villager": "fennel", "item": "pumpkin_pie", "qty": 1}, "condition": {"flag": "delivered:fennel:pumpkin_pie"}}
+      ],
+      "rewards": {"items": [{"item": "forest_skewer", "qty": 2}], "friendship": {"villager": "fennel", "points": 12}},
+      "hints": ["Notes rest on little stones near landmarks and in caves. Pumpkin Pie is a pumpkin, two wheat and a berry."]
+    }
+  ]
+}

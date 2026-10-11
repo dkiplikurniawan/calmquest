@@ -1,0 +1,41 @@
+{
+  "quests": [
+    {
+      "id": "act2_hearthstones", "type": "main", "act": 2, "title": "The Five Hearthstones",
+      "description": "The Heart of Lumeria is awake, but its light only reaches the meadow. Five Hearthstones, scattered across the wide world, could carry it everywhere.",
+      "requires": ["act1_heart_of_lumeria"],
+      "steps": [
+        {"text": "Listen to the Heart Tree", "target": "heart_tree", "condition": {"any": [{"flag": "act2_heard"}, {"counter": "hearthstones", "at_least": 1}]}},
+        {"text": "Restore the five Hearthstones (in any order)", "condition": {"counter": "hearthstones", "at_least": 5}, "progress": {"counter": "hearthstones", "target": 5}}
+      ],
+      "hints": [
+        "Each Hearthstone asks for something different: a lost fox family in Misty Pinewood, the coast's dark lighthouse, a shipwreck on an isle, the crystal caves, and an aurora high in the Frostbloom Highlands.",
+        "A gentle order that works well: the pinewood, then the lighthouse and the isle, then the caves, and the highlands last. Any order is fine."
+      ]
+    },
+    {
+      "id": "act3_return", "type": "main", "act": 3, "title": "Return of the Light",
+      "description": "With all five Hearthstones, the Heart of Lumeria can shine over the whole world. Everyone should be there.",
+      "requires": ["act2_hearthstones"],
+      "steps": [
+        {"text": "Set the Hearthstones in the circle at the Heart Tree", "target": "heart_tree", "condition": {"flag": "hearthstones_placed"}},
+        {"text": "Invite your village friends to the Festival of Light", "condition": {"counter": "festival_invites", "at_least": 5}, "progress": {"counter": "festival_invites", "target": 5}},
+        {"text": "Light the Great Lantern at the Heart Tree", "target": "heart_tree", "condition": {"flag": "act3_complete"}}
+      ],
+      "hints": ["Talk to each villager and choose \"Invite to the festival\". There's no rush: the festival waits for you."]
+    },
+    {
+      "id": "postgame_wider_journal", "type": "side", "title": "A Wider Journal",
+      "description": "Lumeria is bright again. There's still so much to see, and all the time in the world.",
+      "requires": ["act3_return"],
+      "steps": [
+        {"text": "Read the note left at the Moonlit Sanctuary", "target": "note_epilogue", "condition": {"flag": "read:note_epilogue"}},
+        {"text": "Meet the Aurora Stag (it appears only now)", "condition": {"flag": "sketched:aurora_stag"}},
+        {"text": "Become best friends with every villager", "condition": {"counter": "villager_best_friends", "at_least": 5}, "progress": {"counter": "villager_best_friends", "target": 5}},
+        {"text": "Sketch every creature in Lumeria", "condition": {"counter": "creatures_sketched", "at_least": 17}, "progress": {"counter": "creatures_sketched", "target": 17}},
+        {"text": "Catch every kind of fish", "condition": {"counter": "fish_species", "at_least": 12}, "progress": {"counter": "fish_species", "target": 12}}
+      ],
+      "hints": ["Everything here is optional. The journal's Collections page shows what's left."]
+    }
+  ]
+}

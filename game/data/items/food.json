@@ -1,0 +1,17 @@
+{
+  "items": [
+    {"id": "berry_compote", "name": "Berry Compote", "category": "food", "stack": 20, "desc": "Warm, sweet berries.", "uses": "Eat (F) for a cozy feeling. A gift villagers love.", "icon": {"shape": "bowl", "color": "#8e7cc3", "accent": "#fff6e5"}, "food": {"buff": "cozy", "seconds": 120}},
+    {"id": "mushroom_soup", "name": "Mushroom Soup", "category": "food", "stack": 20, "desc": "A gentle, earthy soup.", "uses": "Eat (F): your lantern glows wider for a while.", "icon": {"shape": "bowl", "color": "#b98bb0", "accent": "#fff6e5"}, "food": {"buff": "warm_glow", "seconds": 180}},
+    {"id": "glowcap_stew", "name": "Glowcap Stew", "category": "food", "stack": 20, "desc": "It glows faintly in the bowl.", "uses": "Eat (F): a long, wide lantern glow.", "icon": {"shape": "bowl", "color": "#7fe3d4", "accent": "#fff6e5"}, "food": {"buff": "warm_glow", "seconds": 360}},
+    {"id": "flower_tea", "name": "Wildflower Tea", "category": "food", "stack": 20, "desc": "Fragrant tea with a drop of moon dew.", "uses": "Eat (F): light, quick steps for a while.", "icon": {"shape": "cup", "color": "#f7b2c4", "accent": "#a7d8f0"}, "food": {"buff": "easy_stroll", "seconds": 240}},
+    {"id": "forest_skewer", "name": "Forest Skewer", "category": "food", "stack": 20, "desc": "Mushrooms and berries on a stick.", "uses": "Eat (F): shy creatures feel at ease around you.", "icon": {"shape": "skewer", "color": "#b98bb0", "accent": "#8e7cc3"}, "food": {"buff": "creature_friend", "seconds": 240}},
+    {"id": "carrot_soup", "name": "Carrot Soup", "category": "food", "stack": 20, "desc": "Bright orange and very warming.", "icon": {"shape": "bowl", "color": "#f4a259", "accent": "#fff6e5"}, "food": {"buff": "warm_glow", "seconds": 240}},
+    {"id": "wheat_bread", "name": "Sun Bread", "category": "food", "stack": 20, "desc": "A soft, round loaf.", "icon": {"shape": "bread", "color": "#e9c46a", "accent": "#c49a6c"}, "food": {"buff": "easy_stroll", "seconds": 200}},
+    {"id": "pumpkin_pie", "name": "Pumpkin Pie", "category": "food", "stack": 20, "desc": "Spiced, sweet and shared best with friends.", "icon": {"shape": "pie", "color": "#f4a259", "accent": "#c49a6c"}, "food": {"buff": "cozy", "seconds": 300}},
+    {"id": "strawberry_jam", "name": "Strawberry Jam", "category": "food", "stack": 20, "desc": "Sunshine in a jar.", "icon": {"shape": "jar", "color": "#e9867a", "accent": "#c49a6c"}, "food": {"buff": "creature_friend", "seconds": 240}},
+    {"id": "fish_stew", "name": "Fisher's Stew", "category": "food", "stack": 20, "desc": "Sardines and carrots, simmered slowly.", "icon": {"shape": "bowl", "color": "#b9c8d6", "accent": "#fff6e5"}, "food": {"buff": "lucky_line", "seconds": 300}},
+    {"id": "grilled_trout", "name": "Grilled Trout", "category": "food", "stack": 20, "desc": "Crisp and smoky, grilled over the hearth.", "icon": {"shape": "fish", "color": "#c49a6c", "accent": "#f4a259"}, "food": {"buff": "lucky_line", "seconds": 240}},
+    {"id": "creek_skewer", "name": "Creek Skewer", "category": "food", "stack": 20, "desc": "Little minnows and reeds on a stick.", "icon": {"shape": "skewer", "color": "#b9b6c9", "accent": "#5e8c6a"}, "food": {"buff": "easy_stroll", "seconds": 180}},
+    {"id": "luma_tea", "name": "Luma Tea", "category": "food", "stack": 20, "desc": "It glows softly in the cup.", "icon": {"shape": "cup", "color": "#ffd166", "accent": "#c3b1e1"}, "food": {"buff": "warm_glow", "seconds": 600}}
+  ]
+}

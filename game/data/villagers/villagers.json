@@ -1,0 +1,115 @@
+{
+  "village_center": [5750, 3480],
+  "villagers": [
+    {
+      "id": "bramble", "name": "Bramble", "title": "the moss gardener",
+      "look": {"shape": "hedgehog", "body": "#8a6f5e", "accent": "#8fb996", "glow": "#c2e5b5"},
+      "personality": "Slow, gentle and patient. Talks to plants and believes they answer.",
+      "arrives": {"flag": "heart_tree_restored"},
+      "arrival_text": "A mossy little spirit has wandered in from the meadow, drawn by the Heart Tree's light. It would love a home nearby.",
+      "home": {"site": "home_bramble", "pos": [5420, 3330]},
+      "spots": {"morning": [5470, 3420], "day": [5560, 3560], "evening": [5700, 3610]},
+      "loves": ["wildflower", "strawberry", "flower_tea"], "likes": ["carrot", "berry", "mushroom", "seed_wheat"],
+      "lines": {
+        "greet": ["Oh! Hello. The grass told me you were coming.", "Ah, my friend. The clover is especially soft today.", "You always come by at the nicest moments. Like rain on a warm day."],
+        "morning": "Morning dew is the best kind of water. Don't tell the watering can.",
+        "evening": "The flowers fold up at dusk. I like to fold up a little too.",
+        "night": "Zzz... (Bramble is curled up asleep.)",
+        "loved": "For me? This is wonderful. I'll plant a little thank-you somewhere.",
+        "liked": "How kind. I'll keep it somewhere sunny.",
+        "neutral": "Thank you! I'll find a good use for it.",
+        "lore": "Before the Light faded, the meadow sang. Not loudly. Just enough for the roots to hear.",
+        "invite": "A Festival of Light? I'll bring the flowers. All of them!"
+      },
+      "reward": {"cosmetic": "cloak:moss", "items": [{"item": "seed_strawberry", "qty": 3}]}
+    },
+    {
+      "id": "pip", "name": "Pip", "title": "the lantern-moth courier",
+      "look": {"shape": "moth", "body": "#fff3c4", "accent": "#c3b1e1", "glow": "#ffe8a3"},
+      "personality": "Curious, quick and a little forgetful. Loves delivering news and collecting shiny things.",
+      "arrives": {"flag": "creek_awakened"},
+      "arrival_text": "A tiny moth spirit with a lantern for a tail has fluttered in from Crystal Creek. It's looking for a place to roost.",
+      "home": {"site": "home_pip", "pos": [6020, 3300]},
+      "spots": {"morning": [5960, 3400], "day": [5760, 3460], "evening": [5800, 3600]},
+      "loves": ["moon_dew", "luma_bloom", "luma_tea"], "likes": ["sea_glass", "crystal_shard", "glowcap"],
+      "lines": {
+        "greet": ["Hi hi hi! Did you know there are twelve shades of blue at the creek? I counted. Twice.", "You again! My favourite visitor. Don't tell the others.", "I saved you the shiniest pebble. Then I lost it. It's the thought that counts!"],
+        "morning": "Mornings are for deliveries! Not that anyone has asked me to deliver anything yet.",
+        "evening": "My tail glows brighter at dusk. It's not showing off. Mostly.",
+        "night": "(Pip is asleep, tail glowing softly like a night-light.)",
+        "loved": "Oh! OH! This is the best day in the history of days!",
+        "liked": "Ooh, shiny. Thank you!",
+        "neutral": "A present! I'll put it with my other presents. That's one present.",
+        "lore": "Moths remember light. Every moth in Lumeria remembers the night the lanterns rose.",
+        "invite": "A festival?! I'll tell everyone! Wait. Everyone is already invited? I'll tell them again!"
+      },
+      "reward": {"cosmetic": "glow:moonlight", "items": [{"item": "moon_dew", "qty": 2}]}
+    },
+    {
+      "id": "mossa", "name": "Mossa", "title": "the mushroom cook",
+      "look": {"shape": "mushroom", "body": "#fff6e5", "accent": "#b98bb0", "glow": "#f7d9cf"},
+      "personality": "Warm, a bit bossy in the kitchen, and convinced every problem can be solved with soup.",
+      "arrives": {"flag": "act1_complete"},
+      "arrival_text": "A round mushroom spirit with a ladle has arrived, following the smell of the meadow. She'd like a kitchen of her own.",
+      "home": {"site": "home_mossa", "pos": [5400, 3640]},
+      "spots": {"morning": [5460, 3700], "day": [5590, 3480], "evening": [5730, 3600]},
+      "loves": ["mushroom_soup", "glowcap_stew", "pumpkin_pie"], "likes": ["mushroom", "glowcap", "carrot", "wheat"],
+      "lines": {
+        "greet": ["Hello, dear. Have you eaten? You look like you need soup.", "There you are! I made too much stew again. Entirely on purpose.", "My favourite taster! Sit, sit. Tell me what you've found today."],
+        "morning": "Breakfast is the most important soup of the day.",
+        "evening": "Evenings smell like woodsmoke and onions. Perfect.",
+        "night": "(Mossa is asleep, still holding her ladle.)",
+        "loved": "Oh, you know the way to a mushroom's heart. Thank you, dear.",
+        "liked": "Lovely. That'll go straight in the pot.",
+        "neutral": "Thank you! Everything fits in a soup, eventually.",
+        "lore": "The first cooks of Lumeria cooked with light, not fire. Their stews glowed for days.",
+        "invite": "A festival needs food. Leave that to me. All of it."
+      },
+      "reward": {"cosmetic": "glow:mint", "items": [{"item": "carrot_soup", "qty": 2}]}
+    },
+    {
+      "id": "wren", "name": "Wren", "title": "the sea-wind sailor",
+      "look": {"shape": "bird", "body": "#f3e3c3", "accent": "#5aa8c0", "glow": "#a7d8f0"},
+      "personality": "Breezy and adventurous, full of sea stories that are mostly true.",
+      "arrives": {"flag": "lighthouse_lit"},
+      "arrival_text": "A seabird spirit followed the lighthouse beam inland. She says the meadow wind tastes of salt and wants to stay a while.",
+      "home": {"site": "home_wren", "pos": [6060, 3660]},
+      "spots": {"morning": [6000, 3580], "day": [5880, 3480], "evening": [5770, 3640]},
+      "loves": ["sunpetal_snapper", "sea_glass", "fish_stew"], "likes": ["shell", "driftwood", "tide_sardine"],
+      "lines": {
+        "greet": ["Ahoy! The wind brought me here, and the wind is never wrong. Almost never.", "My favourite landlubber! What's the tide like on your side of the meadow?", "Sit down, sit down. Have I told you about the time I raced a cloud? I won."],
+        "morning": "Morning breeze from the south. Good day for sailing. Or napping.",
+        "evening": "Sunsets at sea are better. Don't tell the meadow.",
+        "night": "(Wren is asleep with her head tucked under a wing.)",
+        "loved": "Now THAT is a treasure. You have a sailor's eye.",
+        "liked": "Ha! Thank you, friend.",
+        "neutral": "A gift from the land! I'll keep it in my sea chest.",
+        "lore": "The old lighthouse wasn't for ships. It was for the light-spirits, so they'd always find their way home.",
+        "invite": "A festival! I'll bring sea songs. Loud ones."
+      },
+      "reward": {"cosmetic": "cloak:sailor", "items": [{"item": "wind_chime", "qty": 1}]}
+    },
+    {
+      "id": "fennel", "name": "Fennel", "title": "the ember-fox storyteller",
+      "look": {"shape": "fox", "body": "#f4a259", "accent": "#fff6e5", "glow": "#ffd166"},
+      "personality": "Thoughtful and kind, an aunt of the fox kits, who knows a story for every occasion.",
+      "arrives": {"flag": "fox_family_home"},
+      "arrival_text": "An older ember fox has come from the pinewood to thank you for bringing the kits home. She would like to live closer to the stories.",
+      "home": {"site": "home_fennel", "pos": [5750, 3770]},
+      "spots": {"morning": [5800, 3700], "day": [5650, 3420], "evening": [5750, 3570]},
+      "loves": ["forest_skewer", "berry", "strawberry_jam"], "likes": ["pinecone", "resin", "mushroom"],
+      "lines": {
+        "greet": ["Ah, the kits' hero. Come, sit by me a while.", "Every time you visit, I think of a new story. Lucky us.", "There you are, little star. The fire missed you."],
+        "morning": "The morning is a story just beginning. I never skip the beginning.",
+        "evening": "Evening is for stories. Shall I tell one? The kits always fall asleep in the middle.",
+        "night": "(Fennel is asleep, her tail curled around her like a blanket.)",
+        "loved": "You remembered. That warms me more than any fire.",
+        "liked": "Thank you, dear one.",
+        "neutral": "A gift is a story you can hold. Thank you.",
+        "lore": "Long ago, every Hearthstone was a fire that a family shared. That's why they're warm.",
+        "invite": "A festival of light. I'll tell the oldest story there is."
+      },
+      "reward": {"cosmetic": "glow:ember", "items": [{"item": "pinecone", "qty": 5}]}
+    }
+  ]
+}

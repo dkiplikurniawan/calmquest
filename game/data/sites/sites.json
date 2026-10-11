@@ -1,0 +1,35 @@
+{
+  "sites": [
+    {"id": "lighthouse", "title": "The Old Lighthouse", "intro": "Salt wind has worn the lighthouse down, and its lamp has been dark for a long time. Ships of light once found the isles by its glow.", "prompt": "Look at the old lighthouse", "complete_flag": "lighthouse_lit", "complete_text": "The great lamp catches, turns, and throws its warm beam over the sea. Somewhere far away, a Hearthstone answers with a glow.", "steps": [
+        {"id": "door", "title": "Mend the door", "requires": [], "inputs": [{"item": "driftwood", "qty": 4}, {"item": "plank", "qty": 2}], "done_text": "The door swings open on a spiral of old stairs."},
+        {"id": "stairs", "title": "Repair the stairs", "requires": ["door"], "inputs": [{"item": "plank", "qty": 4}, {"item": "twine", "qty": 2}], "done_text": "Step by step, the stairs are safe again, all the way to the lamp room."},
+        {"id": "lens", "title": "Fit a sea-glass lens", "requires": ["stairs"], "inputs": [{"item": "sea_glass", "qty": 5}, {"item": "crystal_shard", "qty": 2}], "done_text": "The new lens glitters in every sea color."},
+        {"id": "lamp", "title": "Relight the lamp", "requires": ["lens"], "inputs": [{"item": "resin", "qty": 3}, {"item": "glowcap", "qty": 4}], "done_text": "Resin and glowcaps make a slow, gentle flame."}
+      ]},
+    {"id": "home_bramble", "title": "Bramble's Burrow", "intro": "A cosy mossy burrow under a flowering roof.", "prompt": "Help build Bramble's Burrow", "complete_flag": "home_built:bramble", "complete_text": "The home is finished! It already feels lived in.", "steps": [
+        {"id": "frame", "title": "Dig and frame the burrow", "requires": [], "inputs": [{"item": "plank", "qty": 4}, {"item": "stone", "qty": 4}], "done_text": "Done!"},
+        {"id": "roof", "title": "Weave a moss-and-flower roof", "requires": ["frame"], "inputs": [{"item": "fiber", "qty": 8}, {"item": "wildflower", "qty": 3}], "done_text": "Done!"}
+      ]},
+    {"id": "home_pip", "title": "Pip's Lantern Loft", "intro": "A tall, narrow loft with a lantern at the top.", "prompt": "Help build Pip's Lantern Loft", "complete_flag": "home_built:pip", "complete_text": "The home is finished! It already feels lived in.", "steps": [
+        {"id": "frame", "title": "Raise the loft's frame", "requires": [], "inputs": [{"item": "plank", "qty": 6}, {"item": "twine", "qty": 2}], "done_text": "Done!"},
+        {"id": "roof", "title": "Fit the crystal lantern roof", "requires": ["frame"], "inputs": [{"item": "crystal_shard", "qty": 2}, {"item": "glowcap", "qty": 2}], "done_text": "Done!"}
+      ]},
+    {"id": "home_mossa", "title": "Mossa's Kitchen Cottage", "intro": "A round cottage with a big chimney.", "prompt": "Help build Mossa's Kitchen Cottage", "complete_flag": "home_built:mossa", "complete_text": "The home is finished! It already feels lived in.", "steps": [
+        {"id": "frame", "title": "Build the round walls", "requires": [], "inputs": [{"item": "plank", "qty": 5}, {"item": "clay", "qty": 4}], "done_text": "Done!"},
+        {"id": "roof", "title": "Add the mushroom-cap roof and chimney", "requires": ["frame"], "inputs": [{"item": "mushroom", "qty": 3}, {"item": "stone", "qty": 4}], "done_text": "Done!"}
+      ]},
+    {"id": "home_wren", "title": "Wren's Driftwood Hut", "intro": "A breezy hut that smells of the sea.", "prompt": "Help build Wren's Driftwood Hut", "complete_flag": "home_built:wren", "complete_text": "The home is finished! It already feels lived in.", "steps": [
+        {"id": "frame", "title": "Lash the driftwood frame", "requires": [], "inputs": [{"item": "driftwood", "qty": 5}, {"item": "twine", "qty": 2}], "done_text": "Done!"},
+        {"id": "roof", "title": "Hang the shell wind-roof", "requires": ["frame"], "inputs": [{"item": "shell", "qty": 3}, {"item": "plank", "qty": 2}], "done_text": "Done!"}
+      ]},
+    {"id": "home_fennel", "title": "Fennel's Story Tree", "intro": "A hollow beneath tree roots, with a fire nook for stories.", "prompt": "Help build Fennel's Story Tree", "complete_flag": "home_built:fennel", "complete_text": "The home is finished! It already feels lived in.", "steps": [
+        {"id": "frame", "title": "Shape the hollow under the roots", "requires": [], "inputs": [{"item": "plank", "qty": 4}, {"item": "resin", "qty": 2}], "done_text": "Done!"},
+        {"id": "roof", "title": "Line it with pine and moss", "requires": ["frame"], "inputs": [{"item": "pinecone", "qty": 4}, {"item": "fiber", "qty": 6}], "done_text": "Done!"}
+      ]},
+    {"id": "mountain_path", "title": "The Old Mountain Path", "intro": "Rocks have fallen across the only pass up to the Frostbloom Highlands. With a climbing rope you could reach the top of the rockfall and clear the way.", "prompt": "Look at the fallen rocks", "complete_flag": "highlands_path_open", "complete_text": "The rocks are cleared and new steps lead up the pass. Cool, snowy air drifts down from the highlands.", "steps": [
+        {"id": "rope", "title": "Anchor your climbing rope above the rocks", "requires": [], "tool": "climbing_rope", "inputs": [{"item": "twine", "qty": 2}], "done_text": "The rope holds fast. You can reach the top of the rockfall now."},
+        {"id": "clear", "title": "Roll the loose rocks aside", "requires": ["rope"], "inputs": [{"item": "branch", "qty": 4}], "done_text": "With a few branches as levers, the loose rocks roll gently aside."},
+        {"id": "steps", "title": "Lay new wooden steps", "requires": ["clear"], "inputs": [{"item": "plank", "qty": 6}, {"item": "stone", "qty": 6}], "done_text": "Sturdy steps lead up into the snow."}
+      ]}
+  ]
+}

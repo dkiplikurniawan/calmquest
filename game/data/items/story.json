@@ -1,0 +1,19 @@
+{
+  "items": [
+    {"id": "hearthstone_pinewood", "name": "Hearthstone of the Pines", "category": "quest", "stack": 1, "unique": true,
+     "desc": "Warm as a den on a foggy morning. A gift from the ember fox family.", "uses": "One of the five Hearthstones. Bring them to the Heart Tree.",
+     "icon": {"shape": "crystal", "color": "#f4a259", "accent": "#8fd18a"}},
+    {"id": "hearthstone_coast", "name": "Hearthstone of the Shore", "category": "quest", "stack": 1, "unique": true,
+     "desc": "It glows in slow pulses, like a lighthouse far away.", "uses": "One of the five Hearthstones. Bring them to the Heart Tree.",
+     "icon": {"shape": "crystal", "color": "#f4a259", "accent": "#5cc8c0"}},
+    {"id": "hearthstone_isles", "name": "Hearthstone of the Isles", "category": "quest", "stack": 1, "unique": true,
+     "desc": "Wrapped in an old sail, it smells faintly of salt and sunshine.", "uses": "One of the five Hearthstones. Bring them to the Heart Tree.",
+     "icon": {"shape": "crystal", "color": "#f4a259", "accent": "#f7b2c4"}},
+    {"id": "hearthstone_caverns", "name": "Hearthstone of the Echoes", "category": "quest", "stack": 1, "unique": true,
+     "desc": "Hold it close and you can hear the caverns humming.", "uses": "One of the five Hearthstones. Bring them to the Heart Tree.",
+     "icon": {"shape": "crystal", "color": "#f4a259", "accent": "#a7d8f0"}},
+    {"id": "hearthstone_highlands", "name": "Hearthstone of the Aurora", "category": "quest", "stack": 1, "unique": true,
+     "desc": "Cool to the touch, with green and violet light swirling inside.", "uses": "One of the five Hearthstones. Bring them to the Heart Tree.",
+     "icon": {"shape": "crystal", "color": "#f4a259", "accent": "#c3b1e1"}}
+  ]
+}

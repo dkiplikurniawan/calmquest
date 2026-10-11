@@ -1,0 +1,19 @@
+{
+  "quests": [
+    {
+      "id": "side_highlands",
+      "type": "side",
+      "title": "Above the Clouds",
+      "description": "Beyond a fallen mountain pass north of the coast lie the Frostbloom Highlands, and an old shrine to the aurora.",
+      "requires": ["act1_heart_of_lumeria"],
+      "steps": [
+        {"text": "Read the climber's note near the fallen pass", "target": "note_mountaineer", "condition": {"any": [{"flag": "read:note_mountaineer"}, {"counter": "obtained:climbing_rope", "at_least": 1}]}},
+        {"text": "Make a Climbing Rope at the cottage workbench", "condition": {"counter": "obtained:climbing_rope", "at_least": 1}},
+        {"text": "Restore the old mountain path", "target": "mountain_path", "condition": {"flag": "highlands_path_open"}},
+        {"text": "Climb up to the Frostbloom Highlands", "target": "ws_highlands", "condition": {"region": "frostbloom_highlands"}},
+        {"text": "Wake the aurora shrine", "target": "aurora_shrine", "condition": {"flag": "aurora_aligned"}}
+      ],
+      "hints": ["The climbing rope is braided twine sealed with resin. The rope is a tool: you keep it."]
+    }
+  ]
+}
