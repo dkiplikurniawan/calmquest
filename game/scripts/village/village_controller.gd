@@ -9,11 +9,32 @@ extends Node
 ##   with music notes in the evening.
 ## - The Hearthstone circle at the Heart Tree: Act 2's intro, placing the
 ##   five Hearthstones, and the Act 3 finale (the Festival of Light).
+## 0.4.0: the finale is a short cinematic (about half a minute) with a wide
+## camera shot, befriended creatures joining in, closing lines and the credits.
+## Holding Esc skips it at any moment; the world ends up in the same state
+## either way, the game autosaves before and after, and free exploration
+## continues. Festival lanterns stay around the circle afterwards.
 
 signal finale_finished
 
 const ARRIVAL_CHECK := 1.0
-const FINALE_SECONDS := 9.0
+## Length of the whole finale cinematic when it is not skipped.
+const FINALE_SECONDS := 36.0
+## The camera's wide shot during the finale (smaller = more of the world).
+const FINALE_ZOOM := 0.72
+## At most this many befriended creatures come to the festival.
+const FINALE_CREATURES := 4
+const FESTIVAL_LANTERNS := 6
+const FINALE_INTRO: PackedStringArray = [
+	"Everyone has gathered around the Heart Tree.",
+	"Bramble brought flowers, Mossa brought soup, Wren brought songs, and Pip brought everyone else.",
+	"Fennel begins the oldest story there is...",
+]
+const FINALE_CLOSING: PackedStringArray = [
+	"The Light returns to all of Lumeria",
+	"The paths are bright again, and every friend is home.",
+	"Lumeria will be here whenever you want to visit.",
+]
 
 var overworld: Overworld
 var villagers: Dictionary = {}
@@ -23,7 +44,13 @@ var board: RequestBoard
 var fire: VillageFire
 var stall: Node2D
 var circle: HearthCircle
+## Lantern posts between the campfire and each built home, and by the board.
+var posts: Array[LanternPost] = []
 var finale_running: bool = false
+## The finale's screen layer while it runs (null otherwise).
+var cinematic: FinaleCinematic
+var _guests: Array[Creature] = []
+var _restoring: bool = false
 var _timer: float = 0.0
 
 
@@ -74,7 +101,39 @@ func build(ow: Overworld) -> void:
 				circle.interacted.connect(func(_t: Interactable) -> void: _on_circle())
 				ow.entities.add_child(circle)
 	EventBus.quest_completed.connect(_on_quest_completed)
+	_build_posts(ow)
 	_sync_village()
+
+
+## Posts stand beside the paths from the campfire to every home (they appear
+## once that home is built) and on both sides of the request board.
+func _build_posts(ow: Overworld) -> void:
+	if fire == null:
+		return
+	for id in VillageDB.ids():
+		var home: Node2D = homes[id]
+		var mid := fire.position.lerp(home.position, 0.55)
+		var side := (home.position - fire.position).orthogonal().normalized() * 46.0
+		var post := LanternPost.new()
+		post.position = mid + side
+		post.set_meta("home", id)
+		ow.entities.add_child(post)
+		posts.append(post)
+	if board != null:
+		for dx in [-92.0, 92.0]:
+			var post := LanternPost.new()
+			post.position = board.position + Vector2(dx, 26.0)
+			ow.entities.add_child(post)
+			posts.append(post)
+	# Festival lanterns in a wide ring below the Heart Tree (after the finale).
+	if circle != null:
+		for i in FESTIVAL_LANTERNS:
+			var a := PI * (float(i) + 0.5) / float(FESTIVAL_LANTERNS)
+			var post := LanternPost.new()
+			post.position = circle.position + Vector2(cos(a) * 380.0, 40.0 + sin(a) * 210.0)
+			post.set_meta("festival", true)
+			ow.entities.add_child(post)
+			posts.append(post)
 
 
 func set_night_amount(amount: float) -> void:
@@ -84,6 +143,8 @@ func set_night_amount(amount: float) -> void:
 		fire.set_night_amount(amount)
 	if circle != null:
 		circle.night = amount
+	for post in posts:
+		post.set_night_amount(amount)
 
 
 func _process(delta: float) -> void:
@@ -134,6 +195,12 @@ func _sync_village() -> void:
 	if fire != null:
 		fire.visible = VillageDB.arrived_count() > 0
 		fire.villagers_home = built
+	for post in posts:
+		var home := String(post.get_meta("home", ""))
+		if post.has_meta("festival"):
+			post.visible = GameState.has_flag("act3_complete")
+		else:
+			post.visible = VillageDB.home_built(home) if not home.is_empty() else VillageDB.arrived_count() > 0
 
 
 func _on_home(id: String) -> void:
@@ -235,10 +302,15 @@ func _on_circle() -> void:
 
 ## The Festival of Light: everyone gathers, the Hearthstones send their light
 ## through the Heart Tree, and all of Lumeria brightens. Nothing can go wrong.
+## `fast` (tests) runs every step without waiting and without the cinematic.
+## Timeline (unskipped, about FINALE_SECONDS): gathering and three short lines
+## (9 s), the beams rise (3 s), the light spreads with the wide shot, motes
+## and the closing lines (9 s), the credits (13 s), and a gentle fade (2 s).
 func play_finale(fast: bool = false) -> void:
 	if finale_running or GameState.has_flag("act3_complete"):
 		return
 	finale_running = true
+	SaveManager.autosave("before the Festival of Light")
 	var center := circle.global_position
 	var i := 0
 	var ids := VillageDB.ids()
@@ -249,36 +321,132 @@ func play_finale(fast: bool = false) -> void:
 		# A small cutscene: everyone is already gathered when it begins.
 		npc.global_position = npc.festival_spot
 		i += 1
-	overworld.player.block_input(FINALE_SECONDS if not fast else 0.1)
+	var player := overworld.player
+	player.block_input(FINALE_SECONDS + 1.0 if not fast else 0.1)
 	overworld.fade_night(true)
 	AudioManager.play(&"night")
-	var hud := overworld.hud
 	if not fast:
-		hud.show_dialogue("Everyone has gathered around the Heart Tree. Bramble brought flowers, Mossa brought soup, Wren brought songs, Pip brought everyone else, and Fennel begins the oldest story there is...", 4.5)
-		await get_tree().create_timer(3.5).timeout
+		cinematic = FinaleCinematic.new()
+		cinematic.name = "FinaleCinematic"
+		overworld.add_child(cinematic)
+		overworld.hud.visible = false
+		_gather_guests(center)
+		cinematic.show_lines(_translated(FINALE_INTRO))
+		await _beat(FinaleCinematic.LINE_SECONDS * FINALE_INTRO.size())
 	circle.start_beams()
 	AudioManager.play(&"restore")
 	if not fast:
-		await get_tree().create_timer(3.0).timeout
-	overworld.play_world_restoration()
+		_wide_shot(true)
+		await _beat(3.0)
+	if fast or not cinematic.skipped:
+		overworld.play_world_restoration()
+		_restoring = true
+	_restore_world()
+	if not fast:
+		AudioManager.play(&"swell")
+		overworld.lumi.celebrate(8.0)
+		for guest in _guests:
+			guest.celebrate()
+		if not cinematic.skipped:
+			cinematic.start_motes()
+			cinematic.show_lines(_translated(FINALE_CLOSING))
+		await _beat(FinaleCinematic.LINE_SECONDS * FINALE_CLOSING.size())
+		if not cinematic.skipped:
+			cinematic.roll_credits(AboutScreen.credit_lines(), 13.0)
+		await _beat(13.0)
+		await _beat(2.0)
+	else:
+		overworld.lumi.react()
+		overworld.hud.show_banner("The Light returns to all of Lumeria")
+	_end_finale(fast)
+
+
+## The lasting result of the finale (also reached when it is skipped).
+func _restore_world() -> void:
 	for patch: GloomPatch in overworld.features.patches.values():
 		patch.clear_gloom(true, true)
 	GameState.set_flag("act3_complete")
 	GameState.set_flag("lumeria_restored")
-	overworld.lumi.react()
-	hud.show_banner("The Light returns to all of Lumeria")
-	if not fast:
-		await get_tree().create_timer(2.5).timeout
-	for id in ids:
+
+
+func _end_finale(fast: bool) -> void:
+	var skipped := cinematic != null and cinematic.skipped
+	if skipped:
+		# Skipping never loses anything: the world is restored all the same.
+		# (A restoration already under way simply finishes on its own.)
+		if not _restoring:
+			overworld.terrain.set_restoration(1.0)
+		_restore_world()
+	_restoring = false
+	for id in VillageDB.ids():
 		(villagers[id] as Villager).festival_spot = Vector2.INF
+	for guest in _guests:
+		if is_instance_valid(guest):
+			guest.queue_free()
+	_guests.clear()
+	if cinematic != null:
+		cinematic.queue_free()
+		cinematic = null
+		_wide_shot(false)
+	overworld.hud.visible = true
+	overworld.player.unblock_input()
 	# The cutscene's night lifts again; from here the clock decides day and night.
 	overworld.fade_night(false)
 	finale_running = false
+	_sync_village()
 	QuestManager.request_refresh()
 	SaveManager.autosave("the Festival of Light")
 	finale_finished.emit()
 	if not fast:
 		overworld.show_finale_panel()
+
+
+## Waits `seconds` of unpaused time, or returns at once once the finale is
+## skipped.
+func _beat(seconds: float) -> void:
+	var left := seconds
+	while left > 0.0 and cinematic != null and not cinematic.skipped:
+		await get_tree().process_frame
+		if not get_tree().paused:
+			left -= get_process_delta_time()
+
+
+func _translated(lines: PackedStringArray) -> PackedStringArray:
+	var out := PackedStringArray()
+	for line in lines:
+		out.append(L.t(line))
+	return out
+
+
+## Befriended creatures (friendship above zero) come to the festival too.
+func _gather_guests(center: Vector2) -> void:
+	var friends: Array[String] = []
+	for id in CreatureDB.all_ids():
+		if CreatureDB.friendship(id) > 0 and friends.size() < FINALE_CREATURES:
+			friends.append(id)
+	for k in friends.size():
+		var a := PI * 0.15 + PI * 0.7 * (float(k) + 0.5) / float(friends.size())
+		var guest := Creature.new()
+		# No player: the guests just stay and celebrate (no wandering off).
+		guest.setup(friends[k], center + Vector2(cos(a) * 150.0, 200.0 + sin(a) * 40.0), null, overworld.world)
+		guest.animation_intensity = GameSettings.motion_scale()
+		overworld.entities.add_child(guest)
+		_guests.append(guest)
+
+
+func guest_count() -> int:
+	return _guests.size()
+
+
+## The wide shot zooms out slowly; with Reduce motion or Reduced camera motion
+## it changes behind a short crossfade instead.
+func _wide_shot(on: bool) -> void:
+	var cam := overworld.camera
+	if cam == null:
+		return
+	cam.override_zoom = FINALE_ZOOM if on else 0.0
+	if GameSettings.reduce_motion or GameSettings.reduced_camera_motion:
+		SceneRouter.fade_through(cam.snap)
 
 
 ## The village notice board with up to three small, never-expiring requests.

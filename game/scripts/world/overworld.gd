@@ -16,6 +16,14 @@ const NIGHT_FADE_SECONDS := 2.4
 const COMPLETION_DELAY := 1.4
 const MODAL_INPUT_BLOCK := 0.25
 const RESTORATION_SECONDS := 6.0
+## Most PointLight2D nodes switched on near the screen at once (night, at the
+## busiest places: the village and the festival). The GL Compatibility
+## renderer draws each light that touches the screen as an extra pass; lights
+## far off-screen are culled. The 0.4.0 lights (lantern posts, the cottage
+## window) also switch off when out of view (ViewCull).
+const LIGHT_BUDGET := 16
+## "Near the screen" for the budget: the view grown by this many pixels.
+const LIGHT_MARGIN := 256.0
 const TRAVEL_OFFSET := Vector2(0, 90)
 ## Gentle mode shows soft markers on at most this many objects besides the target.
 const MAX_NEARBY_MARKERS := 2
@@ -330,6 +338,9 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey or event is InputEventJoypadButton or event is InputEventMouseButton:
 		idle_input_seconds = 0.0
 	if _modal_open:
+		return
+	if village.finale_running:
+		# Esc is held to skip the finale (FinaleCinematic); nothing else opens.
 		return
 	if event.is_action_pressed(InputSetup.PAUSE):
 		get_viewport().set_input_as_handled()

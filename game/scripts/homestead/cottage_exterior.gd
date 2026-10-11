@@ -6,6 +6,7 @@ extends Interactable
 
 var _t: float = 0.0
 var _night: float = 0.0
+var _window_light: PointLight2D
 var _decor: Decoration
 
 
@@ -53,6 +54,14 @@ func refresh() -> void:
 
 func set_night_amount(amount: float) -> void:
 	_night = amount
+	# One warm light for the repaired windows at night (within the light budget).
+	if _window_light == null:
+		_window_light = GlowTexture.make_light(Palette.GOLD_SOFT, 1.6, 0.0)
+		_window_light.position = Vector2(-12, -66)
+		add_child(_window_light)
+	var lit := bool(GameState.system_state("cottage").get("window", false)) and amount > 0.05
+	_window_light.enabled = lit
+	_window_light.energy = 0.55 * amount
 	queue_redraw()
 
 

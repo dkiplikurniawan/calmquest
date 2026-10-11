@@ -16,6 +16,8 @@ Every visual and audio element in CALMQUEST is original to this project. No thir
 | Music scores, placeholder music and ambience | generated offline | `tools/music/compose.py`, `tools/music/ambience.py` (see below) | MIT |
 | Font | engine default | Godot's built-in default font. **No custom font file is included yet.** The game uses an SIL OFL font (Nunito or Quicksand) automatically when the developer adds it to `assets/fonts/` together with its `OFL.txt` (see `assets/fonts/README.md`). Record it here when that happens. | Godot Engine MIT license (© Godot Engine contributors) |
 | CALMQUEST wordmark, menu backdrop (isles, fireflies), mood faces, HUD sun/moon arc | procedural drawing | `Wordmark`, `MenuBackdrop`, `MoodFace`, `Hud.DayArc` (`_draw()` code) | MIT |
+| 0.4.0 ground detail, stumps, bird baths, tiny shrines, mushroom rings, lantern posts, fireflies, mist, stars, needles, snow, gulls, lighthouse beam, finale cinematic and motes | procedural drawing | `GroundDetail`, `BiomeDecorArt`, `LanternPost`, `RegionAtmosphere`, `FinaleCinematic` (code) | MIT |
+| `assets/sprites/` | **no sprite sheets included**; the folder only has a README with the expected layout | none yet | record the artist, source and licence here when sheets are added |
 
 ## Music and ambience
 

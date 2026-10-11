@@ -169,6 +169,69 @@ static func _placement_allowed(world: WorldData, kind: String, pos: Vector2, zon
 	return true
 
 
+## Meaningful small things in open ground (0.4.0): at most one per chunk, in a
+## clearing, well away from paths, rivers, clearings and other scenery.
+## kind -> regions where it belongs.
+const FEATURES := {
+	"stump": ["whispering_meadow", "firefly_grove", "misty_pinewood", "crystal_creek"],
+	"bird_bath": ["whispering_meadow", "crystal_creek", "firefly_grove"],
+	"tiny_shrine": ["moonlit_sanctuary", "firefly_grove", "frostbloom_highlands", "sunpetal_coast", "sunpetal_isles"],
+	"mushroom_ring": ["firefly_grove", "misty_pinewood"],
+}
+const FEATURE_CHANCE := 0.7
+## Spots tried per chunk (chunks are large; most single spots are near a path
+## or other scenery).
+const FEATURE_ATTEMPTS := 10
+const FEATURE_PATH_MARGIN := 56.0
+const FEATURE_OBJECT_GAP := 54.0
+
+
+## Uses its own random stream, so the regular scenery and its ids never change.
+static func generate_features(world: WorldData, chunk: Vector2i, clear_zones: Array, noise: FastNoiseLite, objects: Array[Dictionary]) -> Array[Dictionary]:
+	var out: Array[Dictionary] = []
+	if not world.is_chunk_inside(chunk):
+		return out
+	var rng := RandomNumberGenerator.new()
+	rng.seed = hash([world.world_seed, chunk.x, chunk.y, "feature"])
+	var rect := world.chunk_rect(chunk)
+	var chance := rng.randf()
+	var pick := rng.randi_range(0, 99)
+	var variant := rng.randi_range(0, 999)
+	if chance > FEATURE_CHANCE:
+		return out
+	var zones := _zones_near(clear_zones, rect.grow(200.0))
+	for attempt in FEATURE_ATTEMPTS:
+		var pos := rect.get_center() + Vector2(rng.randf_range(-0.42, 0.42), rng.randf_range(-0.42, 0.42)) * rect.size
+		if not _feature_spot_ok(world, pos, zones, noise, objects):
+			continue
+		var region := world.region_at(pos)
+		var options: Array[String] = []
+		for kind: String in FEATURES:
+			if (FEATURES[kind] as Array).has(region):
+				options.append(kind)
+		if options.is_empty():
+			continue
+		out.append({"id": "f_%d_%d" % [chunk.x, chunk.y], "kind": options[pick % options.size()], "pos": pos, "size": 1.0, "variant": variant})
+		break
+	return out
+
+
+static func _feature_spot_ok(world: WorldData, pos: Vector2, zones: Array, noise: FastNoiseLite, objects: Array[Dictionary]) -> bool:
+	if world.is_blocked_at(pos):
+		return false
+	if world.distance_to_paths(pos) < FEATURE_PATH_MARGIN or world.distance_to_river(pos) < FEATURE_PATH_MARGIN:
+		return false
+	if noise.get_noise_2dv(pos) > 0.05:
+		return false
+	for z: Array in zones:
+		if pos.distance_to(z[0]) < float(z[1]) + 60.0:
+			return false
+	for o in objects:
+		if pos.distance_to(o["pos"]) < FEATURE_OBJECT_GAP:
+			return false
+	return true
+
+
 static func _zones_near(zones: Array, rect: Rect2) -> Array:
 	var near: Array = []
 	for z: Array in zones:

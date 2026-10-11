@@ -40,6 +40,21 @@ func _ready() -> void:
 	get_tree().quit(0 if _failures.is_empty() else 1)
 
 
+## Enabled PointLight2D nodes near the screen (the ones the renderer actually
+## draws; lights far off-screen are culled). The total is printed for reference.
+func _enabled_lights() -> int:
+	var near := 0
+	var total := 0
+	for n in get_tree().root.find_children("*", "PointLight2D", true, false):
+		var light := n as PointLight2D
+		if light.enabled and light.is_visible_in_tree():
+			total += 1
+			if ViewCull.near(light.global_position, Overworld.LIGHT_MARGIN):
+				near += 1
+	print("    (%d lights switched on in the whole world, %d of them near the screen)" % [total, near])
+	return near
+
+
 func _frames(n: int) -> void:
 	for i in n:
 		await get_tree().process_frame
@@ -791,9 +806,48 @@ func _run() -> void:
 	for id in VillageDB.ids():
 		VillageDB.invite(id)
 	QuestManager.refresh()
+	# 0.4.0: the finale is a cinematic. Saves go to a test folder so the
+	# autosaves before and after it can be checked.
+	SaveManager.set_save_dir("user://test_tmp/saves_finale")
+	SaveManager.delete_slot(1)
+	SaveManager.current_slot = 1
+	var save_reasons: Array[String] = []
+	var on_saved := func(_slot: int, reason: String) -> void: save_reasons.append(reason)
+	SaveManager.saved.connect(on_saved)
+	var expected_guests := 0
+	for cid in CreatureDB.all_ids():
+		if CreatureDB.friendship(cid) > 0:
+			expected_guests += 1
+	expected_guests = mini(expected_guests, VillageController.FINALE_CREATURES)
 	_use(vc.circle)
-	await get_tree().create_timer(VillageController.FINALE_SECONDS + 1.0).timeout
+	await get_tree().create_timer(5.0).timeout
+	check(vc.finale_running and vc.cinematic != null, "the finale plays as a cinematic")
+	check(not world.hud.visible and not vc.cinematic.caption_text().is_empty(), "the HUD steps aside for the closing lines")
+	check(vc.guest_count() == expected_guests, "befriended creatures join the festival (%d)" % vc.guest_count())
+	check(save_reasons.has("before the Festival of Light"), "the game autosaves before the finale")
+	var esc := InputEventAction.new()
+	esc.action = InputSetup.PAUSE
+	esc.pressed = true
+	Input.parse_input_event(esc)
+	await _frames(3)
+	var esc_up := InputEventAction.new()
+	esc_up.action = InputSetup.PAUSE
+	esc_up.pressed = false
+	Input.parse_input_event(esc_up)
+	await _frames(2)
+	check(not world._modal_open, "Esc during the finale does not open the pause menu")
+	await get_tree().create_timer(20.0).timeout
+	check(vc.cinematic != null and vc.cinematic.credits_text().contains("Godot"), "the credits roll")
+	check(world.camera.override_zoom > 0.0, "the camera takes a wide shot")
+	await get_tree().create_timer(VillageController.FINALE_SECONDS + 1.0 - 25.0).timeout
 	check(GameState.has_flag("act3_complete"), "the Festival of Light restores Lumeria")
+	check(save_reasons.has("the Festival of Light"), "the game autosaves after the finale")
+	check(vc.cinematic == null and vc.guest_count() == 0 and world.hud.visible and world.camera.override_zoom == 0.0, "the cinematic cleans up after itself")
+	var lanterns_lit := true
+	for post in vc.posts:
+		if post.has_meta("festival"):
+			lanterns_lit = lanterns_lit and post.visible
+	check(lanterns_lit, "festival lanterns stay around the Heart Tree")
 	var all_clear := true
 	for patch_node: GloomPatch in world.features.patches.values():
 		all_clear = all_clear and patch_node.is_cleared
@@ -812,6 +866,40 @@ func _run() -> void:
 			epilogue = n
 	check(epilogue != null and epilogue.can_interact(), "a new note appears at the sanctuary")
 	check(CreatureDB.matches("aurora_stag", "whispering_meadow", true, "clear"), "the Aurora Stag now roams")
+	# The finale can be skipped at any moment (hold Esc); the result is the same.
+	# (Test only: the flag is cleared so the finale can be played a second time.)
+	GameState.set_flag("act3_complete", false)
+	save_reasons.clear()
+	vc.play_finale()
+	await get_tree().create_timer(1.5).timeout
+	check(vc.cinematic != null and world.player._input_block > 0.0, "the replayed finale holds the controls")
+	vc.cinematic.request_skip()
+	await _frames(4)
+	check(not vc.finale_running and GameState.has_flag("act3_complete"), "skipping the finale still completes it")
+	check(world._overlay is FinalePanel and save_reasons.has("the Festival of Light"), "a skipped finale still autosaves and says goodbye")
+	(world._overlay as FinalePanel).close_panel()
+	await _frames(2)
+	check(not world._modal_open and world.player.input_enabled and world.hud.visible, "after skipping, free exploration continues")
+	var after_skip := world.player.global_position
+	for i in 20:
+		world.player.velocity = Vector2.UP * Player.SPEED
+		world.player.move_and_slide()
+		await get_tree().physics_frame
+	check(world.player.global_position.distance_to(after_skip) > 30.0, "the player can walk again after a skipped finale")
+	# Light budget: at night in the village, with every lantern built.
+	TimeManager.load_state({"day": TimeManager.day, "minute": 23.0 * 60.0})
+	world.teleport_to(vc.circle.global_position + Vector2(0, 220))
+	await get_tree().create_timer(1.0).timeout
+	var lights := _enabled_lights()
+	check(lights <= Overworld.LIGHT_BUDGET, "lights near the screen stay within the budget at the festival (%d of %d)" % [lights, Overworld.LIGHT_BUDGET])
+	world.teleport_to(vc.fire.global_position + Vector2(0, 160))
+	await get_tree().create_timer(1.0).timeout
+	lights = _enabled_lights()
+	check(lights <= Overworld.LIGHT_BUDGET, "lights near the screen stay within the budget in the village (%d of %d)" % [lights, Overworld.LIGHT_BUDGET])
+	SaveManager.saved.disconnect(on_saved)
+	SaveManager.delete_slot(1)
+	SaveManager.set_save_dir("user://saves")
+	SaveManager.current_slot = -1
 	world.hud.hide_dialogue()
 
 	# --- M11: music, ambience, captions, gamepad, weather toggle -----------------------------

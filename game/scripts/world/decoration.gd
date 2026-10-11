@@ -9,6 +9,7 @@ enum Kind {
 	TREE, PINE, BUSH, FLOWER, STONE, MUSHROOM, GRASS, COTTAGE, FENCE,
 	GROVE_TREE, GLOWCAP, FERN, REEDS, CRYSTAL, MOON_LILY, PILLAR, BEACH_GRASS,
 	DRIFTWOOD, SHELL, SNOW_PINE, FROST_FLOWER, BOULDER, CLIFF_BOULDER,
+	STUMP, BIRD_BATH, TINY_SHRINE, MUSHROOM_RING,
 }
 
 ## Names used by ChunkGenerator / overworld.json decoration profiles.
@@ -20,6 +21,7 @@ const KIND_NAMES := {
 	"pillar": Kind.PILLAR, "beach_grass": Kind.BEACH_GRASS, "driftwood": Kind.DRIFTWOOD,
 	"shell": Kind.SHELL, "snow_pine": Kind.SNOW_PINE, "frost_flower": Kind.FROST_FLOWER,
 	"boulder": Kind.BOULDER, "cliff_boulder": Kind.CLIFF_BOULDER,
+	"stump": Kind.STUMP, "bird_bath": Kind.BIRD_BATH, "tiny_shrine": Kind.TINY_SHRINE, "mushroom_ring": Kind.MUSHROOM_RING,
 }
 ## Kinds that sway gently in the breeze (rotation only, no redraw).
 const SWAYING := [Kind.FLOWER, Kind.GRASS, Kind.FERN, Kind.REEDS, Kind.MOON_LILY, Kind.BEACH_GRASS, Kind.FROST_FLOWER]

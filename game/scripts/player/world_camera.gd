@@ -16,6 +16,8 @@ const DEFAULT_ZOOM := 0.92
 const DEAD_ZONE := 0.06
 
 var target_zoom: float = DEFAULT_ZOOM
+## A wide shot for cutscenes (the finale); 0 = none. It wins over region zoom.
+var override_zoom: float = 0.0
 
 
 func _ready() -> void:
@@ -54,6 +56,8 @@ func snap() -> void:
 ## The UI scale enlarges the whole canvas; the camera zooms out by the same
 ## factor so the world itself is shown at the same size.
 func _wanted_zoom() -> float:
+	if override_zoom > 0.0:
+		return override_zoom / GameSettings.ui_scale()
 	return (DEFAULT_ZOOM if GameSettings.reduced_camera_motion else target_zoom) / GameSettings.ui_scale()
 
 

@@ -146,5 +146,12 @@
  "Show control hints: %s  (click to change)": "Tampilkan petunjuk tombol: %s  (klik untuk mengganti)",
  "[gentle two-note chime]": "[denting lembut dua nada]",
  "[splash and a happy chime]": "[cipratan dan denting riang]",
- "Footsteps": "Langkah kaki"
+ "Footsteps": "Langkah kaki",
+ "Hold %s to skip": "Tahan %s untuk melewati",
+ "Thank you for playing.": "Terima kasih sudah bermain.",
+ "Everyone has gathered around the Heart Tree.": "Semua sudah berkumpul di sekitar Pohon Hati.",
+ "Bramble brought flowers, Mossa brought soup, Wren brought songs, and Pip brought everyone else.": "Bramble membawa bunga, Mossa membawa sup, Wren membawa lagu, dan Pip membawa semua yang lain.",
+ "Fennel begins the oldest story there is...": "Fennel mulai menuturkan kisah tertua yang pernah ada...",
+ "The paths are bright again, and every friend is home.": "Jalan-jalan kembali terang, dan setiap sahabat sudah pulang.",
+ "Lumeria will be here whenever you want to visit.": "Lumeria akan selalu ada kapan pun kamu ingin berkunjung."
 }

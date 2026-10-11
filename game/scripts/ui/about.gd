@@ -1,3 +1,4 @@
+class_name AboutScreen
 extends Control
 ## About: what CALMQUEST is (and is not), credits, licenses, the version, and
 ## How to Play. The disclaimer that used to be on the main menu lives here.

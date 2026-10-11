@@ -40,6 +40,61 @@ static func draw(ci: CanvasItem, kind: int, s: float, variant: int) -> void:
 			_frost_flower(ci, s, variant)
 		Decoration.Kind.BOULDER, Decoration.Kind.CLIFF_BOULDER:
 			_boulder(ci, s, variant, kind == Decoration.Kind.CLIFF_BOULDER)
+		Decoration.Kind.STUMP:
+			_stump(ci, s, variant)
+		Decoration.Kind.BIRD_BATH:
+			_bird_bath(ci, s, variant)
+		Decoration.Kind.TINY_SHRINE:
+			_tiny_shrine(ci, s, variant)
+		Decoration.Kind.MUSHROOM_RING:
+			_mushroom_ring(ci, s, variant)
+
+
+## A tree stump to sit on, with growth rings and a little moss.
+static func _stump(ci: CanvasItem, s: float, v: int) -> void:
+	shadow(ci, 26.0 * s)
+	ci.draw_rect(Rect2(Vector2(-18, -20) * s, Vector2(36, 20) * s), Palette.BARK)
+	ci.draw_line(Vector2(-8, -18) * s, Vector2(-9, -2) * s, Palette.BARK_DARK, 2.0, true)
+	ci.draw_set_transform(Vector2(0, -20) * s, 0.0, Vector2(1.0, 0.42))
+	ci.draw_circle(Vector2.ZERO, 18.0 * s, Color("#c9a274"))
+	for r in [13.0, 8.5, 4.0]:
+		ci.draw_arc(Vector2.ZERO, r * s, 0.0, TAU, 20, Color("#a8804f"), 1.4, true)
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	ci.draw_circle(Vector2(-14 + (v % 3) * 4, -4) * s, 5.0 * s, Palette.SAGE)
+
+
+## A small stone bird bath with a little water.
+static func _bird_bath(ci: CanvasItem, s: float, _v: int) -> void:
+	shadow(ci, 20.0 * s)
+	ci.draw_rect(Rect2(Vector2(-6, -30) * s, Vector2(12, 30) * s), Palette.STONE)
+	ci.draw_rect(Rect2(Vector2(-11, -4) * s, Vector2(22, 5) * s), Palette.STONE_DARK)
+	ci.draw_set_transform(Vector2(0, -32) * s, 0.0, Vector2(1.0, 0.4))
+	ci.draw_circle(Vector2.ZERO, 22.0 * s, Color("#b8b4c6"))
+	ci.draw_circle(Vector2.ZERO, 16.0 * s, Color("#8fb6c8"))
+	ci.draw_circle(Vector2(-5, -4) * s, 6.0 * s, Color(1, 1, 1, 0.45))
+	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+## A tiny stone lantern shrine with a warm glow in its window.
+static func _tiny_shrine(ci: CanvasItem, s: float, _v: int) -> void:
+	shadow(ci, 18.0 * s)
+	ci.draw_rect(Rect2(Vector2(-10, -12) * s, Vector2(20, 12) * s), Color("#9e9ab0"))
+	ci.draw_rect(Rect2(Vector2(-7, -30) * s, Vector2(14, 18) * s), Color("#b3afc4"))
+	ci.draw_rect(Rect2(Vector2(-4, -26) * s, Vector2(8, 8) * s), Palette.GOLD_SOFT)
+	ci.draw_colored_polygon(PackedVector2Array([Vector2(-14, -30) * s, Vector2(14, -30) * s, Vector2(0, -42) * s]), Color("#8f8ca3"))
+	ci.draw_circle(Vector2(0, -22) * s, 9.0 * s, Palette.with_alpha(Palette.GOLD_SOFT, 0.18))
+
+
+## A ring of small mushrooms (a fairy ring).
+static func _mushroom_ring(ci: CanvasItem, s: float, v: int) -> void:
+	for i in 9:
+		var a := TAU * i / 9.0 + (v % 7) * 0.2
+		var p := Vector2(cos(a) * 30.0, sin(a) * 14.0) * s
+		var h := (6.0 + (i % 3) * 1.5) * s
+		ci.draw_line(p, p + Vector2(0, -h), Palette.CREAM, 2.0 * s, true)
+		ci.draw_set_transform(p + Vector2(0, -h), 0.0, Vector2(1.0, 0.6))
+		ci.draw_circle(Vector2.ZERO, 4.5 * s, Color("#e8a39a") if i % 2 == 0 else Color("#f3d6c8"))
+		ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 static func shadow(ci: CanvasItem, radius: float) -> void:

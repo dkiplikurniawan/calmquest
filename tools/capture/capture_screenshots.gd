@@ -364,9 +364,18 @@ func _capture_all() -> void:
 	world.teleport_to(vc.circle.global_position + Vector2(0, 170))
 	await _wait(1.0)
 	vc.play_finale()
-	await _wait(7.0)
+	await _wait(4.0)
+	await _snap("42a_finale_gathering")
+	# The light spreads (about 12-21 s), then the credits roll.
+	await _wait(11.0)
 	await _snap("42_festival_of_light")
-	await _wait(3.0)
+	await _wait(11.0)
+	await _snap("42b_finale_credits")
+	var waited := 0.0
+	while vc.finale_running and waited < 20.0:
+		await _wait(0.5)
+		waited += 0.5
+	await _wait(0.5)
 	if world._overlay is FinalePanel:
 		await _snap("43_finale_panel")
 		(world._overlay as FinalePanel).close_panel()

@@ -7,6 +7,9 @@ extends Node2D
 ## corrections (no jitter when the player stands still). If Lumi falls too far
 ## behind (e.g. after a scene event), she fades out and reappears beside the
 ## player instead of getting lost. Lumi has no collision, so she never blocks movement.
+## 0.4.0: a softer, layered glow, a small trail of sparkles while moving, a
+## happy hop on reactions, and a longer celebration for the finale. A sprite
+## sheet in assets/sprites/lumi.png replaces the drawing when present.
 
 ## Distance Lumi keeps behind the player.
 @export var follow_distance: float = 54.0
@@ -27,6 +30,10 @@ var _happy: float = 0.0
 var _recovering: bool = false
 var _settled: bool = false
 var _light: PointLight2D
+## Recent positions (local to the current position) for the sparkle trail.
+var _trail: Array = []
+var _last_pos: Vector2 = Vector2.INF
+var _celebrate: float = 0.0
 
 
 func _ready() -> void:
@@ -57,6 +64,16 @@ func react() -> void:
 	_happy = 1.4
 
 
+## A longer celebration (the finale): several hops and a burst of sparkles.
+func celebrate(seconds: float = 4.0) -> void:
+	_celebrate = seconds
+	react()
+
+
+func is_celebrating() -> bool:
+	return _celebrate > 0.0
+
+
 func _desired_position() -> Vector2:
 	var facing := Vector2.DOWN
 	if target is Player:
@@ -69,6 +86,17 @@ func _process(delta: float) -> void:
 	_t += delta
 	_hop = maxf(0.0, _hop - delta * 2.2)
 	_happy = maxf(0.0, _happy - delta)
+	if _celebrate > 0.0:
+		_celebrate = maxf(0.0, _celebrate - delta)
+		if _hop <= 0.0 and _celebrate > 0.3:
+			react()
+	# Sparkle trail: remember where Lumi was while she moves.
+	if _last_pos != Vector2.INF and global_position.distance_to(_last_pos) > 3.0 and animation_intensity > 0.2:
+		_trail.push_front([global_position, 0.0])
+	_last_pos = global_position
+	for p: Array in _trail:
+		p[1] = float(p[1]) + delta
+	_trail = _trail.filter(func(p: Array) -> bool: return float(p[1]) < 0.6).slice(0, 8)
 	if target != null and not _recovering:
 		var desired := _desired_position()
 		var gap := global_position.distance_to(desired)
@@ -105,11 +133,20 @@ func _draw() -> void:
 	draw_circle(Vector2.ZERO, 9.0, Palette.with_alpha(Palette.SHADOW, 0.15))
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
-	# Soft glow
-	var glow := 0.85 + 0.15 * sin(_t * 2.0)
+	# Sparkle trail behind Lumi.
 	var glow_col := Cosmetics.glow_color()
-	draw_circle(c, 26.0 * glow, Palette.with_alpha(glow_col, 0.14))
-	draw_circle(c, 18.0 * glow, Palette.with_alpha(glow_col, 0.22))
+	for p: Array in _trail:
+		var age := float(p[1]) / 0.6
+		var local: Vector2 = to_local(p[0]) + Vector2(0, -FLOAT_HEIGHT)
+		draw_circle(local, 2.2 * (1.0 - age), Palette.with_alpha(glow_col, 0.6 * (1.0 - age)))
+	# Soft glow, in gentle layers.
+	var glow := 0.85 + 0.15 * sin(_t * 2.0)
+	for i in 4:
+		draw_circle(c, (32.0 - i * 6.0) * glow, Palette.with_alpha(glow_col, 0.06 + i * 0.04))
+	var sprite := CharacterSprites.lumi()
+	if sprite != null:
+		CharacterSprites.draw_lumi(self, sprite, _t, c)
+		return
 
 	# Tail: a fluffy curl with a turquoise tip, swaying behind Lumi.
 	var sway := sin(_t * 2.4) * 0.35 * k

@@ -21,6 +21,7 @@ var patches: Dictionary = {}
 var gloomlings: Dictionary = {}
 var docks: Dictionary = {}
 var sites: Dictionary = {}
+var _water_timer: float = 0.0
 var kits: Array[LostKit] = []
 var den: FoxDen
 var wreck: SignalPuzzle
@@ -153,6 +154,23 @@ func _resume_following_kits() -> void:
 			k.call_deferred("snap_to_leader")
 
 
+## Water near the view, sampled on a coarse grid (for the low mist).
+func water_near(view: Rect2) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	var step := 240.0
+	var cap := RegionAtmosphere.MIST_POINTS
+	var y := floorf(view.position.y / step) * step
+	while y < view.end.y + step and out.size() < cap:
+		var x := floorf(view.position.x / step) * step
+		while x < view.end.x + step and out.size() < cap:
+			var p := Vector2(x, y)
+			if overworld.world.region_at(p) != "open_sea" and overworld.world.is_water_at(p):
+				out.append(p)
+			x += step
+		y += step
+	return out
+
+
 func set_night_amount(amount: float) -> void:
 	atmosphere.night = amount
 	var tint := overworld.night_tint.color
@@ -170,6 +188,14 @@ func _process(delta: float) -> void:
 	atmosphere.aurora = GameState.has_flag("aurora_aligned")
 	atmosphere.camera_pos = overworld.camera.get_screen_center_position()
 	atmosphere.camera_zoom = overworld.camera.zoom.x
+	atmosphere.minute = TimeManager.visual_minute()
+	atmosphere.lighthouse_lit = GameState.has_flag("lighthouse_lit")
+	if sites.has("lighthouse"):
+		atmosphere.lighthouse_pos = (sites["lighthouse"] as Node2D).global_position
+	_water_timer -= delta
+	if _water_timer <= 0.0:
+		_water_timer = 0.5
+		atmosphere.water_points = water_near(overworld.camera.screen_world_rect())
 	_update_kits()
 	_hide_timer += delta
 	if _hide_timer >= GLOOM_HIDE_CHECK:

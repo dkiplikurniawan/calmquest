@@ -91,18 +91,49 @@ All art is original and drawn procedurally in GDScript (`_draw`) or shaders. The
   - a backdrop of three layers of floating isles with parallax (and slight mouse parallax), fireflies that loop and blink, motes, stars, and a sky that drifts between dusk and twilight over 150 seconds. *Reduce motion* holds the sky and stops the drifting.
 - **Fonts:** a rounded OFL font (Nunito or Quicksand) is used automatically once its file is placed in `assets/fonts/` (see the README there). Until then, Godot's default font is used.
 
+## Polish pass (0.4.0): world and characters
+
+- **Ground detail** (`GroundDetail`, one per chunk, z -9): grass tufts in three shades of the region's color, small flower patches (meadow, grove, creek), fallen gold leaves (grove) or needles (pinewood), pebbles along path edges, soft canopy shadows under trees, and small puddles the day it rains and the day after.
+  - Placement uses its own seeded stream (`"ground"`), so the scenery and its object ids never change. Nothing in it has collision.
+  - It is built once into a single triangle mesh per chunk (one draw command). The first version drew every shape separately and cost about 4-5 ms per frame; the mesh costs about 0.3 ms.
+- **Small features** (`ChunkGenerator.generate_features`, its own `"feature"` stream): an old stump, a bird bath, a tiny shrine or a mushroom ring, at most one per chunk, in open ground well away from paths, the river, clearings and other scenery. The current world has 24, in 9 regions. None of them has collision.
+- **Atmosphere** (`RegionAtmosphere`, CanvasLayer 2), all fading in and out:
+  - fireflies (meadow, grove, creek) at night, locked to the world;
+  - low mist over nearby water at night and in the early morning (at most 12 soft shapes);
+  - a band of stars over open land on clear nights;
+  - falling needles in the pinewood and light snow in the highlands (both follow *Weather effects*);
+  - gulls over the coast by day;
+  - the restored lighthouse's beam sweeping at night.
+  - Small particles are batched into one draw command per effect.
+- **Warm night:** wooden lantern posts on the village paths (they appear as homes are built) and six festival lanterns around the Heart Tree after the finale. The cottage window glows once it is repaired. Their lights switch on only at night and near the screen. `Overworld.LIGHT_BUDGET` is 16 lights near the screen; the test measures 12 at the festival and 7 in the village.
+- **The Traveler:**
+  - arms swing opposite to the feet;
+  - the cloak hem and scarf sway;
+  - the shoulders rise and fall gently when standing still;
+  - a blink every 2.6-5.2 s;
+  - a small dust puff when starting to run (none with *Reduce motion*).
+- **Lumi:** a softer glow in four layers, a short trail of sparkles while moving, and a longer celebration (repeated hops) in the finale.
+- **Sprite pipeline:** `CharacterSprites` draws `assets/sprites/traveler.png` (64 x 64 frames, 6 x 4) and `lumi.png` (48 x 48, 4 frames) instead of the procedural art when those files exist and are large enough. The layout is in `assets/sprites/README.md`. **No sprite sheets are included**; the procedural art is what ships.
+- **Finale cinematic** (`FinaleCinematic`, about 36 s):
+  - letterbox bars, the villagers gathered and up to four befriended creatures;
+  - three short lines, the Hearthstone beams, a slow wide shot (a crossfade with *Reduce motion* or *Reduced camera motion*), motes of light rising while the world is restored, and three closing lines;
+  - credits from the About screen (they fade page by page with *Reduce motion*);
+  - "Hold Esc to skip" with a progress ring.
+
 ## Layering (V2)
 
 | z / layer | Content |
 |---|---|
+| -9 | ground detail (0.4.0) |
 | -6 | cave floor |
 | -5 / -4 | beam puzzle platforms, plates, the shrine circle, the gloom patch ground |
 | -3 | farm plots, tide pools, fishing ripples |
 | CanvasLayer 1 (follows viewport) | gloom veils (shader) and mist |
 | CanvasLayer 2 | atmosphere and weather |
 | CanvasLayer 5+ | HUD, captions, menus |
+| CanvasLayer 20 | the finale cinematic (0.4.0) |
 
 ## Still simple (honest)
 
-- All art is procedural and intentionally simple: there are no sprite sheets, and walk cycles are bob animations.
-- There are no particle effects for pollen or snow; snow is suggested by the ground color and snow-capped pines.
+- All art is procedural and intentionally simple. A sprite-sheet path exists (0.4.0), but no sheets are included, and walk cycles are still bob animations with swinging arms.
+- Falling needles, snow, fireflies and stars are simple drawn dots and lines, not a particle system. There is no pollen.

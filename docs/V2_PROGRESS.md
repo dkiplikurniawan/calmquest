@@ -472,3 +472,26 @@ All were fixed and checked again in screenshots.
   - the stinger duck (-9 dB, 0.6 s in, 2 s out) is unchanged.
   - The numbers are in `MUSIC_PIPELINE.md`; listening is in the new developer listening checklist.
 - **Tests:** 7 new unit tests (`test_audio_polish.gd`: rendered preference and the single warning, surface rules and real-world surfaces, setting persistence, pitch bounds, gentle levels, missing audio), 4 new UI checks (footstep cadence, silence when still, the right surface sound, the setting off), and 9 Python tests for the render tool.
+
+### P4 - Visual atmosphere and the finale
+
+- **World:**
+  - ground detail per chunk;
+  - 24 small features in 9 regions;
+  - fireflies, water mist, stars, needles, snow, gulls and the lighthouse beam;
+  - lantern posts in the village and festival lanterns after the finale;
+  - a warm cottage window.
+  - Details are in `ART_DIRECTION.md`. New random streams keep the existing scenery and object ids identical.
+- **Characters:** the Traveler swings their arms, sways, breathes, blinks and puffs dust when starting to run; Lumi has a layered glow, a sparkle trail and a finale celebration. An optional sprite-sheet path is in place, with the procedural art as the fallback; no sheets are included.
+- **Finale cinematic:** about 36 s, skippable at any moment by holding Esc. It autosaves before ("before the Festival of Light") and after. The world ends up in the same state whether or not it is skipped, the HUD returns, the player is unblocked, and free exploration continues. Esc no longer opens the pause menu during the finale (it is held to skip).
+- **Bug found by the new tests:** the first feature generator tried one spot per chunk; the chunks are large, so every spot was rejected and the world had **zero** features. It now tries up to 10 seeded spots per chunk.
+- **Performance** (`tools/capture/perf_probe.tscn`, a real window on this machine: RTX 3050 Laptop GPU, GL Compatibility, VSync on), running through 5 spots with everything on:
+  - first measurement: 50.1 fps on average. The new ground detail cost 4-5 ms because it drew every shape separately; the village at night lost about 4 ms to up to 40 large overlapping mist shapes.
+  - **After the fixes:** ground detail is one mesh per chunk, small atmosphere particles are batched, and mist is capped at 12 shapes. The result is **61.1 fps on average** (grove 60, creek 65, pinewood 58, coast 62, village at night 60), with a 1% low of 37 fps and a worst frame of 39 ms.
+  - The worst frames also happen with all 0.4.0 features hidden (chunk streaming while running), so they are older than this pass. Pinewood stays slightly under 60 because of its dense trees.
+- **Light budget:** `Overworld.LIGHT_BUDGET` = 16 lights near the screen. The test measures 12 at the festival and 7 in the village at night. 24 lights are switched on in the whole world, but most are far off-screen (waystones, landmarks, caves, all from before 0.4.0), and the renderer does not draw lights that do not touch the screen.
+- **Deliberate test changes (nothing weakened):**
+  - The overworld test still waits `FINALE_SECONDS + 1` in total; the constant grew from 9 to 36 s. The wait is now split so that it can also check the cinematic, the hidden HUD, the guests, the Esc behaviour, the credits, the wide shot, both autosaves, the clean-up and the festival lanterns.
+  - It then replays the finale with the `act3_complete` flag cleared (test only) to check the skip path, and walks afterwards.
+  - The streaming test expects a chunk's children to be exactly its objects. The ground detail is added as an *internal* child, so that contract holds without changing the test.
+- **New tests:** 8 unit tests (`test_visual_polish.gd`: feature determinism and placement rules, no collision, an unchanged scenery stream, ground detail determinism, sprite fallback and frame mapping, blink and puff with Reduce motion, Lumi's celebration, a skip that happens only once) and 17 new overworld checks.

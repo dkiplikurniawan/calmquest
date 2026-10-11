@@ -97,7 +97,13 @@ func build_chunk(chunk: Vector2i) -> Node2D:
 	var node := Node2D.new()
 	node.name = "Chunk_%d_%d" % [chunk.x, chunk.y]
 	node.y_sort_enabled = true
-	for p: Dictionary in ChunkGenerator.generate(world, chunk, clear_zones, _noise):
+	var objects := ChunkGenerator.generate(world, chunk, clear_zones, _noise)
+	var ground := GroundDetail.new()
+	ground.setup(world, chunk, objects)
+	# Internal child: the chunk's own children stay exactly its world objects.
+	node.add_child(ground, false, Node.INTERNAL_MODE_FRONT)
+	objects.append_array(ChunkGenerator.generate_features(world, chunk, clear_zones, _noise, objects))
+	for p: Dictionary in objects:
 		if GameState.is_removed(chunk, String(p["id"])):
 			continue
 		var kind_name := String(p["kind"])

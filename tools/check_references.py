@@ -26,6 +26,9 @@ OPTIONAL = {
     "res://assets/fonts/Nunito-Regular.ttf",
     "res://assets/fonts/Quicksand-VariableFont_wght.ttf",
     "res://assets/fonts/Quicksand-Regular.ttf",
+    # Optional character sprite sheets (assets/sprites/README.md); the procedural art is used without them.
+    "res://assets/sprites/traveler.png",
+    "res://assets/sprites/lumi.png",
 }
 
 
