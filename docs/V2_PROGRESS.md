@@ -284,7 +284,7 @@ Each milestone ends with tests run, the game launching, a note here, and a backu
 **Music, honestly labelled:**
 - `tools/music/compose.py` composes **14 cues** as code. A shared Lumeria theme is varied per place; keys are major, Lydian or Mixolydian at 58-76 BPM; 8-bar progressions loop seamlessly.
 - It writes **multi-track General MIDI files** (`assets/music/midi/`) with its own small SMF writer, because mido and pretty_midi are not installed. Each file has GM programs, tempo, meter, soft velocities and CC7/11/64/91.
-- The machine had no MuseScore, no FluidSynth, no licensed SoundFont and no ogg/ffmpeg encoder. So, as the brief requires, nothing pretends to be orchestral:
+- The machine had no MuseScore, no FluidSynth, no licensed SoundFont and no ogg/ffmpeg encoder. So, as the design rules require, nothing pretends to be orchestral:
   - the game uses **synthesized placeholder loops** rendered from the same notes (numpy additive synthesis, a noise reverb, the reverb tail wrapped onto the start for seamless loops, RMS -22 dBFS as a stand-in for -20 LUFS);
   - they are 16-bit WAVs with a `smpl` loop chunk.
   - `docs/MUSIC_PIPELINE.md` explains how to render them properly.
@@ -342,7 +342,7 @@ Requested after V2: a language setting so the game can be played in English or B
 
 ## Polish pass (0.4.0)
 
-Instructions: `CALMQUEST_POLISH_PROMPT_V3.md`. Work happens on the git branch `polish-0.4.0`. The first commit is the untouched 0.3.1 baseline, and each milestone gets its own commit.
+Plan: the polish design document (0.4.0). Work happens on the git branch `polish-0.4.0`. The first commit is the untouched 0.3.1 baseline, and each milestone gets its own commit.
 
 **Baseline (before any change, 2026-10-11):** all 15 checks pass: 144 unit tests, 656 smoke, 378 overworld and 39 UI checks, 7 scenes, 1,481/1,481 catalog strings, 13 Python tests.
 

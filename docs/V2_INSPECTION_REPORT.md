@@ -5,7 +5,7 @@ Backup made before any V2 edit: `E:\CALMQUEST_backups\CALMQUEST_pre_v2_20261011_
 
 ## 0. Most important finding
 
-**"World 2.0" does not exist in this project.** No code, scene, data file or document mentions Firefly Grove, Crystal Creek, Moonlit Sanctuary, a "Follow the Lost Lights" quest chain, or a crystal puzzle. These names appear only in `CALMQUEST_V2_PROMPT.md`. The playable game is the **V1 MVP**: one area, Whispering Meadow.
+**"World 2.0" does not exist in this project.** No code, scene, data file or document mentions Firefly Grove, Crystal Creek, Moonlit Sanctuary, a "Follow the Lost Lights" quest chain, or a crystal puzzle. These names existed only in the V2 design plan. The playable game is the **V1 MVP**: one area, Whispering Meadow.
 
 Consequences for the plan:
 - **M1 (stabilize World 2.0)** is reinterpreted as: verify and stabilize the real V1 baseline, then *build* Act 1 (Lost Lights, Firefly Grove, Crystal Creek, Moonlit Sanctuary) inside the new large world, because Act 1 needs regions that only M2 creates.
