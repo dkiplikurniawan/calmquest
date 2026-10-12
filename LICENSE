@@ -1,21 +1,27 @@
-MIT License
+Copyright (c) 2026 Dul Kipli Kurniawan. All rights reserved.
 
-Copyright (c) 2026 The CALMQUEST author
+CALMQUEST: The Lost Light — source available for review only.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This repository is published so that reviewers, educators and potential
+collaborators can read and evaluate the source code, documentation and
+design of the project.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+You MAY:
+  - view and read the source code and documentation;
+  - build and run the project locally for personal evaluation or review.
+
+You may NOT, without prior written permission from the author:
+  - copy, reproduce or redistribute the source code, builds or assets,
+    in whole or in part;
+  - modify the software or create derivative works;
+  - sell, sublicense, publish or otherwise use the software, its assets,
+    name or characters for any commercial or public purpose.
+
+Third-party components keep their own licenses. Godot Engine is
+distributed under the MIT License (c) Godot Engine contributors.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+IMPLIED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR
+OTHER LIABILITY ARISING FROM THE USE OF THE SOFTWARE.
+
+For permission requests, contact the author via GitHub: @dkiplikurniawan

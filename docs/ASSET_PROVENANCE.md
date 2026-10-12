@@ -4,20 +4,20 @@ Every visual and audio element in CALMQUEST is original to this project. No thir
 
 | Asset | Type | Origin | License |
 |---|---|---|---|
-| `icon.svg` | vector image | hand-written SVG for this project | MIT (project license) |
-| All characters, scenery, POIs, UI icons | procedural drawing | GDScript `_draw()` code in `game/scripts/**` | MIT |
-| Ground, river glints, gloom veil | shaders | `game/shaders/ground.gdshader`, `river.gdshader`, `gloom.gdshader` | MIT |
-| Wildlife (16 creatures), Gloomlings, fox kits, docks, lighthouse, shipwreck, cabins, tide pools | procedural drawing | `CreatureArt`, `Gloomling`, `BoatDock`, `SignalPuzzle`, `SceneryPiece` (`_draw()` code) | MIT |
-| Creature, lore and quest text | original writing | `game/data/wildlife/`, `game/data/lore/`, `game/data/quests/` | MIT |
-| Noise textures | generated at runtime | Godot `FastNoiseLite` with the world seed | MIT |
-| UI theme, checkbox and slider icons | generated at runtime | `UiTheme` (images built pixel by pixel) | MIT |
-| Sound effects (incl. 0.4.0: gathering, crafting, cooking, placing, quest step, fishing splash and catch, rest swell, footsteps on six surfaces) and the fallback ambient pad | synthesized at runtime | `SoundSynth` (sine partials, envelopes and low-passed noise; no samples) | MIT |
+| `icon.svg` | vector image | hand-written SVG for this project | All rights reserved (project license) |
+| All characters, scenery, POIs, UI icons | procedural drawing | GDScript `_draw()` code in `game/scripts/**` | All rights reserved |
+| Ground, river glints, gloom veil | shaders | `game/shaders/ground.gdshader`, `river.gdshader`, `gloom.gdshader` | All rights reserved |
+| Wildlife (16 creatures), Gloomlings, fox kits, docks, lighthouse, shipwreck, cabins, tide pools | procedural drawing | `CreatureArt`, `Gloomling`, `BoatDock`, `SignalPuzzle`, `SceneryPiece` (`_draw()` code) | All rights reserved |
+| Creature, lore and quest text | original writing | `game/data/wildlife/`, `game/data/lore/`, `game/data/quests/` | All rights reserved |
+| Noise textures | generated at runtime | Godot `FastNoiseLite` with the world seed | All rights reserved |
+| UI theme, checkbox and slider icons | generated at runtime | `UiTheme` (images built pixel by pixel) | All rights reserved |
+| Sound effects (incl. 0.4.0: gathering, crafting, cooking, placing, quest step, fishing splash and catch, rest swell, footsteps on six surfaces) and the fallback ambient pad | synthesized at runtime | `SoundSynth` (sine partials, envelopes and low-passed noise; no samples) | All rights reserved |
 | `assets/music/rendered/` | **empty**: rendered recordings go here (see `docs/MUSIC_PIPELINE.md`) | none yet | record the sound library and licence here when files are added |
-| Music scores, placeholder music and ambience | generated offline | `tools/music/compose.py`, `tools/music/ambience.py` (see below) | MIT |
+| Music scores, placeholder music and ambience | generated offline | `tools/music/compose.py`, `tools/music/ambience.py` (see below) | All rights reserved |
 | Font | engine default | Godot's built-in default font. **No custom font file is included yet.** The game uses an SIL OFL font (Nunito or Quicksand) automatically when the developer adds it to `assets/fonts/` together with its `OFL.txt` (see `assets/fonts/README.md`). Record it here when that happens. | Godot Engine MIT license (© Godot Engine contributors) |
-| CALMQUEST wordmark, menu backdrop (isles, fireflies), mood faces, HUD sun/moon arc | procedural drawing | `Wordmark`, `MenuBackdrop`, `MoodFace`, `Hud.DayArc` (`_draw()` code) | MIT |
-| 0.4.0 ground detail, stumps, bird baths, tiny shrines, mushroom rings, lantern posts, fireflies, mist, stars, needles, snow, gulls, lighthouse beam, finale cinematic and motes | procedural drawing | `GroundDetail`, `BiomeDecorArt`, `LanternPost`, `RegionAtmosphere`, `FinaleCinematic` (code) | MIT |
-| 0.4.0 rest spot seats (benches, log, stump, stones, driftwood, crystal pool), the map's bench icon, Lumi curled up, the "Breathe with Lumi" glow | procedural drawing | `RestSpot`, `MapView`, `Lumi`, `BreathePanel` (code) | MIT |
+| CALMQUEST wordmark, menu backdrop (isles, fireflies), mood faces, HUD sun/moon arc | procedural drawing | `Wordmark`, `MenuBackdrop`, `MoodFace`, `Hud.DayArc` (`_draw()` code) | All rights reserved |
+| 0.4.0 ground detail, stumps, bird baths, tiny shrines, mushroom rings, lantern posts, fireflies, mist, stars, needles, snow, gulls, lighthouse beam, finale cinematic and motes | procedural drawing | `GroundDetail`, `BiomeDecorArt`, `LanternPost`, `RegionAtmosphere`, `FinaleCinematic` (code) | All rights reserved |
+| 0.4.0 rest spot seats (benches, log, stump, stones, driftwood, crystal pool), the map's bench icon, Lumi curled up, the "Breathe with Lumi" glow | procedural drawing | `RestSpot`, `MapView`, `Lumi`, `BreathePanel` (code) | All rights reserved |
 | `assets/sprites/` | **no sprite sheets included**; the folder only has a README with the expected layout | none yet | record the artist, source and licence here when sheets are added |
 
 ## Music and ambience
